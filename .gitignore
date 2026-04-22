@@ -12,6 +12,20 @@ dist
 dist-ssr
 *.local
 
+# dotenv environment variable files
+.env
+.env.*
+!.env.example
+
+# Coverage / test output
+coverage
+*.lcov
+.nyc_output
+
+# Vite timestamp files
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
