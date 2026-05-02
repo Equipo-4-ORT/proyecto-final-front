@@ -16,6 +16,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `.gitignore` ahora excluye `.env` y `.env.*` manteniendo `.env.example`.
 
 ### Removed
+- `.env` desregistrado del repo (antes trackeado con `VITE_API_URL=` vacío) — ahora local-only vía `.gitignore`. No se reescribe historia porque nunca contuvo secrets reales.
 
 ## [0.1.0] - 2026-04-15
 
