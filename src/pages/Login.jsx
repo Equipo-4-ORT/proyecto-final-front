@@ -1,11 +1,12 @@
 function Login() {
-  const handleLogin = () => {
-    // Simulación del flujo OAuth:
-  // En producción, esto redirigirá al backend (ej: /auth/google)
-  // que se encarga del login con Google y luego redirige a /callback con el JWT.
-  // Por ahora usamos un token fake para poder desarrollar el frontend sin backend.
-    window.location.href = "/callback?token=fake-jwt-123" 
+const handleLogin = () => {
+  if (import.meta.env.DEV && import.meta.env.VITE_USE_MOCK_LOGIN === "true") {
+    window.location.href = "/callback?token=fake-jwt-123"
+    return
   }
+
+  window.location.href = `${import.meta.env.VITE_API_URL}/auth/google`
+}
 
   return (
     <div className="flex items-center justify-center h-screen">
