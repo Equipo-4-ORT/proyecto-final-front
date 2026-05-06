@@ -17,7 +17,7 @@ function Callback() {
 
      // TODO: validar token contra backend cuando esté disponible
      
-    if (token) {
+    if (token && isValidJWT(token)) {
       // Se guarda el JWT en localStorage
       localStorage.setItem("token", token) // Esto no es seguro para producción. 
  // En una implementación real el token debería manejarse con cookies httpOnly desde el backend.
