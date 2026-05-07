@@ -1,8 +1,18 @@
+@import "tailwindcss";
+
 * {
   box-sizing: border-box;
 }
 
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
 body {
   margin: 0;
-  font-family: sans-serif;
+  background-color: #f8fafc;
+  color: #0f172a;
+  font-family: Inter, sans-serif;
 }
