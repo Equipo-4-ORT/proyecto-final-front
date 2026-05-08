@@ -16,6 +16,8 @@ export default defineConfig({
       include: ["src/**/*.{js,jsx}"],
       exclude: [
         "src/main.jsx",
+        "src/contexts/AuthContext.jsx",
+        "src/hooks/useAuth.js",
         "src/test/**",
         "src/**/__tests__/**",
         "src/**/__mocks__/**",

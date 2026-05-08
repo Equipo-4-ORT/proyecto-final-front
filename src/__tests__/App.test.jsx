@@ -22,7 +22,7 @@ describe("App routing", () => {
   it("renders Login at /login", () => {
     renderAt("/login")
     expect(
-      screen.getByRole("heading", { name: /login/i, level: 1 })
+      screen.getByRole("button", { name: /sign in with google/i })
     ).toBeInTheDocument()
   })
 
