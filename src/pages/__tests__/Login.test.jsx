@@ -3,10 +3,10 @@ import { render, screen } from "@testing-library/react"
 import Login from "../Login"
 
 describe("Login", () => {
-  it("renders the Login heading", () => {
+  it("renders the Sign in with Google button", () => {
     render(<Login />)
     expect(
-      screen.getByRole("heading", { name: /login/i, level: 1 })
+      screen.getByRole("button", { name: /sign in with google/i })
     ).toBeInTheDocument()
   })
 })
