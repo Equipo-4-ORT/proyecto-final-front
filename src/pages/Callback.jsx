@@ -1,35 +1,33 @@
-import { useEffect } from "react"
-import { useNavigate, useLocation } from "react-router-dom"
+import { useEffect } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
+
+const isValidJWT = (token) =>
+  typeof token === 'string' && token.split('.').length === 3
 
 function Callback() {
   const navigate = useNavigate()
   const location = useLocation()
 
-  // Validación básica de JWT (formato xxx.yyy.zzz)
-  const isValidJWT = (token) => {
-    return typeof token === "string" && token.split(".").length === 3
-  }
-
   useEffect(() => {
     // Se obtiene el token desde la query (?token=...)
     const params = new URLSearchParams(location.search)
-    const token = params.get("token")
+    const token = params.get('token')
 
-     // TODO: validar token contra backend cuando esté disponible
-     
+    // TODO: validar token contra backend cuando esté disponible
+
     if (token && isValidJWT(token)) {
       // Se guarda el JWT en localStorage
-      localStorage.setItem("token", token) // Esto no es seguro para producción. 
- // En una implementación real el token debería manejarse con cookies httpOnly desde el backend.
-      
- // Limpia la URL para evitar que el token quede visible
-      window.history.replaceState({}, document.title, "/callback")
+      localStorage.setItem('token', token) // Esto no es seguro para producción.
+      // En una implementación real el token debería manejarse con cookies httpOnly desde el backend.
+
+      // Limpia la URL para evitar que el token quede visible
+      window.history.replaceState({}, document.title, '/callback')
 
       // Redirección a la app principal
-      navigate("/dashboard", { replace: true })
+      navigate('/dashboard', { replace: true })
     } else {
       // Si no hay token, se vuelve al login
-      navigate("/login")
+      navigate('/login')
     }
   }, [location.search, navigate])
 
