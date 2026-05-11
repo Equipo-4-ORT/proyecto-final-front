@@ -1,7 +1,8 @@
 function Login() {
   const handleLogin = () => {
     if (import.meta.env.DEV && import.meta.env.VITE_USE_MOCK_LOGIN === 'true') {
-      window.location.href = '/callback?token=fake-jwt-123'
+      window.location.href =
+  "/callback?token=fake.header.signature"
       return
     }
 
