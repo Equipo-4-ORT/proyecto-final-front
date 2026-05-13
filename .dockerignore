@@ -4,9 +4,12 @@ dist
 .gitignore
 .env
 .env.*
+!.env.example
 .vscode
 .idea
 .DS_Store
 *.md
 .github
+coverage
+*.log
 npm-debug.log*
