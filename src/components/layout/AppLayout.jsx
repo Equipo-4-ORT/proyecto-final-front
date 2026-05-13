@@ -1,15 +1,33 @@
 import Sidebar from "./Sidebar"
 import Header from "./Header"
 
-function AppLayout({ children }) {
+function AppLayout({
+  children,
+  sourceCounts = {},
+  selectedDate,
+  onDateChange,
+  onExportExcel,
+  workdayHours,
+  defaultActivityHours,
+  onWorkdayHoursChange,
+  onDefaultActivityHoursChange,
+}) {
   return (
     <div className="min-h-screen bg-slate-100">
-      <Sidebar />
+      <Sidebar sourceCounts={sourceCounts} onExportExcel={onExportExcel} />
 
-      <div className="ml-64 min-h-screen flex flex-col">
-        <Header />
+      <div className="min-h-screen flex flex-col md:ml-64">
+        <Header
+          selectedDate={selectedDate}
+          onDateChange={onDateChange}
+          onExportExcel={onExportExcel}
+          workdayHours={workdayHours}
+          defaultActivityHours={defaultActivityHours}
+          onWorkdayHoursChange={onWorkdayHoursChange}
+          onDefaultActivityHoursChange={onDefaultActivityHoursChange}
+        />
 
-        <main className="p-6">
+        <main className="p-4 sm:p-6">
           {children}
         </main>
       </div>

@@ -5,6 +5,7 @@ const badgeColors = {
   orange: "bg-orange-100 text-orange-700",
   violet: "bg-violet-100 text-violet-700",
   slate: "bg-slate-100 text-slate-700",
+  amber: "bg-amber-100 text-amber-700",
 }
 
 function Badge({ children, color = "slate" }) {
