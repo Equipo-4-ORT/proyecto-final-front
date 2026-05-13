@@ -29,7 +29,7 @@ describe("App routing", () => {
   it("renders Dashboard at /dashboard", () => {
     renderAt("/dashboard")
     expect(
-      screen.getByRole("heading", { name: /dashboard/i, level: 1 })
+      screen.getByRole("heading", { name: /^dashboard$/i, level: 2 })
     ).toBeInTheDocument()
   })
 
