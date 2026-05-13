@@ -75,7 +75,7 @@ describe("ActivityFormRow", () => {
     })
     expect(onChange).toHaveBeenCalledWith("title", "T")
 
-    fireEvent.change(screen.getByDisplayValue(""), {
+    fireEvent.change(screen.getByRole("combobox"), {
       target: { value: "jira" },
     })
     expect(onChange).toHaveBeenCalledWith("source", "jira")

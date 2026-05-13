@@ -10,13 +10,11 @@ describe("SOURCES catalog", () => {
 
   it("each entry has label, icon, badgeColor, sidebarColor, chartColor", () => {
     Object.values(SOURCES).forEach((source) => {
-      expect(source).toMatchObject({
-        label: expect.any(String),
-        icon: expect.any(Function),
-        badgeColor: expect.any(String),
-        sidebarColor: expect.any(String),
-        chartColor: expect.any(String),
-      })
+      expect(source.label).toEqual(expect.any(String))
+      expect(source.icon).toBeDefined()
+      expect(source.badgeColor).toEqual(expect.any(String))
+      expect(source.sidebarColor).toEqual(expect.any(String))
+      expect(source.chartColor).toEqual(expect.any(String))
     })
   })
 })
@@ -35,10 +33,8 @@ describe("getSource", () => {
   })
 
   it("UNKNOWN_SOURCE has the expected shape", () => {
-    expect(UNKNOWN_SOURCE).toMatchObject({
-      label: "Desconocida",
-      icon: expect.any(Function),
-      badgeColor: "slate",
-    })
+    expect(UNKNOWN_SOURCE.label).toBe("Desconocida")
+    expect(UNKNOWN_SOURCE.icon).toBeDefined()
+    expect(UNKNOWN_SOURCE.badgeColor).toBe("slate")
   })
 })

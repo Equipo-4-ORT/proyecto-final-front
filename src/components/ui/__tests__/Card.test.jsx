@@ -14,8 +14,8 @@ describe("Card", () => {
 
   it("merges custom className with base classes", () => {
     render(<Card className="p-6 custom-class">x</Card>)
-    const container = screen.getByText("x").parentElement
-    expect(container.className).toContain("custom-class")
-    expect(container.className).toContain("rounded-2xl")
+    const cardDiv = screen.getByText("x")
+    expect(cardDiv.className).toContain("custom-class")
+    expect(cardDiv.className).toContain("rounded-2xl")
   })
 })

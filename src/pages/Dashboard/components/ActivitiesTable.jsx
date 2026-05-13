@@ -55,6 +55,7 @@ function ActivitiesTable({ activities, setActivities, defaultActivityHours }) {
     setEditingActivityId(activity.id)
     setEditingErrors({})
     setEditingData({
+      source: activity.source,
       title: activity.title || "",
       description: activity.description || "",
       start: activity.start || "",

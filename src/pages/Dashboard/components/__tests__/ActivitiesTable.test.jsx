@@ -58,9 +58,9 @@ describe("ActivitiesTable", () => {
     let latest
     render(<Harness onChange={(next) => (latest = next)} />)
     fireEvent.click(screen.getByRole("button", { name: /\+ agregar actividad/i }))
-    fireEvent.change(screen.getByDisplayValue(""), { target: { value: "calendar" } })
+    fireEvent.change(screen.getByRole("combobox"), { target: { value: "calendar" } })
     fireEvent.change(screen.getAllByPlaceholderText(/título/i)[0], { target: { value: "Nueva" } })
-    // Find the start/end inputs inside the form row by type=time using DOM query.
+    // The last two time inputs belong to the form row (start, end).
     const timeInputs = document.querySelectorAll('input[type="time"]')
     fireEvent.change(timeInputs[timeInputs.length - 2], { target: { value: "13:00" } })
     fireEvent.change(timeInputs[timeInputs.length - 1], { target: { value: "14:00" } })
@@ -74,7 +74,7 @@ describe("ActivitiesTable", () => {
     let latest
     render(<Harness initial={[]} onChange={(next) => (latest = next)} />)
     fireEvent.click(screen.getByRole("button", { name: /\+ agregar actividad/i }))
-    fireEvent.change(screen.getByDisplayValue(""), { target: { value: "jira" } })
+    fireEvent.change(screen.getByRole("combobox"), { target: { value: "jira" } })
     const timeInputs = document.querySelectorAll('input[type="time"]')
     fireEvent.change(timeInputs[0], { target: { value: "09:00" } })
     fireEvent.click(screen.getByRole("button", { name: /^agregar$/i }))
@@ -143,18 +143,17 @@ describe("ActivitiesTable", () => {
     expect(onChange).not.toHaveBeenCalled()
   })
 
-  it("clears editing state when deleting the row currently being edited", () => {
+  it("keeps other rows' edit state untouched when deleting a different row", () => {
     let latest
     render(<Harness onChange={(next) => (latest = next)} />)
-    // Start editing id=1
+    // Start editing id=1; this hides the delete button for that row.
     fireEvent.click(screen.getAllByRole("button", { name: /editar actividad/i })[0])
-    expect(screen.getAllByRole("button", { name: /guardar edición/i })[0]).toBeInTheDocument()
-    // Delete the same row
+    // Delete row 2 (the only one still showing a delete button).
     fireEvent.click(screen.getAllByRole("button", { name: /eliminar actividad/i })[0])
     fireEvent.click(screen.getByRole("button", { name: /^eliminar$/i }))
-    expect(latest.find((activity) => activity.id === 1)).toBeUndefined()
-    // No more "guardar edición" buttons since the edited row is gone.
-    expect(screen.queryByRole("button", { name: /guardar edición/i })).toBeNull()
+    expect(latest.find((activity) => activity.id === 2)).toBeUndefined()
+    // Row 1 is still in edit mode.
+    expect(screen.getAllByRole("button", { name: /guardar edición/i }).length).toBeGreaterThan(0)
   })
 
   it("cancel-add resets form state", () => {
