@@ -1,7 +1,7 @@
 import { Check, Pencil, Trash2, X } from "lucide-react"
 import Badge from "../../../components/ui/Badge"
 import TextInput from "../../../components/ui/TextInput"
-import { SOURCES } from "../../../constants/sources"
+import { getSource } from "../../../constants/sources"
 import { formatDuration, getActivityDurationMinutes, getActivityEndTime, } from "../utils/dashboardCalculations"
 
 function getOptionalTextClass(value) {
@@ -28,12 +28,7 @@ function ActivityMobileCard({
   onSaveEdit,
   onDeleteClick,
 }) {
-  const source = SOURCES[activity.source]
-
-  if (!source) {
-    return null
-  }
-
+  const source = getSource(activity.source)
   const Icon = source.icon
 
   return (
@@ -136,37 +131,31 @@ function ActivityMobileCard({
             />
 
             <div className="grid grid-cols-2 gap-2">
-              <div>
-                <TextInput
-                  type="time"
-                  value={editingData.start}
-                  className={
-                    editingErrors.start
-                      ? "!border-red-500 focus:!border-red-500 focus:ring-red-100"
-                      : ""
-                  }
-                  onChange={(event) =>
-                    onEditingChange("start", event.target.value)
-                  }
-                />
+              <TextInput
+                type="time"
+                value={editingData.start}
+                className={
+                  editingErrors.start
+                    ? "!border-red-500 focus:!border-red-500 focus:ring-red-100"
+                    : ""
+                }
+                onChange={(event) =>
+                  onEditingChange("start", event.target.value)
+                }
+              />
 
-              </div>
-
-              <div>
-                <TextInput
-                  type="time"
-                  value={editingData.end}
-                  className={
-                    editingErrors.end
-                      ? "!border-red-500 focus:!border-red-500 focus:ring-red-100"
-                      : ""
-                  }
-                  onChange={(event) =>
-                    onEditingChange("end", event.target.value)
-                  }
-                />
-
-              </div>
+              <TextInput
+                type="time"
+                value={editingData.end}
+                className={
+                  editingErrors.end
+                    ? "!border-red-500 focus:!border-red-500 focus:ring-red-100"
+                    : ""
+                }
+                onChange={(event) =>
+                  onEditingChange("end", event.target.value)
+                }
+              />
             </div>
 
             <TextInput

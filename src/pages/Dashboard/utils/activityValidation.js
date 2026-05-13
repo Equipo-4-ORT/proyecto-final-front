@@ -1,3 +1,5 @@
+import { parseTimeToMinutes } from "./dashboardCalculations"
+
 export function validateActivity(activityData) {
   const errors = {}
 
@@ -12,7 +14,7 @@ export function validateActivity(activityData) {
   if (
     activityData.end &&
     activityData.start &&
-    activityData.end <= activityData.start
+    parseTimeToMinutes(activityData.end) <= parseTimeToMinutes(activityData.start)
   ) {
     errors.end = "La hora de fin debe ser mayor a la de inicio"
   }

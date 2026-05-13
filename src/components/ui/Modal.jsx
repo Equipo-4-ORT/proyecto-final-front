@@ -1,15 +1,51 @@
+import { useEffect, useId } from "react"
+
 function Modal({
   isOpen,
   title,
   children,
   actions,
+  onClose,
 }) {
+  const titleId = useId()
+
+  useEffect(() => {
+    if (!isOpen) {
+      return
+    }
+
+    function handleKeyDown(event) {
+      if (event.key === "Escape") {
+        onClose?.()
+      }
+    }
+
+    document.addEventListener("keydown", handleKeyDown)
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = "hidden"
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown)
+      document.body.style.overflow = previousOverflow
+    }
+  }, [isOpen, onClose])
+
   if (!isOpen) {
     return null
   }
 
+  function handleBackdropClick() {
+    onClose?.()
+  }
+
+  function stopPropagation(event) {
+    event.stopPropagation()
+  }
+
   return (
     <div
+      role="presentation"
+      onClick={handleBackdropClick}
       className="
         fixed inset-0 z-50
         flex items-center justify-center
@@ -19,6 +55,10 @@ function Modal({
       "
     >
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        onClick={stopPropagation}
         className="
           w-full max-w-md
           rounded-2xl
@@ -29,7 +69,7 @@ function Modal({
         "
       >
         <div className="px-6 py-5 border-b border-slate-200">
-          <h2 className="text-xl font-bold text-slate-800">
+          <h2 id={titleId} className="text-xl font-bold text-slate-800">
             {title}
           </h2>
         </div>

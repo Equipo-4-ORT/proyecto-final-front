@@ -1,7 +1,7 @@
 import { Check, Pencil, Trash2, X } from "lucide-react"
 import Badge from "../../../components/ui/Badge"
 import TextInput from "../../../components/ui/TextInput"
-import { SOURCES } from "../../../constants/sources"
+import { getSource } from "../../../constants/sources"
 
 import {
   formatDuration,
@@ -21,10 +21,7 @@ function ActivityRow({
   onSaveEdit,
   onDeleteClick,
 }) {
-  const source = SOURCES[activity.source]
-  if (!source) {
-    return null
-  }
+  const source = getSource(activity.source)
   const Icon = source.icon
 
   return (
@@ -110,21 +107,18 @@ function ActivityRow({
 
       <td className="px-4 py-3">
         {isEditing ? (
-          <div>
-            <TextInput
-              type="time"
-              value={editingData.end}
-              className={
-                editingErrors.end
-                  ? "!border-red-500 focus:!border-red-500 focus:ring-red-100"
-                  : ""
-              }
-              onChange={(event) =>
-                onEditingChange("end", event.target.value)
-              }
-            />
-            
-          </div>
+          <TextInput
+            type="time"
+            value={editingData.end}
+            className={
+              editingErrors.end
+                ? "!border-red-500 focus:!border-red-500 focus:ring-red-100"
+                : ""
+            }
+            onChange={(event) =>
+              onEditingChange("end", event.target.value)
+            }
+          />
         ) : (
           activity.end || (
             <span className="text-slate-400 italic">

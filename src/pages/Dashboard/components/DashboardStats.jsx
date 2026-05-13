@@ -4,7 +4,7 @@ import { formatDuration } from "../utils/dashboardCalculations"
 
 function DashboardStats({
   totalActivities,
-  meetCount,
+  calendarEventCount,
   totalHours,
   productivityPercentage,
   workdayHours,
@@ -20,8 +20,8 @@ function DashboardStats({
       color: "blue",
     },
     {
-      title: "Reuniones de Meet",
-      value: meetCount,
+      title: "Eventos de Calendar",
+      value: calendarEventCount,
       subtitle: "Del día seleccionado",
       icon: Video,
       color: "orange",

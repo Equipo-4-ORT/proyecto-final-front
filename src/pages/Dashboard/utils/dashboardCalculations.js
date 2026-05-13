@@ -1,7 +1,7 @@
 export const DEFAULT_WORKDAY_HOURS = 8
 export const DEFAULT_ACTIVITY_HOURS = 1
 
-function parseTimeToMinutes(time) {
+export function parseTimeToMinutes(time) {
   if (!time || !time.includes(":")) {
     return 0
   }
@@ -65,10 +65,8 @@ export function getTotalHours(activities,defaultActivityHours = DEFAULT_ACTIVITY
   return getTotalMinutes(activities, defaultActivityHours) / 60
 }
 
-export function getMeetCount(activities) {
-  return activities.filter((activity) => {
-    return activity.source === "calendar" && activity.title?.toLowerCase().includes("reun")
-  }).length
+export function getCalendarEventCount(activities) {
+  return activities.filter((activity) => activity.source === "calendar").length
 }
 
 export function getProductivityPercentage(totalHours, workdayHours = DEFAULT_WORKDAY_HOURS,) {

@@ -139,6 +139,7 @@ function ActivitiesTable({ activities, setActivities, defaultActivityHours }) {
       return
   }
 
+  // TODO: reemplazar este id local por el que devuelva el backend (crypto.randomUUID() como id temporal).
   const newActivity = {
     id:
       activities.length > 0
@@ -251,6 +252,7 @@ function ActivitiesTable({ activities, setActivities, defaultActivityHours }) {
 
       <Modal
         isOpen={Boolean(deletingActivity)}
+        onClose={handleCloseDelete}
         title="Eliminar actividad"
         actions={
           <>

@@ -9,6 +9,8 @@ const badgeColors = {
 }
 
 function Badge({ children, color = "slate" }) {
+  const colorClasses = badgeColors[color] || badgeColors.slate
+
   return (
     <span
       className={`
@@ -17,7 +19,7 @@ function Badge({ children, color = "slate" }) {
         rounded-full
         text-xs font-medium
         whitespace-nowrap
-        ${badgeColors[color]}
+        ${colorClasses}
       `}
     >
       {children}

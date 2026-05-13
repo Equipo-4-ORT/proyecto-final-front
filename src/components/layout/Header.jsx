@@ -4,7 +4,7 @@ import UserMenu from "./UserMenu"
 import Button from "../ui/Button"
 import { getTodayDate } from "../../utils/dateHelpers"
 
-//Reemplazar por datos provenientes del backend cuando estén dispo
+// TODO: eliminar este mock y obtener el usuario desde AuthContext/useAuth cuando esté implementado.
 const currentUser = {
   name: "Usuario",
   email: "user@autolog.com",

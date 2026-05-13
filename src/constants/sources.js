@@ -1,10 +1,23 @@
 import {
   CalendarDays,
   FileText,
+  HelpCircle,
   ListTodo,
   PanelsTopLeft,
   Table2,
 } from "lucide-react"
+
+export const UNKNOWN_SOURCE = {
+  label: "Desconocida",
+  icon: HelpCircle,
+  badgeColor: "slate",
+  sidebarColor: "bg-slate-400",
+  chartColor: "#94a3b8",
+}
+
+export function getSource(sourceKey) {
+  return SOURCES[sourceKey] || UNKNOWN_SOURCE
+}
 
 export const SOURCES = {
   calendar: {
