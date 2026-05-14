@@ -1,52 +1,51 @@
-import { useMemo, useState } from 'react'
-
+import { useState, useEffect, useMemo } from 'react'
 import { AuthContext } from './auth-context'
 
-const initialToken = localStorage.getItem('token')
+const decodeJWT = (token) => {
+  try {
+    return JSON.parse(atob(token.split('.')[1]))
+  } catch {
+    return null
+  }
+}
 
-const initialUser = initialToken
-  ? {
-      name: 'Martín',
-      email: 'martin@test.com',
-    }
-  : null
+const isTokenValid = (token) => {
+  if (!token || typeof token !== 'string' || token.split('.').length !== 3) return false
+  const payload = decodeJWT(token)
+  return payload && payload.exp * 1000 > Date.now()
+}
 
 export function AuthProvider({ children }) {
-  const [token, setToken] = useState(initialToken)
+  const [token, setToken] = useState(() => localStorage.getItem('token'))
+  const [loading, setLoading] = useState(true)
 
-  const [user, setUser] = useState(initialUser)
+  useEffect(() => {
+    if (token && !isTokenValid(token)) {
+      localStorage.removeItem('token')
+      setToken(null)
+    }
+    setLoading(false)
+  }, [token])
 
-  function login(newToken) {
+  // user se deriva del token sincrónicamente — sin race condition
+  const user = useMemo(() => {
+    if (!isTokenValid(token)) return null
+    const payload = decodeJWT(token)
+    return { id: payload.sub, email: payload.email, role: payload.role }
+  }, [token])
+
+  const login = (newToken) => {
     localStorage.setItem('token', newToken)
-
     setToken(newToken)
-
-    setUser({
-      name: 'Martín',
-      email: 'martin@test.com',
-    })
   }
 
-  function logout() {
+  const logout = () => {
     localStorage.removeItem('token')
-
     setToken(null)
-    setUser(null)
   }
-
-  const value = useMemo(
-    () => ({
-      token,
-      user,
-      isAuthenticated: Boolean(token),
-      login,
-      logout,
-    }),
-    [token, user]
-  )
 
   return (
-    <AuthContext.Provider value={value}>
+    <AuthContext.Provider value={{ user, token, login, logout, isAuthenticated: !!user, loading }}>
       {children}
     </AuthContext.Provider>
   )
