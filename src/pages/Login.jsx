@@ -1,12 +1,17 @@
 function Login() {
   const handleLogin = () => {
-    if (import.meta.env.DEV && import.meta.env.VITE_USE_MOCK_LOGIN === 'true') {
+    const useMockLogin =
+      import.meta.env.VITE_USE_MOCK_LOGIN === 'true'
+
+    if (useMockLogin) {
       window.location.href =
-  "/callback?token=fake.header.signature"
+        '/callback?token=header.payload.signature'
+
       return
     }
 
-    window.location.href = `${import.meta.env.VITE_API_URL}/auth/google`
+    window.location.href =
+      `${import.meta.env.VITE_API_URL}/auth/google`
   }
 
   return (
@@ -14,7 +19,6 @@ function Login() {
       <button
         type="button"
         onClick={handleLogin}
-        className="px-6 py-3 bg-black text-white rounded-lg"
       >
         Sign in with Google
       </button>

@@ -1,63 +1,45 @@
-import { useMemo, useState } from 'react'
+import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 
-import { AuthContext } from './auth-context'
-
-function decodeJWT(token) {
-  try {
-    const payload = token.split('.')[1]
-
-    const decoded = JSON.parse(atob(payload))
-
-    return decoded
-  } catch {
-    return null
-  }
-}
-
-const storedToken = localStorage.getItem('token')
+export const AuthContext = createContext(null)
 
 export function AuthProvider({ children }) {
-  const [token, setToken] = useState(storedToken || null)
-
-  const [user, setUser] = useState(() => {
-    if (!storedToken) {
-      return null
-    }
-
-    return decodeJWT(storedToken)
+  const [token, setToken] = useState(() => {
+    return localStorage.getItem('token')
   })
 
-  const [loading] = useState(false)
+  const [user, setUser] = useState(null)
 
-  const login = (newToken) => {
-    localStorage.setItem('token', newToken)
+  useEffect(() => {
+    if (token) {
+      localStorage.setItem('token', token)
 
-    const decodedUser = decodeJWT(newToken)
+      setUser({
+        name: 'Martín',
+        email: 'martin@test.com',
+      })
+    } else {
+      localStorage.removeItem('token')
+      setUser(null)
+    }
+  }, [token])
 
+  function login(newToken) {
     setToken(newToken)
-    setUser(decodedUser)
   }
 
-  const logout = () => {
-    localStorage.removeItem('token')
-
+  function logout() {
     setToken(null)
-    setUser(null)
-
-    // Más adelante podríamos pegarle al backend:
-    // await api.post('/auth/logout')
   }
 
   const value = useMemo(
     () => ({
       token,
       user,
-      isAuthenticated: !!token,
-      loading,
+      isAuthenticated: Boolean(token),
       login,
       logout,
     }),
-    [token, user, loading],
+    [token, user]
   )
 
   return (
@@ -65,4 +47,8 @@ export function AuthProvider({ children }) {
       {children}
     </AuthContext.Provider>
   )
+}
+
+export function useAuthContext() {
+  return useContext(AuthContext)
 }

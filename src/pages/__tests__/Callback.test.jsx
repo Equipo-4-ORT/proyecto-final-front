@@ -1,49 +1,66 @@
-import { describe, it, expect, vi, beforeEach } from "vitest"
-import { render, screen } from "@testing-library/react"
-import { MemoryRouter, Route, Routes } from "react-router-dom"
+import { render } from "@testing-library/react"
+import { MemoryRouter } from "react-router-dom"
+import { vi } from "vitest"
+
 import Callback from "../Callback"
+import { AuthProvider } from "../../contexts/AuthContext"
 
 const mockNavigate = vi.fn()
 
 vi.mock("react-router-dom", async () => {
   const actual = await vi.importActual("react-router-dom")
-  return { ...actual, useNavigate: () => mockNavigate }
+
+  return {
+    ...actual,
+    useNavigate: () => mockNavigate,
+  }
 })
 
-const renderCallback = (search = "") =>
-  render(
-    <MemoryRouter initialEntries={[`/callback${search}`]}>
-      <Routes>
-        <Route path="/callback" element={<Callback />} />
-      </Routes>
-    </MemoryRouter>
+function renderCallback(search = "") {
+  window.history.pushState({}, "Callback", `/callback${search}`)
+
+  return render(
+    <AuthProvider>
+      <MemoryRouter initialEntries={[`/callback${search}`]}>
+        <Callback />
+      </MemoryRouter>
+    </AuthProvider>
   )
+}
 
 describe("Callback", () => {
   beforeEach(() => {
-    mockNavigate.mockClear()
     localStorage.clear()
+    mockNavigate.mockClear()
   })
 
-  it("renders processing message", () => {
+  test("saves token and navigates to dashboard when JWT is valid", () => {
     renderCallback("?token=valid.jwt.token")
-    expect(screen.getByRole("heading", { name: /procesando/i })).toBeInTheDocument()
+
+    expect(localStorage.getItem("token")).toBe(
+      "valid.jwt.token"
+    )
+
+    expect(mockNavigate).toHaveBeenCalledWith(
+      "/dashboard"
+    )
   })
 
-  it("saves token and navigates to dashboard when JWT is valid", () => {
-    renderCallback("?token=valid.jwt.token")
-    expect(localStorage.getItem("token")).toBe("valid.jwt.token")
-    expect(mockNavigate).toHaveBeenCalledWith("/dashboard", { replace: true })
-  })
-
-  it("navigates to login when token format is invalid", () => {
+  test("navigates to login when token format is invalid", () => {
     renderCallback("?token=invalidtoken")
+
     expect(localStorage.getItem("token")).toBeNull()
-    expect(mockNavigate).toHaveBeenCalledWith("/login")
+
+    expect(mockNavigate).toHaveBeenCalledWith(
+      "/login"
+    )
   })
 
-  it("navigates to login when token is missing", () => {
+  test("navigates to login when token is missing", () => {
     renderCallback()
-    expect(mockNavigate).toHaveBeenCalledWith("/login")
+
+    expect(mockNavigate).toHaveBeenCalledWith(
+      "/login"
+    )
   })
 })

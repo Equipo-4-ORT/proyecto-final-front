@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
-import { ChevronDown, Info, LogOut } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { ChevronDown, Info, LogOut } from 'lucide-react'
 
 function SettingNumberField({
   label,
@@ -110,8 +110,8 @@ function UserMenu({
   onWorkdayHoursChange,
   onDefaultActivityHoursChange,
 }) {
-  const [isOpen, setIsOpen] = useState(false)
   const navigate = useNavigate()
+  const [isOpen, setIsOpen] = useState(false)
   const menuRef = useRef(null)
 
   function toggleMenu() {
@@ -151,9 +151,12 @@ function UserMenu({
   }
 
   function handleLogout() {
+  if (onLogout) {
     onLogout()
-    navigate('/login')
   }
+
+  navigate('/login')
+}
 
   return (
     <div ref={menuRef} className="relative ml-2">

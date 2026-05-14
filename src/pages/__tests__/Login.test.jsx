@@ -24,16 +24,33 @@ describe("Login", () => {
     })
 
     it("redirects to Google auth when mock login is disabled", () => {
-      render(<Login />)
-      fireEvent.click(screen.getByRole("button", { name: /sign in with google/i }))
-      expect(window.location.href).toContain("/auth/google")
-    })
+  vi.stubEnv("VITE_USE_MOCK_LOGIN", "false")
+  vi.stubEnv("VITE_API_URL", "http://localhost:3000")
 
-    it("redirects to mock callback when mock login is enabled", () => {
-      vi.stubEnv("VITE_USE_MOCK_LOGIN", "true")
-      render(<Login />)
-      fireEvent.click(screen.getByRole("button", { name: /sign in with google/i }))
-      expect(window.location.href).toBe("/callback?token=fake-jwt-123")
+  render(<Login />)
+
+  fireEvent.click(
+    screen.getByRole("button", {
+      name: /sign in with google/i,
     })
+  )
+
+  expect(window.location.href).toContain("/auth/google")
+})
+    it("redirects to mock callback when mock login is enabled", () => {
+  vi.stubEnv("VITE_USE_MOCK_LOGIN", "true")
+
+  render(<Login />)
+
+  fireEvent.click(
+    screen.getByRole("button", {
+      name: /sign in with google/i,
+    })
+  )
+
+  expect(window.location.href).toBe(
+    "/callback?token=header.payload.signature"
+  )
+})
   })
 })

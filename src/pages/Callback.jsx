@@ -4,7 +4,8 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 
 const isValidJWT = (token) =>
-  typeof token === 'string' && token.split('.').length === 3
+  typeof token === 'string' &&
+  token.split('.').length === 3
 
 function Callback() {
   const navigate = useNavigate()
@@ -22,9 +23,10 @@ function Callback() {
 
       window.history.replaceState({}, document.title, '/callback')
 
-      navigate('/dashboard', { replace: true })
+     navigate('/dashboard')
     } else {
-      navigate('/login', { replace: true })
+      localStorage.removeItem('token')
+      navigate('/login')
     }
   }, [location.search, login, navigate])
 
