@@ -1,6 +1,6 @@
-import { createContext, useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 
-export const AuthContext = createContext()
+import { AuthContext } from './auth-context'
 
 function decodeJWT(token) {
   try {
@@ -14,22 +14,20 @@ function decodeJWT(token) {
   }
 }
 
+const storedToken = localStorage.getItem('token')
+
 export function AuthProvider({ children }) {
-  const [token, setToken] = useState(null)
-const [user, setUser] = useState(null)
-const [loading, setLoading] = useState(true)
- useEffect(() => {
-  const storedToken = localStorage.getItem('token')
+  const [token, setToken] = useState(storedToken || null)
 
-  if (storedToken) {
-    const decodedUser = decodeJWT(storedToken)
+  const [user, setUser] = useState(() => {
+    if (!storedToken) {
+      return null
+    }
 
-    setToken(storedToken)
-    setUser(decodedUser)
-  }
+    return decodeJWT(storedToken)
+  })
 
-  setLoading(false)
-}, [])
+  const [loading] = useState(false)
 
   const login = (newToken) => {
     localStorage.setItem('token', newToken)
@@ -51,16 +49,17 @@ const [loading, setLoading] = useState(true)
   }
 
   const value = useMemo(
-  () => ({
-    token,
-    user,
-    isAuthenticated: !!token,
-    loading,
-    login,
-    logout,
-  }),
-  [token, user, loading],
-)
+    () => ({
+      token,
+      user,
+      isAuthenticated: !!token,
+      loading,
+      login,
+      logout,
+    }),
+    [token, user, loading],
+  )
+
   return (
     <AuthContext.Provider value={value}>
       {children}
