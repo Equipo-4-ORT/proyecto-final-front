@@ -1,5 +1,11 @@
 import { render, screen } from "@testing-library/react"
 import App from "../App"
+import {
+  describe,
+  test,
+  expect,
+  beforeEach,
+} from 'vitest'
 
 function renderAt(route) {
   window.history.pushState({}, "Test page", route)

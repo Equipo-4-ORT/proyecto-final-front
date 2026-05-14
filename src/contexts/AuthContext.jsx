@@ -1,34 +1,36 @@
-import { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
+import { AuthContext } from './auth-context'
 
-export const AuthContext = createContext(null)
+const initialToken = localStorage.getItem('token')
+
+const initialUser = initialToken
+  ? {
+      name: 'Martín',
+      email: 'martin@test.com',
+    }
+  : null
 
 export function AuthProvider({ children }) {
-  const [token, setToken] = useState(() => {
-    return localStorage.getItem('token')
-  })
+  const [token, setToken] = useState(initialToken)
 
-  const [user, setUser] = useState(null)
-
-  useEffect(() => {
-    if (token) {
-      localStorage.setItem('token', token)
-
-      setUser({
-        name: 'Martín',
-        email: 'martin@test.com',
-      })
-    } else {
-      localStorage.removeItem('token')
-      setUser(null)
-    }
-  }, [token])
+  const [user, setUser] = useState(initialUser)
 
   function login(newToken) {
+    localStorage.setItem('token', newToken)
+
     setToken(newToken)
+
+    setUser({
+      name: 'Martín',
+      email: 'martin@test.com',
+    })
   }
 
   function logout() {
+    localStorage.removeItem('token')
+
     setToken(null)
+    setUser(null)
   }
 
   const value = useMemo(
@@ -47,8 +49,4 @@ export function AuthProvider({ children }) {
       {children}
     </AuthContext.Provider>
   )
-}
-
-export function useAuthContext() {
-  return useContext(AuthContext)
 }
