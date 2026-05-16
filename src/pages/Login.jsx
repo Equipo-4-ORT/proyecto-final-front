@@ -13,13 +13,6 @@ function Login() {
   const errorMessage = ERROR_MESSAGES[errorParam] ?? null
 
   const handleLogin = () => {
-    const useMockLogin = import.meta.env.VITE_USE_MOCK_LOGIN === 'true'
-
-    if (useMockLogin) {
-      window.location.href = '/callback?token=header.payload.signature'
-      return
-    }
-
     window.location.href = `${import.meta.env.VITE_API_URL}/auth/google`
   }
 

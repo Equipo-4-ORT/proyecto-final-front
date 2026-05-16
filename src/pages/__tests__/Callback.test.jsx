@@ -11,6 +11,9 @@ import {
 import Callback from "../Callback"
 import { AuthProvider } from "../../contexts/AuthContext"
 
+const MOCK_JWT =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwiZW1haWwiOiJkZXZAdGVzdC5jb20iLCJyb2xlIjoiYWRtaW4iLCJleHAiOjk5OTk5OTk5OTl9.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+
 const mockNavigate = vi.fn()
 
 vi.mock("react-router-dom", async () => {
@@ -41,11 +44,9 @@ describe("Callback", () => {
   })
 
   test("saves token and navigates to dashboard when JWT is valid", () => {
-    renderCallback("?token=valid.jwt.token")
+    renderCallback(`?token=${MOCK_JWT}`)
 
-    expect(localStorage.getItem("token")).toBe(
-      "valid.jwt.token"
-    )
+    expect(localStorage.getItem("token")).toBe(MOCK_JWT)
 
     expect(mockNavigate).toHaveBeenCalledWith(
       "/dashboard"

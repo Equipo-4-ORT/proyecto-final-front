@@ -1,12 +1,21 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"
 import { render, screen, fireEvent } from "@testing-library/react"
+import { MemoryRouter } from "react-router-dom"
 import Login from "../Login"
 
+function renderLogin(search = "") {
+  return render(
+    <MemoryRouter initialEntries={[`/login${search}`]}>
+      <Login />
+    </MemoryRouter>
+  )
+}
+
 describe("Login", () => {
-  it("renders the Sign in with Google button", () => {
-    render(<Login />)
+  it("renders the Continuar con Google button", () => {
+    renderLogin()
     expect(
-      screen.getByRole("button", { name: /sign in with google/i })
+      screen.getByRole("button", { name: /continuar con google/i })
     ).toBeInTheDocument()
   })
 
@@ -23,34 +32,16 @@ describe("Login", () => {
       vi.unstubAllEnvs()
     })
 
-    it("redirects to Google auth when mock login is disabled", () => {
-  vi.stubEnv("VITE_USE_MOCK_LOGIN", "false")
-  vi.stubEnv("VITE_API_URL", "http://localhost:3000")
+    it("redirects to Google auth when clicking the button", () => {
+      vi.stubEnv("VITE_API_URL", "http://localhost:3000")
 
-  render(<Login />)
+      renderLogin()
 
-  fireEvent.click(
-    screen.getByRole("button", {
-      name: /sign in with google/i,
+      fireEvent.click(
+        screen.getByRole("button", { name: /continuar con google/i })
+      )
+
+      expect(window.location.href).toContain("/auth/google")
     })
-  )
-
-  expect(window.location.href).toContain("/auth/google")
-})
-    it("redirects to mock callback when mock login is enabled", () => {
-  vi.stubEnv("VITE_USE_MOCK_LOGIN", "true")
-
-  render(<Login />)
-
-  fireEvent.click(
-    screen.getByRole("button", {
-      name: /sign in with google/i,
-    })
-  )
-
-  expect(window.location.href).toBe(
-    "/callback?token=header.payload.signature"
-  )
-})
   })
 })

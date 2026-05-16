@@ -7,6 +7,9 @@ import {
   beforeEach,
 } from 'vitest'
 
+const MOCK_JWT =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwiZW1haWwiOiJkZXZAdGVzdC5jb20iLCJyb2xlIjoiYWRtaW4iLCJleHAiOjk5OTk5OTk5OTl9.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+
 function renderAt(route) {
   window.history.pushState({}, "Test page", route)
 
@@ -23,7 +26,7 @@ describe("App routing", () => {
 
     expect(
       screen.getByRole("button", {
-        name: /sign in with google/i,
+        name: /continuar con google/i,
       })
     ).toBeInTheDocument()
   })
@@ -33,13 +36,13 @@ describe("App routing", () => {
 
     expect(
       screen.getByRole("button", {
-        name: /sign in with google/i,
+        name: /continuar con google/i,
       })
     ).toBeInTheDocument()
   })
 
   test("renders Dashboard when token exists", () => {
-    localStorage.setItem("token", "valid.jwt.token")
+    localStorage.setItem("token", MOCK_JWT)
 
     renderAt("/dashboard")
 
@@ -51,7 +54,7 @@ describe("App routing", () => {
   })
 
   test("renders Admin when token exists", () => {
-    localStorage.setItem("token", "valid.jwt.token")
+    localStorage.setItem("token", MOCK_JWT)
 
     renderAt("/admin")
 
