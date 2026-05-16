@@ -1,0 +1,12 @@
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.8",
+  "base_commit_sha": "2a1a3b7cf564e18a848fbcfda924a197dbbe13f4",
+  "prompts": {},
+  "humans": {
+    "h_7169d60c0714e6": {
+      "author": "martinexequi_meli <martinexequiel.diaz@mercadolibre.com>"
+    }
+  }
+}
