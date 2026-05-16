@@ -1,0 +1,19 @@
+.gitleaks.toml
+  s_0dd253e3994a2a::t_4581082cb31b72 7,9-10
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.8",
+  "base_commit_sha": "b59f4cdba96c4f58fa157bdbf23c727c8bdd7a81",
+  "prompts": {},
+  "sessions": {
+    "s_0dd253e3994a2a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a54d37aa-4e56-47f2-bec7-3619bd6c1335",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "martinexequi_meli <martinexequiel.diaz@mercadolibre.com>"
+    }
+  }
+}
