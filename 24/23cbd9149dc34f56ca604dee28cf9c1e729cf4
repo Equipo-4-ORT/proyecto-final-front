@@ -1,0 +1,26 @@
+src/pages/Callback.jsx
+  s_0dd253e3994a2a::t_6bcab4b3246a4f 15,18
+src/pages/__tests__/Callback.test.jsx
+  s_0dd253e3994a2a::t_b16627d921279e 46,51,57,59
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.8",
+  "base_commit_sha": "2423cbd9149dc34f56ca604dee28cf9c1e729cf4",
+  "prompts": {},
+  "humans": {
+    "h_7169d60c0714e6": {
+      "author": "martinexequi_meli <martinexequiel.diaz@mercadolibre.com>"
+    }
+  },
+  "sessions": {
+    "s_0dd253e3994a2a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a54d37aa-4e56-47f2-bec7-3619bd6c1335",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "martinexequi_meli <martinexequiel.diaz@mercadolibre.com>"
+    }
+  }
+}
