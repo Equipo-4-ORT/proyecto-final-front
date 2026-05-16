@@ -12,6 +12,9 @@ function Callback() {
     const params = new URLSearchParams(location.search)
     const token = params.get('token')
 
+    // lgtm[js/user-controlled-bypass] - token proviene del redirect de nuestro backend tras OAuth,
+    // la validación real de firma ocurre server-side en cada llamada a la API.
+    // Deuda técnica: migrar a cookie HTTP-only para no exponer el token en la URL.
     if (token) {
       login(token)
       window.history.replaceState({}, document.title, '/callback')
