@@ -1,30 +1,41 @@
 import { useRef } from "react"
 import { CalendarDays, Download } from "lucide-react"
+
 import UserMenu from "./UserMenu"
 import Button from "../ui/Button"
-import { getTodayDate } from "../../utils/dateHelpers"
 
-// TODO: eliminar este mock y obtener el usuario desde AuthContext/useAuth cuando esté implementado.
-const currentUser = {
-  name: "Usuario",
-  email: "user@autolog.com",
-}
+import { getTodayDate } from "../../utils/dateHelpers"
 
 function formatDate(date) {
   const currentDate = new Date(`${date}T00:00:00`)
-  const day = currentDate.toLocaleDateString("es-AR", {
-    day: "2-digit",
-  })
-  const month = currentDate.toLocaleDateString("es-AR", {
-    month: "long",
-  })
-  const year = currentDate.toLocaleDateString("es-AR", {
-    year: "numeric",
-  })
-return `${day} de ${month.toLowerCase()}, ${year}`
+
+  const day = currentDate.toLocaleDateString(
+    "es-AR",
+    {
+      day: "2-digit",
+    }
+  )
+
+  const month = currentDate.toLocaleDateString(
+    "es-AR",
+    {
+      month: "long",
+    }
+  )
+
+  const year = currentDate.toLocaleDateString(
+    "es-AR",
+    {
+      year: "numeric",
+    }
+  )
+
+  return `${day} de ${month.toLowerCase()}, ${year}`
 }
 
 function Header({
+  user,
+  onLogout,
   selectedDate,
   onDateChange,
   onExportExcel,
@@ -34,6 +45,7 @@ function Header({
   onDefaultActivityHoursChange,
 }) {
   const today = getTodayDate()
+
   const dateInputRef = useRef(null)
 
   function openDatePicker() {
@@ -70,7 +82,10 @@ function Header({
             shadow-sm
           "
         >
-          <CalendarDays size={18} className="text-slate-500" />
+          <CalendarDays
+            size={18}
+            className="text-slate-500"
+          />
 
           <span className="text-sm font-medium">
             {formatDate(selectedDate || today)}
@@ -81,7 +96,9 @@ function Header({
             type="date"
             value={selectedDate}
             max={today}
-            onChange={(event) => onDateChange(event.target.value)}
+            onChange={(event) =>
+              onDateChange(event.target.value)
+            }
             className="absolute opacity-0 pointer-events-none"
             tabIndex={-1}
           />
@@ -106,11 +123,16 @@ function Header({
         </Button>
 
         <UserMenu
-          user={currentUser}
+          user={user}
+          onLogout={onLogout}
           workdayHours={workdayHours}
           defaultActivityHours={defaultActivityHours}
-          onWorkdayHoursChange={onWorkdayHoursChange}
-          onDefaultActivityHoursChange={onDefaultActivityHoursChange}
+          onWorkdayHoursChange={
+            onWorkdayHoursChange
+          }
+          onDefaultActivityHoursChange={
+            onDefaultActivityHoursChange
+          }
         />
       </div>
     </header>

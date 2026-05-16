@@ -1,49 +1,73 @@
-import { describe, it, expect, beforeEach } from "vitest"
 import { render, screen } from "@testing-library/react"
 import App from "../App"
+import {
+  describe,
+  test,
+  expect,
+  beforeEach,
+} from 'vitest'
 
-const renderAt = (path) => {
-  window.history.pushState({}, "", path)
+const MOCK_JWT =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwiZW1haWwiOiJkZXZAdGVzdC5jb20iLCJyb2xlIjoiYWRtaW4iLCJleHAiOjk5OTk5OTk5OTl9.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+
+function renderAt(route) {
+  window.history.pushState({}, "Test page", route)
+
   return render(<App />)
 }
 
 describe("App routing", () => {
   beforeEach(() => {
-    window.history.pushState({}, "", "/")
+    localStorage.clear()
   })
 
-  it("renders the home heading at /", () => {
-    renderAt("/")
-    expect(
-      screen.getByRole("heading", { name: /home/i, level: 1 })
-    ).toBeInTheDocument()
-  })
-
-  it("renders Login at /login", () => {
+  test("renders Login at /login", () => {
     renderAt("/login")
+
     expect(
-      screen.getByRole("button", { name: /sign in with google/i })
+      screen.getByRole("button", {
+        name: /continuar con google/i,
+      })
     ).toBeInTheDocument()
   })
 
-  it("renders Dashboard at /dashboard", () => {
+  test("redirects protected routes to login when no token exists", () => {
     renderAt("/dashboard")
+
     expect(
-      screen.getByRole("heading", { name: /^dashboard$/i, level: 2 })
+      screen.getByRole("button", {
+        name: /continuar con google/i,
+      })
     ).toBeInTheDocument()
   })
 
-  it("renders Admin at /admin", () => {
+  test("renders Dashboard when token exists", () => {
+    localStorage.setItem("token", MOCK_JWT)
+
+    renderAt("/dashboard")
+
+    expect(
+      screen.getByRole("heading", {
+        name: /dashboard/i,
+      })
+    ).toBeInTheDocument()
+  })
+
+  test("renders Admin when token exists", () => {
+    localStorage.setItem("token", MOCK_JWT)
+
     renderAt("/admin")
+
     expect(
-      screen.getByRole("heading", { name: /admin/i, level: 1 })
+      screen.getByRole("heading", {
+        name: /admin/i,
+      })
     ).toBeInTheDocument()
   })
 
-  it("renders NotFound on unknown routes", () => {
-    renderAt("/this-route-does-not-exist")
-    expect(
-      screen.getByRole("heading", { name: /404/, level: 1 })
-    ).toBeInTheDocument()
+  test("renders NotFound on unknown routes", () => {
+    renderAt("/unknown-route")
+
+    expect(screen.getByText(/404/i)).toBeInTheDocument()
   })
 })

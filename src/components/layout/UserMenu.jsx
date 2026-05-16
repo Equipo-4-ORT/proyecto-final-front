@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from "react"
-import { ChevronDown, Info, LogOut } from "lucide-react"
-import { useNavigate } from "react-router-dom"
+import { useEffect, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { ChevronDown, Info, LogOut } from 'lucide-react'
 
 function SettingNumberField({
   label,
@@ -104,13 +104,14 @@ function SettingNumberField({
 
 function UserMenu({
   user,
+  onLogout,
   workdayHours,
   defaultActivityHours,
   onWorkdayHoursChange,
   onDefaultActivityHoursChange,
 }) {
-  const [isOpen, setIsOpen] = useState(false)
   const navigate = useNavigate()
+  const [isOpen, setIsOpen] = useState(false)
   const menuRef = useRef(null)
 
   function toggleMenu() {
@@ -124,10 +125,10 @@ function UserMenu({
       }
     }
 
-    document.addEventListener("mousedown", handleClickOutside)
+    document.addEventListener('mousedown', handleClickOutside)
 
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside)
+      document.removeEventListener('mousedown', handleClickOutside)
     }
   }, [])
 
@@ -150,9 +151,12 @@ function UserMenu({
   }
 
   function handleLogout() {
-    //Eliminar token
-    navigate("/login")
+  if (onLogout) {
+    onLogout()
   }
+
+  navigate('/login')
+}
 
   return (
     <div ref={menuRef} className="relative ml-2">
@@ -169,19 +173,17 @@ function UserMenu({
       >
         <div className="text-right">
           <p className="text-sm font-semibold text-slate-800">
-            {user.name}
+            {user?.name || 'Usuario'}
           </p>
 
-          <p className="text-xs text-slate-500">
-            {user.email}
-          </p>
+          <p className="text-xs text-slate-500">{user?.email || 'Sin email'}</p>
         </div>
 
         <ChevronDown
           size={18}
           className={`
             text-slate-500 transition
-            ${isOpen ? "rotate-180" : ""}
+            ${isOpen ? 'rotate-180' : ''}
           `}
         />
       </button>
@@ -199,17 +201,13 @@ function UserMenu({
             z-50
           "
         >
-          <h3 className="text-lg font-bold text-slate-800">
-            Configuración
-          </h3>
+          <h3 className="text-lg font-bold text-slate-800">Configuración</h3>
 
           <div className="mt-5 space-y-5">
             <SettingNumberField
               label="Jornada laboral diaria"
               value={workdayHours}
-              onChange={(value) =>
-                onWorkdayHoursChange(clampHours(value))
-              }
+              onChange={(value) => onWorkdayHoursChange(clampHours(value))}
               onDecrease={() =>
                 decreaseValue(workdayHours, onWorkdayHoursChange)
               }
@@ -226,10 +224,16 @@ function UserMenu({
                 onDefaultActivityHoursChange(clampHours(value))
               }
               onDecrease={() =>
-                decreaseValue(defaultActivityHours, onDefaultActivityHoursChange)
+                decreaseValue(
+                  defaultActivityHours,
+                  onDefaultActivityHoursChange,
+                )
               }
               onIncrease={() =>
-                increaseValue(defaultActivityHours, onDefaultActivityHoursChange)
+                increaseValue(
+                  defaultActivityHours,
+                  onDefaultActivityHoursChange,
+                )
               }
               helperText="Se usa cuando una actividad no tiene hora de fin. El sistema estima su duración con este valor."
             />
@@ -252,9 +256,7 @@ function UserMenu({
             >
               <LogOut size={18} />
 
-              <span className="font-medium">
-                Cerrar sesión
-              </span>
+              <span className="font-medium">Cerrar sesión</span>
             </button>
           </div>
         </div>

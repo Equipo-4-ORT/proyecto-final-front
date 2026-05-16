@@ -4,7 +4,8 @@ title = "AutoLog Frontend Gitleaks Config"
 useDefault = true   # usa todas las reglas built-in de gitleaks
 
 [allowlist]
-description = "Ignorar placeholders en .env.example"
+description = "Ignorar placeholders en .env.example y tokens de prueba en tests"
 paths = [
-    '''\.env\.example$'''
+    '''\.env\.example$''',
+    '''src/.*__tests__/.*'''
 ]
