@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import { AuthContext } from './auth-context'
 
 const decodeJWT = (token) => {
@@ -16,36 +16,33 @@ const isTokenValid = (token) => {
 }
 
 export function AuthProvider({ children }) {
-  const [token, setToken] = useState(() => localStorage.getItem('token'))
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    if (token && !isTokenValid(token)) {
+  const [token, setToken] = useState(() => {
+    const stored = localStorage.getItem('token')
+    if (stored && !isTokenValid(stored)) {
       localStorage.removeItem('token')
-      setToken(null)
+      return null
     }
-    setLoading(false)
-  }, [token])
+    return stored
+  })
 
-  // user se deriva del token sincrónicamente — sin race condition
   const user = useMemo(() => {
     if (!isTokenValid(token)) return null
     const payload = decodeJWT(token)
     return { id: payload.sub, email: payload.email, role: payload.role }
   }, [token])
 
-  const login = (newToken) => {
+  const login = useCallback((newToken) => {
     localStorage.setItem('token', newToken)
     setToken(newToken)
-  }
+  }, [])
 
-  const logout = () => {
+  const logout = useCallback(() => {
     localStorage.removeItem('token')
     setToken(null)
-  }
+  }, [])
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout, isAuthenticated: !!user, loading }}>
+    <AuthContext.Provider value={{ user, token, login, logout, isAuthenticated: !!user }}>
       {children}
     </AuthContext.Provider>
   )

@@ -28,7 +28,7 @@ function Callback() {
       localStorage.removeItem('token')
       navigate('/login')
     }
-  }, [location.search, navigate])
+  }, [location.search, navigate, login])
 
   return <h1>Procesando login...</h1>
 }
