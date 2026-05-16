@@ -1,0 +1,23 @@
+src/contexts/AuthContext.jsx
+  s_0dd253e3994a2a::t_80302672c7ab0a 1,19-21,23,25-26,34,37,39,42,45
+src/pages/Callback.jsx
+  s_0dd253e3994a2a::t_057df305b818fe 31
+src/components/PrivateRoute.jsx
+  s_0dd253e3994a2a::t_fc0e62883fe590 6,15
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.8",
+  "base_commit_sha": "773060d56a6a398b0a59f1cae59c2831c6f49252",
+  "prompts": {},
+  "sessions": {
+    "s_0dd253e3994a2a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a54d37aa-4e56-47f2-bec7-3619bd6c1335",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "martinexequi_meli <martinexequiel.diaz@mercadolibre.com>"
+    }
+  }
+}
