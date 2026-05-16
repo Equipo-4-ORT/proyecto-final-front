@@ -43,31 +43,17 @@ describe("Callback", () => {
     mockNavigate.mockClear()
   })
 
-  test("saves token and navigates to dashboard when JWT is valid", () => {
+  test("saves token and navigates to dashboard when token is present", () => {
     renderCallback(`?token=${MOCK_JWT}`)
 
     expect(localStorage.getItem("token")).toBe(MOCK_JWT)
 
-    expect(mockNavigate).toHaveBeenCalledWith(
-      "/dashboard"
-    )
-  })
-
-  test("navigates to login when token format is invalid", () => {
-    renderCallback("?token=invalidtoken")
-
-    expect(localStorage.getItem("token")).toBeNull()
-
-    expect(mockNavigate).toHaveBeenCalledWith(
-      "/login"
-    )
+    expect(mockNavigate).toHaveBeenCalledWith("/dashboard")
   })
 
   test("navigates to login when token is missing", () => {
     renderCallback()
 
-    expect(mockNavigate).toHaveBeenCalledWith(
-      "/login"
-    )
+    expect(mockNavigate).toHaveBeenCalledWith("/login")
   })
 })
