@@ -34,7 +34,7 @@ jobs:
     name: CHANGELOG Updated
     runs-on: ubuntu-latest
     # Solo aplica en PRs a main (release-ready)
-    if: github.base_ref == 'main'
+    if: github.event.pull_request.base.ref == 'main'
     steps:
       - uses: actions/checkout@v4
         with:
