@@ -1,0 +1,19 @@
+.github/workflows/security.yml
+  s_8d9e9eed517a33::t_64c30b0e3a9d4e 37
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.8",
+  "base_commit_sha": "fd46cc275f43dc1489c4f989045d1c82b49faafd",
+  "prompts": {},
+  "sessions": {
+    "s_8d9e9eed517a33": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "50b27016-5ecf-49db-af0f-1c6fcd2cecab",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "martinexequi_meli <martinexequiel.diaz@mercadolibre.com>"
+    }
+  }
+}
