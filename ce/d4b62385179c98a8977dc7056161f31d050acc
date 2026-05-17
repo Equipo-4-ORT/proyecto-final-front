@@ -1,0 +1,19 @@
+CHANGELOG.md
+  s_a9d615dab43a60::t_900777f0dfc2a1 8-37
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.8",
+  "base_commit_sha": "ced4b62385179c98a8977dc7056161f31d050acc",
+  "prompts": {},
+  "sessions": {
+    "s_a9d615dab43a60": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "160d4e16-c769-402a-b3a8-de525fa628da",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "martinexequi_meli <martinexequiel.diaz@mercadolibre.com>"
+    }
+  }
+}
