@@ -1,8 +1,25 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+
+:root {
+  --color-primary: #082f63;
+  --color-primary-hover: #06264f;
+}
+
+
 * {
   box-sizing: border-box;
 }
 
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
 body {
   margin: 0;
-  font-family: sans-serif;
+  background-color: #f8fafc;
+  color: #0f172a;
+  font-family: Inter, sans-serif;
 }

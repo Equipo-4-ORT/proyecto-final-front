@@ -1,0 +1,73 @@
+import { render, screen } from "@testing-library/react"
+import App from "../App"
+import {
+  describe,
+  test,
+  expect,
+  beforeEach,
+} from 'vitest'
+
+const MOCK_JWT =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwiZW1haWwiOiJkZXZAdGVzdC5jb20iLCJyb2xlIjoiYWRtaW4iLCJleHAiOjk5OTk5OTk5OTl9.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+
+function renderAt(route) {
+  window.history.pushState({}, "Test page", route)
+
+  return render(<App />)
+}
+
+describe("App routing", () => {
+  beforeEach(() => {
+    localStorage.clear()
+  })
+
+  test("renders Login at /login", () => {
+    renderAt("/login")
+
+    expect(
+      screen.getByRole("button", {
+        name: /continuar con google/i,
+      })
+    ).toBeInTheDocument()
+  })
+
+  test("redirects protected routes to login when no token exists", () => {
+    renderAt("/dashboard")
+
+    expect(
+      screen.getByRole("button", {
+        name: /continuar con google/i,
+      })
+    ).toBeInTheDocument()
+  })
+
+  test("renders Dashboard when token exists", () => {
+    localStorage.setItem("token", MOCK_JWT)
+
+    renderAt("/dashboard")
+
+    expect(
+      screen.getByRole("heading", {
+        name: /dashboard/i,
+      })
+    ).toBeInTheDocument()
+  })
+
+  test("renders Admin when token exists", () => {
+    localStorage.setItem("token", MOCK_JWT)
+
+    renderAt("/admin")
+
+    expect(
+      screen.getByRole("heading", {
+        name: /admin/i,
+      })
+    ).toBeInTheDocument()
+  })
+
+  test("renders NotFound on unknown routes", () => {
+    renderAt("/unknown-route")
+
+    expect(screen.getByText(/404/i)).toBeInTheDocument()
+  })
+})
