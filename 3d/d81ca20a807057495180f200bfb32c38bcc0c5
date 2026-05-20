@@ -1,0 +1,19 @@
+src/services/jiraApi.js
+  s_91cf38f630989f::t_0efab0e1f38672 1-34
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.11",
+  "base_commit_sha": "3dd81ca20a807057495180f200bfb32c38bcc0c5",
+  "prompts": {},
+  "sessions": {
+    "s_91cf38f630989f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "93ce4040-5a8c-4454-9aa6-b568337e080b",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "martinexequi_meli <martinexequiel.diaz@mercadolibre.com>"
+    }
+  }
+}
