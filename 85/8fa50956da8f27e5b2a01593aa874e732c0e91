@@ -1,0 +1,27 @@
+src/pages/__tests__/Dashboard.test.jsx
+  s_91cf38f630989f::t_af514d62f1b50d 1,5-17
+src/pages/Dashboard/components/__tests__/JiraCallbackBanner.test.jsx
+  s_91cf38f630989f::t_37722a3717509f 1-75
+src/hooks/__tests__/useJiraConnection.test.js
+  s_91cf38f630989f::t_309a4dd295cf75 1-170
+src/pages/Dashboard/components/__tests__/JiraIntegrationCard.test.jsx
+  s_91cf38f630989f::t_2940c46856b818 1-155
+src/services/__tests__/jiraApi.test.js
+  s_91cf38f630989f::t_78cdc0f706744a 1-119
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.11",
+  "base_commit_sha": "858fa50956da8f27e5b2a01593aa874e732c0e91",
+  "prompts": {},
+  "sessions": {
+    "s_91cf38f630989f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "93ce4040-5a8c-4454-9aa6-b568337e080b",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "martinexequi_meli <martinexequiel.diaz@mercadolibre.com>"
+    }
+  }
+}
