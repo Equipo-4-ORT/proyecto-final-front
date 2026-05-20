@@ -47,15 +47,24 @@ const VARIANT_STYLES = {
 function JiraCallbackBanner() {
   const location = useLocation()
   const [message, setMessage] = useState(null)
+  const [processedSearch, setProcessedSearch] = useState(null)
 
-  useEffect(() => {
+  // Derivamos el mensaje del query string durante el render: cuando cambia
+  // la búsqueda, lo recalculamos en vez de hacerlo dentro de un efecto.
+  if (location.search !== processedSearch) {
+    setProcessedSearch(location.search)
     const params = new URLSearchParams(location.search)
     const jiraParam = params.get("jira")
-    if (!jiraParam) return
+    if (jiraParam) {
+      setMessage(buildMessage(jiraParam, params.get("reason")))
+    }
+  }
 
-    const reasonParam = params.get("reason")
-    const next = buildMessage(jiraParam, reasonParam)
-    setMessage(next)
+  // El efecto solo hace lo que es un efecto real: tocar un sistema externo
+  // (el historial del navegador) para limpiar la URL.
+  useEffect(() => {
+    const params = new URLSearchParams(location.search)
+    if (!params.has("jira")) return
 
     params.delete("jira")
     params.delete("reason")
