@@ -1,0 +1,21 @@
+src/__tests__/App.test.jsx
+  s_cefafb1d6970f4::t_99566ccb2c8af4 8,11-13
+src/pages/__tests__/Admin.test.jsx
+  s_cefafb1d6970f4::t_31690e3404433c 1,5-7
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.11",
+  "base_commit_sha": "1b785512e99671ddef59eb72ab1684c13091102f",
+  "prompts": {},
+  "sessions": {
+    "s_cefafb1d6970f4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2cdf74b1-4ef5-44da-a3c4-2b858dce4d79",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "martinexequi_meli <martinexequiel.diaz@mercadolibre.com>"
+    }
+  }
+}
