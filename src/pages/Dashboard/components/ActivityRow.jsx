@@ -141,10 +141,9 @@ function ActivityRow({
           )
         )}
       </td>
-      
       <td className="px-4 py-3">
-  <StatusBadge status={activity.status} />
-</td>
+        <StatusBadge status={activity.status} />
+      </td>
 
       <td className="px-4 py-3">
         {isEditing ? (
@@ -170,76 +169,76 @@ function ActivityRow({
       </td>
 
       <td className="px-4 py-3">
-  {!readOnly && (
-    <div className="flex items-center gap-2">
-      {isEditing ? (
-        <>
-          <button
-            type="button"
-            onClick={onSaveEdit}
-            className="
-              w-9 h-9 rounded-xl border border-slate-200
-              flex items-center justify-center
-              text-slate-500
-              hover:bg-emerald-50 hover:text-emerald-600
-              transition
-            "
-            aria-label="Guardar edición"
-          >
-            <Check size={16} />
-          </button>
+        {!readOnly && (
+          <div className="flex items-center gap-2">
+            {isEditing ? (
+              <>
+                <button
+                  type="button"
+                  onClick={onSaveEdit}
+                  className="
+                    w-9 h-9 rounded-xl border border-slate-200
+                    flex items-center justify-center
+                    text-slate-500
+                    hover:bg-emerald-50 hover:text-emerald-600
+                    transition
+                  "
+                  aria-label="Guardar edición"
+                >
+                  <Check size={16} />
+                </button>
 
-          <button
-            type="button"
-            onClick={onCancelEdit}
-            className="
-              w-9 h-9 rounded-xl border border-slate-200
-              flex items-center justify-center
-              text-slate-500
-              hover:bg-red-50 hover:text-red-600
-              transition
-            "
-            aria-label="Cancelar edición"
-          >
-            <X size={16} />
-          </button>
-        </>
-      ) : (
-        <>
-          <button
-            type="button"
-            onClick={() => onStartEdit(activity)}
-            className="
-              w-9 h-9 rounded-xl border border-slate-200
-              flex items-center justify-center
-              text-slate-500
-              hover:bg-slate-50 hover:text-blue-600
-              transition
-            "
-            aria-label="Editar actividad"
-          >
-            <Pencil size={16} />
-          </button>
+                <button
+                  type="button"
+                  onClick={onCancelEdit}
+                  className="
+                    w-9 h-9 rounded-xl border border-slate-200
+                    flex items-center justify-center
+                    text-slate-500
+                    hover:bg-red-50 hover:text-red-600
+                    transition
+                  "
+                  aria-label="Cancelar edición"
+                >
+                  <X size={16} />
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  type="button"
+                  onClick={() => onStartEdit(activity)}
+                  className="
+                    w-9 h-9 rounded-xl border border-slate-200
+                    flex items-center justify-center
+                    text-slate-500
+                    hover:bg-slate-50 hover:text-blue-600
+                    transition
+                  "
+                  aria-label="Editar actividad"
+                >
+                  <Pencil size={16} />
+                </button>
 
-          <button
-            type="button"
-            onClick={() => onDeleteClick(activity)}
-            className="
-              w-9 h-9 rounded-xl border border-slate-200
-              flex items-center justify-center
-              text-slate-500
-              hover:bg-red-50 hover:text-red-600
-              transition
-            "
-            aria-label="Eliminar actividad"
-          >
-            <Trash2 size={16} />
-          </button>
-        </>
-      )}
-    </div>
-  )}
-</td>
+                <button
+                  type="button"
+                  onClick={() => onDeleteClick(activity)}
+                  className="
+                    w-9 h-9 rounded-xl border border-slate-200
+                    flex items-center justify-center
+                    text-slate-500
+                    hover:bg-red-50 hover:text-red-600
+                    transition
+                  "
+                  aria-label="Eliminar actividad"
+                >
+                  <Trash2 size={16} />
+                </button>
+              </>
+            )}
+          </div>
+        )}
+      </td>
     </tr>
   )
 }

@@ -80,7 +80,7 @@ function Dashboard() {
   const sourceCounts = getSourceCounts(activities, SOURCES)
 
   function handleExportExcel() {
-    // Reemplazar por backend después
+    // TODO: reemplazar por llamada al backend — POST /reports/export con selectedDate y activities
     console.log('Exportar Excel', {
       selectedDate,
       activities,
@@ -88,13 +88,8 @@ function Dashboard() {
   }
 
   function handleGenerateReport() {
+    // TODO: llamar al backend para generar el informe (GET /activities + procesamiento IA)
     console.log('Generar informe')
-
-    // después:
-    // fetch backend
-    // GET activities
-    // IA
-    // etc
   }
 
   function handleLogout() {

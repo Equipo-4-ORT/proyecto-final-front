@@ -30,15 +30,15 @@ function App() {
           />
 
           <Route
-  path="/admin"
-  element={
-    <PrivateRoute>
-      <RequireRole role="admin">
-        <Admin />
-      </RequireRole>
-    </PrivateRoute>
-  }
-/>
+            path="/admin"
+            element={
+              <PrivateRoute>
+                <RequireRole role="admin">
+                  <Admin />
+                </RequireRole>
+              </PrivateRoute>
+            }
+          />
 
           <Route path="*" element={<NotFound />} />
         </Routes>
