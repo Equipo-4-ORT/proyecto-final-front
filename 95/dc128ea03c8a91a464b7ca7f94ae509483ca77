@@ -1,0 +1,20 @@
+src/pages/Dashboard.jsx
+  s_91cf38f630989f::t_514554aba11b2b 12-13
+  s_91cf38f630989f::t_d79b949fdac082 138-141
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.11",
+  "base_commit_sha": "95dc128ea03c8a91a464b7ca7f94ae509483ca77",
+  "prompts": {},
+  "sessions": {
+    "s_91cf38f630989f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "93ce4040-5a8c-4454-9aa6-b568337e080b",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "martinexequi_meli <martinexequiel.diaz@mercadolibre.com>"
+    }
+  }
+}
