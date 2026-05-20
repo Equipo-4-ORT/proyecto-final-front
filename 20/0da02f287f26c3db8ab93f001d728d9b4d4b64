@@ -1,0 +1,19 @@
+src/pages/Dashboard/components/JiraIntegrationCard.jsx
+  s_91cf38f630989f::t_59cf747c2a41ea 1-160
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.11",
+  "base_commit_sha": "200da02f287f26c3db8ab93f001d728d9b4d4b64",
+  "prompts": {},
+  "sessions": {
+    "s_91cf38f630989f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "93ce4040-5a8c-4454-9aa6-b568337e080b",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "martinexequi_meli <martinexequiel.diaz@mercadolibre.com>"
+    }
+  }
+}
