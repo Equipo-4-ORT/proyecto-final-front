@@ -5,7 +5,12 @@ import {
   test,
   expect,
   beforeEach,
+  vi,
 } from 'vitest'
+
+vi.mock('../services/api', () => ({
+  default: { post: vi.fn() },
+}))
 
 const MOCK_JWT =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwiZW1haWwiOiJkZXZAdGVzdC5jb20iLCJyb2xlIjoiYWRtaW4iLCJleHAiOjk5OTk5OTk5OTl9.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
