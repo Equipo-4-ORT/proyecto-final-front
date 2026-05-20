@@ -1,6 +1,20 @@
-import { describe, it, expect } from "vitest"
+import { describe, it, expect, vi } from "vitest"
 import { render, screen } from "@testing-library/react"
 import { MemoryRouter } from "react-router-dom"
+
+vi.mock("../../hooks/useJiraConnection", () => ({
+  useJiraConnection: () => ({
+    status: { connected: false, siteUrl: null, lastSyncAt: null, reconnectRequired: false },
+    loading: false,
+    actionInFlight: null,
+    error: null,
+    lastSyncResult: null,
+    connect: vi.fn(),
+    disconnect: vi.fn(),
+    syncToday: vi.fn(),
+    refresh: vi.fn(),
+  }),
+}))
 
 import Dashboard from "../Dashboard"
 import { AuthProvider } from "../../contexts/AuthContext"
