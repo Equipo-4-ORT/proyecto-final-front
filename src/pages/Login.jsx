@@ -6,6 +6,7 @@ const ERROR_MESSAGES = {
   auth_failed: 'Ocurrió un error al iniciar sesión. Intentá de nuevo.',
   missing_code: 'No se recibió respuesta de Google. Intentá de nuevo.',
   unauthorized_user: 'Tu cuenta no está habilitada. Contactá al administrador.',
+  user_not_active: 'Tu cuenta está deshabilitada. Contactá al administrador.',
 }
 
 function Login() {

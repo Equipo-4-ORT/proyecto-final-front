@@ -8,7 +8,13 @@ import TextInput from '../components/ui/TextInput'
 const ROLE_LABELS = { ADMIN: 'Admin', EMPLOYEE: 'Empleado' }
 const STATUS_LABELS = { ACTIVE: 'Activo', INACTIVE: 'Inactivo' }
 
-const EMPTY_FORM = { fullName: '', email: '', role: 'EMPLOYEE' }
+const EMPTY_FORM = { fullName: '', email: '' }
+
+const formatDate = (value) => {
+  if (!value) return '—'
+  const date = new Date(value)
+  return Number.isNaN(date.getTime()) ? '—' : date.toLocaleDateString('es-AR')
+}
 
 function Admin() {
   const { user, logout } = useAuth()
@@ -17,6 +23,7 @@ function Admin() {
   const [loading, setLoading] = useState(true)
   const [fetchError, setFetchError] = useState(null)
   const [togglingId, setTogglingId] = useState(null)
+  const [toggleError, setToggleError] = useState(null)
 
   const [modalOpen, setModalOpen] = useState(false)
   const [form, setForm] = useState(EMPTY_FORM)
@@ -42,11 +49,12 @@ function Admin() {
 
   const handleToggleStatus = async (id) => {
     setTogglingId(id)
+    setToggleError(null)
     try {
       const updated = await adminApi.toggleStatus(id)
       setUsers((prev) => prev.map((u) => (u.id === updated.id ? updated : u)))
     } catch {
-      // si falla no hacemos nada, el estado no cambia
+      setToggleError('No se pudo actualizar el estado del usuario. Intentá de nuevo.')
     } finally {
       setTogglingId(null)
     }
@@ -109,6 +117,12 @@ function Admin() {
             <Button onClick={openModal}>+ Nuevo usuario</Button>
           </div>
 
+          {toggleError && (
+            <div className="px-6 py-3 bg-red-50 border-b border-red-200 text-red-600 text-sm">
+              {toggleError}
+            </div>
+          )}
+
           {loading && (
             <div className="px-6 py-10 text-center text-slate-400 text-sm">Cargando...</div>
           )}
@@ -159,7 +173,7 @@ function Admin() {
                       </span>
                     </td>
                     <td className="px-6 py-3 text-slate-400">
-                      {new Date(u.createdAt).toLocaleDateString('es-AR')}
+                      {formatDate(u.createdAt)}
                     </td>
                     <td className="px-6 py-3">
                       <button
@@ -200,8 +214,11 @@ function Admin() {
       >
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium text-slate-700">Nombre completo</label>
+            <label htmlFor="fullName" className="text-sm font-medium text-slate-700">
+              Nombre completo
+            </label>
             <TextInput
+              id="fullName"
               name="fullName"
               placeholder="Ej: María García"
               value={form.fullName}
@@ -211,8 +228,11 @@ function Admin() {
           </div>
 
           <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium text-slate-700">Email</label>
+            <label htmlFor="email" className="text-sm font-medium text-slate-700">
+              Email
+            </label>
             <TextInput
+              id="email"
               name="email"
               type="email"
               placeholder="Ej: mgarcia@empresa.com"
@@ -220,20 +240,6 @@ function Admin() {
               onChange={handleChange}
               disabled={saving}
             />
-          </div>
-
-          <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium text-slate-700">Rol</label>
-            <select
-              name="role"
-              value={form.role}
-              onChange={handleChange}
-              disabled={saving}
-              className="w-full border border-slate-200 focus:border-slate-300 bg-white rounded-xl px-4 py-2.5 text-slate-700 outline-none transition focus:ring-4 focus:ring-blue-100"
-            >
-              <option value="EMPLOYEE">Empleado</option>
-              <option value="ADMIN">Admin</option>
-            </select>
           </div>
 
           {formError && (
