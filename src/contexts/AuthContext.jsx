@@ -10,7 +10,8 @@ const decodeJWT = (token) => {
 }
 
 const isTokenValid = (token) => {
-  if (!token || typeof token !== 'string' || token.split('.').length !== 3) return false
+  if (!token || typeof token !== 'string' || token.split('.').length !== 3)
+    return false
   const payload = decodeJWT(token)
   return payload && payload.exp * 1000 > Date.now()
 }
@@ -42,7 +43,9 @@ export function AuthProvider({ children }) {
   }, [])
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout, isAuthenticated: !!user }}>
+    <AuthContext.Provider
+      value={{ user, token, login, logout, isAuthenticated: !!user }}
+    >
       {children}
     </AuthContext.Provider>
   )
