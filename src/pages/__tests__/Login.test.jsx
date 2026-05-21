@@ -19,6 +19,20 @@ describe("Login", () => {
     ).toBeInTheDocument()
   })
 
+  it("shows the error message when the account is disabled", () => {
+    renderLogin("?error=user_not_active")
+    expect(
+      screen.getByText(/tu cuenta está deshabilitada/i)
+    ).toBeInTheDocument()
+  })
+
+  it("shows the error message when the account is not registered", () => {
+    renderLogin("?error=unauthorized_user")
+    expect(
+      screen.getByText(/tu cuenta no está habilitada/i)
+    ).toBeInTheDocument()
+  })
+
   describe("handleLogin", () => {
     beforeEach(() => {
       Object.defineProperty(window, "location", {

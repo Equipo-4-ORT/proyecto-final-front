@@ -8,12 +8,21 @@ import {
   vi,
 } from 'vitest'
 
-vi.mock('../services/api', () => ({
-  default: { post: vi.fn() },
+// El front no llega al backend en los tests: solo necesitamos que la ruta
+// /admin no rompa al montar el panel.
+vi.mock("../services/api", () => ({
+  default: {},
+  adminApi: {
+    getUsers: vi.fn(() => Promise.resolve([])),
+    createUser: vi.fn(),
+    toggleStatus: vi.fn(),
+  },
 }))
 
+// El rol viaja en mayúscula en el JWT real (enum Role { EMPLOYEE ADMIN } del
+// backend); PrivateRoute compara contra "ADMIN", así que el mock debe coincidir.
 const MOCK_JWT =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwiZW1haWwiOiJkZXZAdGVzdC5jb20iLCJyb2xlIjoiYWRtaW4iLCJleHAiOjk5OTk5OTk5OTl9.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwiZW1haWwiOiJkZXZAdGVzdC5jb20iLCJyb2xlIjoiQURNSU4iLCJleHAiOjk5OTk5OTk5OTl9.testsignature"
 
 function renderAt(route) {
   window.history.pushState({}, "Test page", route)
@@ -58,14 +67,15 @@ describe("App routing", () => {
     ).toBeInTheDocument()
   })
 
-  test("renders Admin when token exists", () => {
+  test("renders Admin when token exists", async () => {
     localStorage.setItem("token", MOCK_JWT)
 
     renderAt("/admin")
 
     expect(
-      screen.getByRole("heading", {
-        name: /admin/i,
+      await screen.findByRole("heading", {
+        name: /panel de administración/i,
+        level: 1,
       })
     ).toBeInTheDocument()
   })
