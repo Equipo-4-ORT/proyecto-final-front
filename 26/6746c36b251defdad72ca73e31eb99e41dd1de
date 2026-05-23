@@ -1,0 +1,56 @@
+src/pages/Dashboard.jsx
+  s_7fc5ac853def2c::t_793bb76f0ac403 1,6,25-28,31-33,40,55-57,67-69,89-154,230,232-234,240,244,247,280-291,294,296
+  s_7fc5ac853def2c::t_943ee94b6230eb 12-13
+  s_7fc5ac853def2c::t_49f7eecbbafdfa 297-298
+  s_7fc5ac853def2c::t_f35b76c2492f23 155-195,197-228
+  s_7fc5ac853def2c::t_66668f256defd7 58-59
+  s_7fc5ac853def2c::t_d8b79284ccdd7a 29-30,34-39
+src/pages/Dashboard/components/ActivityFormRow.jsx
+  s_7fc5ac853def2c::t_929db0ede40217 10
+  s_7fc5ac853def2c::t_c41073486b9feb 33,36,42
+src/pages/Dashboard/components/ReportView.jsx
+  s_7fc5ac853def2c::t_d324e268d0c74d 15-16
+  s_7fc5ac853def2c::t_21026395c0e97e 38-39
+  s_7fc5ac853def2c::t_3f874660bb8deb 37
+  s_7fc5ac853def2c::t_c6ab83c6d8ff06 14
+src/pages/Dashboard/components/__tests__/ActivitiesTable.test.jsx
+  s_7fc5ac853def2c::t_d63f13e20685de 57,70-77,80,88-89
+src/pages/__tests__/Dashboard.test.jsx
+  s_7fc5ac853def2c::t_97de3e3a88ab4d 19-21,24-25
+  s_7fc5ac853def2c::t_1efd0f36360a43 22-23
+src/services/activitiesApi.js
+  s_7fc5ac853def2c::t_ecfe19d5290390 12-22
+  s_7fc5ac853def2c::t_ee4ec7d371111d 1-11
+src/pages/Dashboard/components/ActivitiesTable.jsx
+  s_7fc5ac853def2c::t_3009df61ff5304 211-214,216-218
+  s_7fc5ac853def2c::t_85afccafa7263c 166,173,176-196,198-203,215
+  s_7fc5ac853def2c::t_3c0798d39784ad 62,174,312
+  s_7fc5ac853def2c::t_0cb87aa7a39836 300-311,313-316,318-321,323-325
+  s_7fc5ac853def2c::t_49b06a074f990b 36-37,45
+  s_7fc5ac853def2c::t_52867b6140739e 35,42
+  s_7fc5ac853def2c::t_12089641125d00 160-162
+  s_7fc5ac853def2c::t_cf77034bd40eb6 103-110
+  s_7fc5ac853def2c::t_90f568848ed0d7 139-141,143-145,151-159,163
+  s_7fc5ac853def2c::t_8014bef6a97875 61
+  s_7fc5ac853def2c::t_62a8d7e9a9e26f 197,205,207-209
+  s_7fc5ac853def2c::t_309b3f568118a1 317,322
+src/pages/Dashboard/utils/activityMapper.js
+  s_7fc5ac853def2c::t_2900d117a4764f 1-101,151-158
+  s_7fc5ac853def2c::t_3d5c5d160440be 102-150
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.0",
+  "base_commit_sha": "266746c36b251defdad72ca73e31eb99e41dd1de",
+  "prompts": {},
+  "sessions": {
+    "s_7fc5ac853def2c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f230a51c-dbf3-4a89-be82-dc7a04e127b4",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "martinexequi_meli <martinexequiel.diaz@mercadolibre.com>"
+    }
+  }
+}
