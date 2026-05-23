@@ -1,0 +1,19 @@
+src/pages/Dashboard/components/JiraCallbackBanner.jsx
+  s_af820fd379032a::t_7d6eed4deda95f 51,71,85
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.0",
+  "base_commit_sha": "b2ccac8763f834b8fbd668b46369614f31e30ce5",
+  "prompts": {},
+  "sessions": {
+    "s_af820fd379032a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c0d2a17a-58b6-48dd-8f5a-4acf2d4f1d7d",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "martinexequi_meli <martinexequiel.diaz@mercadolibre.com>"
+    }
+  }
+}
