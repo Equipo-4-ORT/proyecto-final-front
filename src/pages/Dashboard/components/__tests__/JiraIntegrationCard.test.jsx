@@ -70,7 +70,7 @@ describe("JiraIntegrationCard", () => {
     it("muestra badge 'Conectado', site y last sync", () => {
       setup({ status: connectedStatus })
       expect(screen.getByText(/^conectado$/i)).toBeInTheDocument()
-      expect(screen.getByText(/acme\.atlassian\.net/)).toBeInTheDocument()
+      expect(screen.getByText("https://acme.atlassian.net")).toBeInTheDocument()
       expect(screen.getByText(/última sincronización/i)).toBeInTheDocument()
     })
 
