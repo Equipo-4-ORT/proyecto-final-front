@@ -1,0 +1,14 @@
+src/pages/Dashboard.jsx
+  h_7169d60c0714e6 1-2,4-7,9-11,23,25-26,50,54,58,62,73,79,85-86,92-96,100,127-135
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.0",
+  "base_commit_sha": "85e6c321a7369ccc75de952bd3de4a47d1dd3892",
+  "prompts": {},
+  "humans": {
+    "h_7169d60c0714e6": {
+      "author": "martinexequi_meli <martinexequiel.diaz@mercadolibre.com>"
+    }
+  }
+}
