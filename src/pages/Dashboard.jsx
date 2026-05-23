@@ -9,6 +9,8 @@ import { SOURCES } from '../constants/sources'
 import DashboardStats from './Dashboard/components/DashboardStats'
 import ReportView from './Dashboard/components/ReportView'
 import SourceSummary from './Dashboard/components/SourceSummary'
+import JiraCallbackBanner from "./Dashboard/components/JiraCallbackBanner"
+import JiraIntegrationCard from "./Dashboard/components/JiraIntegrationCard"
 
 import {
   getCalendarEventCount,
@@ -111,6 +113,10 @@ function Dashboard() {
       onWorkdayHoursChange={setWorkdayHours}
       onDefaultActivityHoursChange={setDefaultActivityHours}
     >
+      <JiraCallbackBanner />
+
+      <JiraIntegrationCard />
+
       <DashboardStats
         totalActivities={totalActivities}
         calendarEventCount={calendarEventCount}
