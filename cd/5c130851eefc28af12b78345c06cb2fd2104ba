@@ -1,0 +1,30 @@
+src/pages/Admin.jsx
+  s_af820fd379032a::t_f60a197c63db5f 39,50-54
+  s_af820fd379032a::t_28d9f32936bf89 1
+  s_af820fd379032a::t_8a93cb06e0ad12 93
+  s_af820fd379032a::t_77f5797493c35b 4,9-12
+src/hooks/useJiraConnection.js
+  s_af820fd379032a::t_7ca8efb8d97821 48-49
+src/pages/Dashboard/components/JiraCallbackBanner.jsx
+  s_af820fd379032a::t_9a6725fe57c312 1,5-6,51,53,56-63,65,77,91
+src/utils/apiErrors.js
+  s_af820fd379032a::t_4ed27bb1363b43 1-24
+src/services/jiraApi.js
+  s_af820fd379032a::t_6133dd753293a0 3-10,21
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.0",
+  "base_commit_sha": "cd5c130851eefc28af12b78345c06cb2fd2104ba",
+  "prompts": {},
+  "sessions": {
+    "s_af820fd379032a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c0d2a17a-58b6-48dd-8f5a-4acf2d4f1d7d",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "martinexequi_meli <martinexequiel.diaz@mercadolibre.com>"
+    }
+  }
+}
