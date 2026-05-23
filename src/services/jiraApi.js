@@ -1,6 +1,13 @@
 import api from "./api"
 
-const ATLASSIAN_AUTH_PREFIX = "https://auth.atlassian.com/"
+function isValidAtlassianAuthUrl(raw) {
+  try {
+    const parsed = new URL(raw)
+    return parsed.protocol === "https:" && parsed.hostname === "auth.atlassian.com"
+  } catch {
+    return false
+  }
+}
 
 export async function getJiraStatus() {
   const { data } = await api.get("/api/jira/status")
@@ -11,7 +18,7 @@ export async function getJiraAuthUrl() {
   const { data } = await api.get("/api/jira/auth")
   const url = typeof data?.authorizationUrl === "string" ? data.authorizationUrl : ""
 
-  if (!url.startsWith(ATLASSIAN_AUTH_PREFIX)) {
+  if (!isValidAtlassianAuthUrl(url)) {
     throw new Error("URL de autorización inválida")
   }
 

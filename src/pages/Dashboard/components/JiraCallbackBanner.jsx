@@ -1,6 +1,8 @@
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useLocation } from "react-router-dom"
 import { CheckCircle2, Info, X, XCircle } from "lucide-react"
+
+const VALID_JIRA_PARAMS = new Set(["connected", "cancelled", "error"])
 
 const REASON_MESSAGES = {
   token_exchange_failed: "Atlassian rechazó la autenticación. Probá de nuevo.",
@@ -46,22 +48,21 @@ const VARIANT_STYLES = {
 
 function JiraCallbackBanner() {
   const location = useLocation()
-  const [message, setMessage] = useState(null)
-  const [processedSearch, setProcessedSearch] = useState(null)
+  const [dismissed, setDismissed] = useState(false)
 
-  // Derivamos el mensaje del query string durante el render: cuando cambia
-  // la búsqueda, lo recalculamos en vez de hacerlo dentro de un efecto.
-  if (location.search !== processedSearch) {
-    setProcessedSearch(location.search)
+  const message = useMemo(() => {
     const params = new URLSearchParams(location.search)
     const jiraParam = params.get("jira")
-    if (jiraParam) {
-      setMessage(buildMessage(jiraParam, params.get("reason")))
-    }
-  }
+    if (!jiraParam || !VALID_JIRA_PARAMS.has(jiraParam)) return null
+    return buildMessage(jiraParam, params.get("reason"))
+  }, [location.search])
 
-  // El efecto solo hace lo que es un efecto real: tocar un sistema externo
-  // (el historial del navegador) para limpiar la URL.
+  // Cada vez que llega un nuevo callback (nueva search), el banner vuelve a ser visible.
+  useEffect(() => {
+    setDismissed(false)
+  }, [location.search])
+
+  // Limpia ?jira y ?reason de la URL para no contaminar el historial.
   useEffect(() => {
     const params = new URLSearchParams(location.search)
     if (!params.has("jira")) return
@@ -73,7 +74,7 @@ function JiraCallbackBanner() {
     window.history.replaceState({}, document.title, cleanUrl)
   }, [location.pathname, location.search])
 
-  if (!message) return null
+  if (!message || dismissed) return null
 
   const style = VARIANT_STYLES[message.variant]
   const Icon = style.icon
@@ -87,7 +88,7 @@ function JiraCallbackBanner() {
       <p className="flex-1 text-sm font-medium">{message.text}</p>
       <button
         type="button"
-        onClick={() => setMessage(null)}
+        onClick={() => setDismissed(true)}
         className="rounded-full p-1 hover:bg-black/5 transition"
         aria-label="Cerrar"
       >

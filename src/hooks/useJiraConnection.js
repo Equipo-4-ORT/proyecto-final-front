@@ -45,6 +45,8 @@ export function useJiraConnection() {
     setError(null)
     try {
       const url = await getJiraAuthUrl()
+      // Navegación imperativa intencional: Atlassian requiere salir de la SPA
+      // para completar el flujo OAuth. No se puede usar useNavigate aquí.
       window.location.href = url
     } catch (err) {
       setError({ scope: "connect", code: extractErrorCode(err) })
