@@ -48,7 +48,7 @@ const VARIANT_STYLES = {
 
 function JiraCallbackBanner() {
   const location = useLocation()
-  const [dismissed, setDismissed] = useState(false)
+  const [dismissedSearch, setDismissedSearch] = useState(null)
 
   const message = useMemo(() => {
     const params = new URLSearchParams(location.search)
@@ -57,12 +57,6 @@ function JiraCallbackBanner() {
     return buildMessage(jiraParam, params.get("reason"))
   }, [location.search])
 
-  // Cada vez que llega un nuevo callback (nueva search), el banner vuelve a ser visible.
-  useEffect(() => {
-    setDismissed(false)
-  }, [location.search])
-
-  // Limpia ?jira y ?reason de la URL para no contaminar el historial.
   useEffect(() => {
     const params = new URLSearchParams(location.search)
     if (!params.has("jira")) return
@@ -74,7 +68,7 @@ function JiraCallbackBanner() {
     window.history.replaceState({}, document.title, cleanUrl)
   }, [location.pathname, location.search])
 
-  if (!message || dismissed) return null
+  if (!message || location.search === dismissedSearch) return null
 
   const style = VARIANT_STYLES[message.variant]
   const Icon = style.icon
@@ -88,7 +82,7 @@ function JiraCallbackBanner() {
       <p className="flex-1 text-sm font-medium">{message.text}</p>
       <button
         type="button"
-        onClick={() => setDismissed(true)}
+        onClick={() => setDismissedSearch(location.search)}
         className="rounded-full p-1 hover:bg-black/5 transition"
         aria-label="Cerrar"
       >
