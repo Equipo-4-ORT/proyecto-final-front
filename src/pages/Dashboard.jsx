@@ -1,14 +1,14 @@
-import { useEffect, useState } from "react"
-import { useNavigate } from "react-router-dom"
+import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
-import { useAuth } from "../hooks/useAuth"
+import { useAuth } from '../hooks/useAuth'
+import EmptyState from './Dashboard/components/EmptyState'
+import AppLayout from '../components/layout/AppLayout'
+import { SOURCES } from '../constants/sources'
 
-import AppLayout from "../components/layout/AppLayout"
-import { SOURCES } from "../constants/sources"
-
-import DashboardStats from "./Dashboard/components/DashboardStats"
-import ActivitiesTable from "./Dashboard/components/ActivitiesTable"
-import SourceSummary from "./Dashboard/components/SourceSummary"
+import DashboardStats from './Dashboard/components/DashboardStats'
+import ReportView from './Dashboard/components/ReportView'
+import SourceSummary from './Dashboard/components/SourceSummary'
 import JiraCallbackBanner from "./Dashboard/components/JiraCallbackBanner"
 import JiraIntegrationCard from "./Dashboard/components/JiraIntegrationCard"
 
@@ -20,10 +20,10 @@ import {
   getTotalHours,
   DEFAULT_ACTIVITY_HOURS,
   DEFAULT_WORKDAY_HOURS,
-} from "./Dashboard/utils/dashboardCalculations"
+} from './Dashboard/utils/dashboardCalculations'
 
-import { initialActivities } from "./Dashboard/mocks/activities"
-import { getTodayDate } from "../utils/dateHelpers"
+import { initialActivities } from './Dashboard/mocks/activities'
+import { getTodayDate } from '../utils/dateHelpers'
 
 function getStoredNumber(key, fallbackValue) {
   const storedValue = localStorage.getItem(key)
@@ -34,9 +34,7 @@ function getStoredNumber(key, fallbackValue) {
 
   const parsedValue = Number(storedValue)
 
-  return Number.isNaN(parsedValue)
-    ? fallbackValue
-    : parsedValue
+  return Number.isNaN(parsedValue) ? fallbackValue : parsedValue
 }
 
 function Dashboard() {
@@ -46,78 +44,60 @@ function Dashboard() {
 
   const [activities, setActivities] = useState(initialActivities)
 
-  const [selectedDate, setSelectedDate] = useState(
-    getTodayDate()
-  )
+  const [selectedDate, setSelectedDate] = useState(getTodayDate())
 
   const [workdayHours, setWorkdayHours] = useState(() =>
-    getStoredNumber(
-      "workdayHours",
-      DEFAULT_WORKDAY_HOURS
-    )
+    getStoredNumber('workdayHours', DEFAULT_WORKDAY_HOURS),
   )
 
-  const [defaultActivityHours, setDefaultActivityHours] =
-    useState(() =>
-      getStoredNumber(
-        "defaultActivityHours",
-        DEFAULT_ACTIVITY_HOURS
-      )
-    )
+  const [defaultActivityHours, setDefaultActivityHours] = useState(() =>
+    getStoredNumber('defaultActivityHours', DEFAULT_ACTIVITY_HOURS),
+  )
 
   useEffect(() => {
-    localStorage.setItem(
-      "workdayHours",
-      workdayHours
-    )
+    localStorage.setItem('workdayHours', workdayHours)
   }, [workdayHours])
 
   useEffect(() => {
-    localStorage.setItem(
-      "defaultActivityHours",
-      defaultActivityHours
-    )
+    localStorage.setItem('defaultActivityHours', defaultActivityHours)
   }, [defaultActivityHours])
 
   const totalActivities = activities.length
 
-  const totalHours = getTotalHours(
-    activities,
-    defaultActivityHours
+  const totalHours = getTotalHours(activities, defaultActivityHours)
+
+  const calendarEventCount = getCalendarEventCount(activities)
+
+  const productivityPercentage = getProductivityPercentage(
+    totalHours,
+    workdayHours,
   )
-
-  const calendarEventCount =
-    getCalendarEventCount(activities)
-
-  const productivityPercentage =
-    getProductivityPercentage(
-      totalHours,
-      workdayHours
-    )
 
   const sourceSummary = getSourceSummary(
     activities,
     SOURCES,
-    defaultActivityHours
+    defaultActivityHours,
   )
 
-  const sourceCounts = getSourceCounts(
-    activities,
-    SOURCES
-  )
+  const sourceCounts = getSourceCounts(activities, SOURCES)
 
   function handleExportExcel() {
-    // Reemplazar por backend después
-    console.log("Exportar Excel", {
+    // TODO: reemplazar por llamada al backend — POST /reports/export con selectedDate y activities
+    console.log('Exportar Excel', {
       selectedDate,
       activities,
     })
   }
 
+  function handleGenerateReport() {
+    // TODO: llamar al backend para generar el informe (GET /activities + procesamiento IA)
+    console.log('Generar informe')
+  }
+
   function handleLogout() {
     logout()
 
-    navigate("/login")
+    navigate('/login')
   }
 
   return (
@@ -131,9 +111,7 @@ function Dashboard() {
       workdayHours={workdayHours}
       defaultActivityHours={defaultActivityHours}
       onWorkdayHoursChange={setWorkdayHours}
-      onDefaultActivityHoursChange={
-        setDefaultActivityHours
-      }
+      onDefaultActivityHoursChange={setDefaultActivityHours}
     >
       <JiraCallbackBanner />
 
@@ -143,19 +121,18 @@ function Dashboard() {
         totalActivities={totalActivities}
         calendarEventCount={calendarEventCount}
         totalHours={totalHours}
-        productivityPercentage={
-          productivityPercentage
-        }
+        productivityPercentage={productivityPercentage}
         workdayHours={workdayHours}
       />
-
-      <ActivitiesTable
-        activities={activities}
-        setActivities={setActivities}
-        defaultActivityHours={
-          defaultActivityHours
-        }
-      />
+      {activities.length === 0 ? (
+        <EmptyState onGenerate={handleGenerateReport} />
+      ) : (
+        <ReportView
+          activities={activities}
+          setActivities={setActivities}
+          defaultActivityHours={defaultActivityHours}
+        />
+      )}
 
       <SourceSummary
         sourceSummary={sourceSummary}
