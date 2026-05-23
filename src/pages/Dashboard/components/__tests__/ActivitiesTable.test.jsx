@@ -54,7 +54,7 @@ describe("ActivitiesTable", () => {
     expect(screen.getByText(/indicá una hora de inicio/i)).toBeInTheDocument()
   })
 
-  it("adds a valid activity and assigns the next id", () => {
+  it("adds a valid activity with a generated id", () => {
     let latest
     render(<Harness onChange={(next) => (latest = next)} />)
     fireEvent.click(screen.getByRole("button", { name: /\+ agregar actividad/i }))
@@ -67,10 +67,17 @@ describe("ActivitiesTable", () => {
     fireEvent.click(screen.getByRole("button", { name: /^agregar$/i }))
 
     expect(latest).toHaveLength(3)
-    expect(latest.at(-1)).toMatchObject({ id: 3, source: "calendar", title: "Nueva", start: "13:00", end: "14:00" })
+    expect(latest.at(-1)).toMatchObject({
+      source: "calendar",
+      title: "Nueva",
+      start: "13:00",
+      end: "14:00",
+    })
+    expect(typeof latest.at(-1).id).toBe("string")
+    expect(latest.at(-1).id.length).toBeGreaterThan(0)
   })
 
-  it("starts with id 1 when the list is empty", () => {
+  it("creates the first activity when the list is empty", () => {
     let latest
     render(<Harness initial={[]} onChange={(next) => (latest = next)} />)
     fireEvent.click(screen.getByRole("button", { name: /\+ agregar actividad/i }))
@@ -78,7 +85,8 @@ describe("ActivitiesTable", () => {
     const timeInputs = document.querySelectorAll('input[type="time"]')
     fireEvent.change(timeInputs[0], { target: { value: "09:00" } })
     fireEvent.click(screen.getByRole("button", { name: /^agregar$/i }))
-    expect(latest[0].id).toBe(1)
+    expect(latest).toHaveLength(1)
+    expect(typeof latest[0].id).toBe("string")
   })
 
   it("opens, confirms and removes the activity via the delete modal", () => {

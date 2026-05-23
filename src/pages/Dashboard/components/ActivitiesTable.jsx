@@ -32,12 +32,17 @@ function getTimeValue(time) {
 function ActivitiesTable({
   activities,
   setActivities,
+  onAddActivity,
+  onUpdateActivity,
+  onDeleteActivity,
   defaultActivityHours,
   readOnly = false,
 }) {
   const [isAdding, setIsAdding] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [formData, setFormData] = useState(initialFormData)
   const [formErrors, setFormErrors] = useState({})
+  const [actionError, setActionError] = useState(null)
   const [editingActivityId, setEditingActivityId] = useState(null)
   const [editingData, setEditingData] = useState(initialFormData)
   const [editingErrors, setEditingErrors] = useState({})
@@ -53,6 +58,8 @@ function ActivitiesTable({
       ...prev,
       [field]: '',
     }))
+
+    setActionError(null)
   }
 
   function handleStartEdit(activity) {
@@ -93,6 +100,14 @@ function ActivitiesTable({
       return
     }
 
+    setEditingErrors({})
+    setActionError(null)
+
+    if (typeof onUpdateActivity === 'function') {
+      handleSaveEditWithApi(editingActivityId)
+      return
+    }
+
     setActivities((prev) =>
       prev.map((activity) =>
         activity.id === editingActivityId
@@ -121,48 +136,86 @@ function ActivitiesTable({
     setDeletingActivity(null)
   }
 
-  function handleConfirmDelete() {
-    setActivities((prev) =>
-      prev.filter((activity) => activity.id !== deletingActivity.id),
-    )
+  async function handleConfirmDelete() {
+    const target = deletingActivity
+    if (!target) return
 
-    if (editingActivityId === deletingActivity.id) {
+    setDeletingActivity(null)
+
+    if (editingActivityId === target.id) {
       setEditingActivityId(null)
       setEditingData(initialFormData)
       setEditingErrors({})
     }
 
-    setDeletingActivity(null)
+    setActionError(null)
+
+    if (typeof onDeleteActivity !== 'function') {
+      setActivities((prev) =>
+        prev.filter((activity) => activity.id !== target.id),
+      )
+      return
+    }
+
+    const result = await onDeleteActivity(target.id)
+    if (result && result.ok === false) {
+      setActionError(result.message || 'No pudimos eliminar la actividad.')
+    }
   }
 
-  function handleAddActivity() {
+  async function handleAddActivity() {
     const errors = validateActivity(formData)
     if (Object.keys(errors).length > 0) {
       setFormErrors(errors)
       return
     }
 
-    // TODO: reemplazar este id local por el que devuelva el backend (crypto.randomUUID() como id temporal).
-    const newActivity = {
-      id:
-        activities.length > 0
-          ? Math.max(...activities.map((activity) => activity.id)) + 1
-          : 1,
-      source: formData.source,
-      title: formData.title.trim(),
-      description: formData.description.trim(),
-      start: formData.start,
-      end: formData.end,
-      status: 'pending',
-      notes: formData.notes.trim(),
+    setFormErrors({})
+    setActionError(null)
+
+    if (typeof onAddActivity !== 'function') {
+      const newActivity = {
+        id: crypto.randomUUID(),
+        source: formData.source,
+        title: formData.title.trim(),
+        description: formData.description.trim(),
+        start: formData.start,
+        end: formData.end,
+        status: 'pending',
+        notes: formData.notes.trim(),
+      }
+      setActivities((prev) => [...prev, newActivity])
+      setFormData(initialFormData)
+      setIsAdding(false)
+      return
     }
 
-    //Reemplazar por llamada al backend cuando esté dispo
-    setActivities((prev) => [...prev, newActivity])
+    setIsSubmitting(true)
+    try {
+      const result = await onAddActivity(formData)
+      if (result && result.ok === false) {
+        setActionError(result.message || 'No pudimos crear la actividad.')
+        return
+      }
+      setFormData(initialFormData)
+      setIsAdding(false)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
 
-    setFormData(initialFormData)
-    setFormErrors({})
-    setIsAdding(false)
+  async function handleSaveEditWithApi(targetId) {
+    const original = activities.find((activity) => activity.id === targetId)
+    if (!original) return
+
+    const result = await onUpdateActivity(targetId, editingData)
+    if (result && result.ok === false) {
+      setActionError(result.message || 'No pudimos actualizar la actividad.')
+      return
+    }
+    setEditingActivityId(null)
+    setEditingData(initialFormData)
+    setEditingErrors({})
   }
 
   const sortedActivities = [...activities].sort(
@@ -244,19 +297,32 @@ function ActivitiesTable({
       </div>
 
       {!readOnly && (
-        <ActivityFormRow
-          isAdding={isAdding}
-          formData={formData}
-          errors={formErrors}
-          onChange={handleChange}
-          onAdd={handleAddActivity}
-          onCancel={() => {
-            setIsAdding(false)
-            setFormData(initialFormData)
-            setFormErrors({})
-          }}
-          onStartAdding={() => setIsAdding(true)}
-        />
+        <>
+          <ActivityFormRow
+            isAdding={isAdding}
+            formData={formData}
+            errors={formErrors}
+            isSubmitting={isSubmitting}
+            onChange={handleChange}
+            onAdd={handleAddActivity}
+            onCancel={() => {
+              setIsAdding(false)
+              setFormData(initialFormData)
+              setFormErrors({})
+              setActionError(null)
+            }}
+            onStartAdding={() => setIsAdding(true)}
+          />
+
+          {actionError && (
+            <p
+              role="alert"
+              className="mt-2 text-sm text-red-600"
+            >
+              {actionError}
+            </p>
+          )}
+        </>
       )}
 
       <Modal

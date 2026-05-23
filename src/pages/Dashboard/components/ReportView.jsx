@@ -11,6 +11,9 @@ function getReportStatus(activities) {
 function ReportView({
   activities,
   setActivities,
+  onAddActivity,
+  onUpdateActivity,
+  onDeleteActivity,
   defaultActivityHours,
   readOnly = false,
 }) {
@@ -31,6 +34,9 @@ function ReportView({
       <ActivitiesTable
         activities={activities}
         setActivities={setActivities}
+        onAddActivity={onAddActivity}
+        onUpdateActivity={onUpdateActivity}
+        onDeleteActivity={onDeleteActivity}
         defaultActivityHours={defaultActivityHours}
         readOnly={readOnly}
       />
