@@ -5,12 +5,12 @@ import { useAuth } from '../hooks/useAuth'
 import EmptyState from './Dashboard/components/EmptyState'
 import AppLayout from '../components/layout/AppLayout'
 import { SOURCES } from '../constants/sources'
-
+import { useReport } from '../hooks/useReport'
 import DashboardStats from './Dashboard/components/DashboardStats'
 import ReportView from './Dashboard/components/ReportView'
 import SourceSummary from './Dashboard/components/SourceSummary'
-import JiraCallbackBanner from "./Dashboard/components/JiraCallbackBanner"
-import JiraIntegrationCard from "./Dashboard/components/JiraIntegrationCard"
+import JiraCallbackBanner from './Dashboard/components/JiraCallbackBanner'
+import JiraIntegrationCard from './Dashboard/components/JiraIntegrationCard'
 
 import {
   getCalendarEventCount,
@@ -22,7 +22,7 @@ import {
   DEFAULT_WORKDAY_HOURS,
 } from './Dashboard/utils/dashboardCalculations'
 
-import { initialActivities } from './Dashboard/mocks/activities'
+
 import { getTodayDate } from '../utils/dateHelpers'
 
 function getStoredNumber(key, fallbackValue) {
@@ -42,9 +42,9 @@ function Dashboard() {
 
   const { user, logout } = useAuth()
 
-  const [activities, setActivities] = useState(initialActivities)
-
+  const [activities, setActivities] = useState([])
   const [selectedDate, setSelectedDate] = useState(getTodayDate())
+  const { data: report, isLoading, error } = useReport(selectedDate)
 
   const [workdayHours, setWorkdayHours] = useState(() =>
     getStoredNumber('workdayHours', DEFAULT_WORKDAY_HOURS),
@@ -61,6 +61,12 @@ function Dashboard() {
   useEffect(() => {
     localStorage.setItem('defaultActivityHours', defaultActivityHours)
   }, [defaultActivityHours])
+
+  useEffect(() => {
+    if (report?.activities) {
+      setActivities(report.activities)
+    }
+  }, [report])
 
   const totalActivities = activities.length
 
@@ -98,6 +104,48 @@ function Dashboard() {
     logout()
 
     navigate('/login')
+  }
+
+  if (isLoading) {
+    return (
+      <AppLayout
+        user={user}
+        onLogout={handleLogout}
+        sourceCounts={{}}
+        selectedDate={selectedDate}
+        onDateChange={setSelectedDate}
+        onExportExcel={handleExportExcel}
+        workdayHours={workdayHours}
+        defaultActivityHours={defaultActivityHours}
+        onWorkdayHoursChange={setWorkdayHours}
+        onDefaultActivityHoursChange={setDefaultActivityHours}
+      >
+        <div className="py-10 text-center text-slate-500">
+          Cargando reporte...
+        </div>
+      </AppLayout>
+    )
+  }
+
+  if (error) {
+    return (
+      <AppLayout
+        user={user}
+        onLogout={handleLogout}
+        sourceCounts={{}}
+        selectedDate={selectedDate}
+        onDateChange={setSelectedDate}
+        onExportExcel={handleExportExcel}
+        workdayHours={workdayHours}
+        defaultActivityHours={defaultActivityHours}
+        onWorkdayHoursChange={setWorkdayHours}
+        onDefaultActivityHoursChange={setDefaultActivityHours}
+      >
+        <div className="py-10 text-center text-red-500">
+          Error al cargar el reporte.
+        </div>
+      </AppLayout>
+    )
   }
 
   return (

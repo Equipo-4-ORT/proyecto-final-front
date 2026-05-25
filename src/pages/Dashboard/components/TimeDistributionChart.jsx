@@ -1,5 +1,5 @@
-import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip, } from "recharts"
-import { formatDuration, } from "../utils/dashboardCalculations"
+import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts'
+import { formatDuration } from '../utils/dashboardCalculations'
 
 function TimeDistributionChart({ data, workdayHours }) {
   const chartData = data
@@ -8,12 +8,12 @@ function TimeDistributionChart({ data, workdayHours }) {
       name: item.label,
       value: item.minutes,
       percentage:
-      workdayHours > 0
-        ? Math.min(
-            Math.round((item.minutes / (workdayHours * 60)) * 100),
-            100
-          )
-        : 0,
+        workdayHours > 0
+          ? Math.min(
+              Math.round((item.minutes / (workdayHours * 60)) * 100),
+              100,
+            )
+          : 0,
       color: item.chartColor,
     }))
 
@@ -29,9 +29,23 @@ function TimeDistributionChart({ data, workdayHours }) {
       </div>
     )
   }
+  function CustomTooltip({ active, payload }) {
+    if (!active || !payload?.length) {
+      return null
+    }
 
+    const item = payload[0]
+
+    return (
+      <div className="rounded-xl border border-slate-200 bg-white px-3 py-2 shadow-lg">
+        <p className="font-medium text-slate-800">{item.name}</p>
+
+        <p className="text-sm text-slate-500">{formatDuration(item.value)}</p>
+      </div>
+    )
+  }
   return (
-    <div className="flex flex-col lg:flex-row items-center justify-between gap-6 min-h-[260px]">
+    <div className="flex flex-col xl:flex-row items-center xl:items-start justify-between gap-6 min-h-[260px]">
       <div className="relative w-[220px] h-[220px] sm:w-[260px] sm:h-[260px]">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
@@ -43,18 +57,11 @@ function TimeDistributionChart({ data, workdayHours }) {
               paddingAngle={2}
             >
               {chartData.map((item) => (
-                <Cell
-                  key={item.name}
-                  fill={item.color}
-                />
+                <Cell key={item.name} fill={item.color} />
               ))}
             </Pie>
 
-            <Tooltip
-              formatter={(value) =>
-                formatDuration(value)
-              }
-            />
+            <Tooltip content={<CustomTooltip />} />
           </PieChart>
         </ResponsiveContainer>
 
@@ -69,13 +76,11 @@ function TimeDistributionChart({ data, workdayHours }) {
             {totalWholeHours} h
           </p>
 
-          <p className="text-sm text-slate-500">
-            horas totales
-          </p>
+          <p className="text-sm text-slate-500">horas totales</p>
         </div>
       </div>
 
-      <div className="w-full flex-1 space-y-3 sm:space-y-4">
+      <div className="w-full flex-1 space-y-3 sm:space-y-4 min-w-0">
         {chartData.map((item) => (
           <div
             key={item.name}
@@ -89,7 +94,7 @@ function TimeDistributionChart({ data, workdayHours }) {
                 }}
               />
 
-              <span className="font-medium text-slate-700">
+              <span className="font-medium text-slate-700 truncate">
                 {item.name}
               </span>
             </div>
