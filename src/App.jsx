@@ -7,6 +7,7 @@ import Callback from './pages/Callback'
 import Dashboard from './pages/Dashboard'
 import Login from './pages/Login'
 import NotFound from './pages/NotFound'
+import HistoryPage from './pages/History' 
 
 function App() {
   return (
@@ -24,6 +25,16 @@ function App() {
             element={
               <PrivateRoute>
                 <Dashboard />
+              </PrivateRoute>
+            }
+          />
+
+          
+          <Route
+            path="/history"
+            element={
+              <PrivateRoute>
+                <HistoryPage />
               </PrivateRoute>
             }
           />

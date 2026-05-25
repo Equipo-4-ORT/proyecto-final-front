@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 
 import { useAuth } from '../hooks/useAuth'
 import EmptyState from './Dashboard/components/EmptyState'
@@ -38,12 +38,13 @@ function getStoredNumber(key, fallbackValue) {
 
 function Dashboard() {
   const navigate = useNavigate()
-
   const { user, logout } = useAuth()
 
+  const [searchParams] = useSearchParams()
+  const urlDate = searchParams.get('date')
+
   const [activities, setActivities] = useState([])
-  const [selectedDate, setSelectedDate] = useState(getTodayDate())
-  const { data: report, isLoading, error } = useReport(selectedDate)
+  const [selectedDate, setSelectedDate] = useState(urlDate || getTodayDate())
 
   const [workdayHours, setWorkdayHours] = useState(() =>
     getStoredNumber('workdayHours', DEFAULT_WORKDAY_HOURS),
@@ -53,6 +54,9 @@ function Dashboard() {
     getStoredNumber('defaultActivityHours', DEFAULT_ACTIVITY_HOURS),
   )
 
+  // OJO: El hook de datos se queda acá abajo de los states que usa
+  const { data: report, isLoading, error } = useReport(selectedDate)
+
   useEffect(() => {
     localStorage.setItem('workdayHours', workdayHours)
   }, [workdayHours])
@@ -61,11 +65,22 @@ function Dashboard() {
     localStorage.setItem('defaultActivityHours', defaultActivityHours)
   }, [defaultActivityHours])
 
-  const totalActivities = activities.length
+  useEffect(() => {
+  if (report?.activities?.length > 0) {
+    const timer = setTimeout(() => {
+      setActivities(report.activities)
+    }, 0)
+    return () => clearTimeout(timer)
+  }
+}, [report])
 
-  const totalHours = getTotalHours(activities, defaultActivityHours)
+  const displayedActivities = activities
 
-  const calendarEventCount = getCalendarEventCount(activities)
+  const totalActivities = displayedActivities.length
+
+  const totalHours = getTotalHours(displayedActivities, defaultActivityHours)
+
+  const calendarEventCount = getCalendarEventCount(displayedActivities)
 
   const productivityPercentage = getProductivityPercentage(
     totalHours,
@@ -73,32 +88,26 @@ function Dashboard() {
   )
 
   const sourceSummary = getSourceSummary(
-    activities,
+    displayedActivities,
     SOURCES,
     defaultActivityHours,
   )
 
-  const sourceCounts = getSourceCounts(activities, SOURCES)
-
-  const displayedActivities =
-    report?.activities?.length > 0 ? report.activities : activities
+  const sourceCounts = getSourceCounts(displayedActivities, SOURCES)
 
   function handleExportExcel() {
-    // TODO: reemplazar por llamada al backend — POST /reports/export con selectedDate y activities
     console.log('Exportar Excel', {
       selectedDate,
-      activities,
+      activities: displayedActivities,
     })
   }
 
   function handleGenerateReport() {
-    // TODO: llamar al backend para generar el informe (GET /activities + procesamiento IA)
     console.log('Generar informe')
   }
 
   function handleLogout() {
     logout()
-
     navigate('/login')
   }
 
@@ -168,14 +177,15 @@ function Dashboard() {
         productivityPercentage={productivityPercentage}
         workdayHours={workdayHours}
       />
-      {activities.length === 0 ? (
+
+      {displayedActivities.length === 0 ? (
         <EmptyState onGenerate={handleGenerateReport} />
       ) : (
         <ReportView
-  activities={displayedActivities}
-  setActivities={setActivities}
-  defaultActivityHours={defaultActivityHours}
-/>
+          activities={displayedActivities}
+          setActivities={setActivities}
+          defaultActivityHours={defaultActivityHours}
+        />
       )}
 
       <SourceSummary

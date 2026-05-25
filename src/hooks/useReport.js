@@ -1,15 +1,42 @@
-import { useQuery } from "@tanstack/react-query"
+import { useState, useEffect } from 'react'
+import { getReportByDate } from '../services/reportsService'
 
-import { getReportByDate } from "../services/reportsService"
+export function useReport(selectedDate) {
+  const [data, setData] = useState(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState(null)
 
-export function useReport(date) {
-  return useQuery({
-    queryKey: ["report", date],
+  useEffect(() => {
+    let isMounted = true
 
-    queryFn: () => getReportByDate(date),
+    const initializeFetch = () => {
+      if (isMounted) {
+        setIsLoading(true)
+        setError(null)
+      }
+    };
 
-    enabled: Boolean(date),
+    initializeFetch()
 
-    staleTime: 1000 * 60 * 5,
-  })
+    getReportByDate(selectedDate)
+      .then((reportData) => {
+        if (isMounted) {
+          setData(reportData)
+          setIsLoading(false)
+        }
+      })
+      .catch((err) => {
+        if (isMounted) {
+          console.error("Error crítico e inesperado en useReport:", err)
+          setError(err)
+          setIsLoading(false)
+        }
+      })
+
+    return () => {
+      isMounted = false
+    }
+  }, [selectedDate])
+
+  return { data, isLoading, error }
 }
