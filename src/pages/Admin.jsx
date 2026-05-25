@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { adminApi } from '../services/api'
+import { adminApi } from '../services/adminApi'
 import { useAuth } from '../hooks/useAuth'
 import { getApiErrorMessage } from '../utils/apiErrors'
 import Modal from '../components/ui/Modal'

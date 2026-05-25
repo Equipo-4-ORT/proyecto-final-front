@@ -1,23 +1,30 @@
-import { fireEvent, render, screen } from "@testing-library/react"
+import { fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { MemoryRouter } from "react-router-dom"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
 import JiraCallbackBanner from "../JiraCallbackBanner"
 
+const mockNavigate = vi.fn()
+
+vi.mock("react-router-dom", async (importOriginal) => {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    useNavigate: () => mockNavigate,
+  }
+})
+
 const renderWithQuery = (search = "") => {
   return render(
     <MemoryRouter initialEntries={[`/dashboard${search}`]}>
       <JiraCallbackBanner />
-    </MemoryRouter>
+    </MemoryRouter>,
   )
 }
 
 describe("JiraCallbackBanner", () => {
-  let replaceStateSpy
-
   beforeEach(() => {
-    replaceStateSpy = vi.spyOn(window.history, "replaceState")
-    window.history.replaceState({}, "", "/dashboard")
+    mockNavigate.mockClear()
   })
 
   it("no renderiza nada si no hay query param ?jira=", () => {
@@ -51,17 +58,18 @@ describe("JiraCallbackBanner", () => {
     expect(screen.getByText(/no pudimos conectar con jira/i)).toBeInTheDocument()
   })
 
-  it("limpia ?jira y ?reason de la URL con replaceState", () => {
+  it("limpia ?jira y ?reason de la URL via navigate replace", async () => {
     renderWithQuery("?jira=connected")
-    expect(replaceStateSpy).toHaveBeenCalled()
-    const lastCall = replaceStateSpy.mock.calls[replaceStateSpy.mock.calls.length - 1]
-    expect(lastCall[2]).toBe("/dashboard")
+    await waitFor(() => {
+      expect(mockNavigate).toHaveBeenCalledWith("/dashboard", { replace: true })
+    })
   })
 
-  it("preserva otros query params al limpiar", () => {
+  it("preserva otros query params al limpiar", async () => {
     renderWithQuery("?jira=connected&foo=bar")
-    const lastCall = replaceStateSpy.mock.calls[replaceStateSpy.mock.calls.length - 1]
-    expect(lastCall[2]).toBe("/dashboard?foo=bar")
+    await waitFor(() => {
+      expect(mockNavigate).toHaveBeenCalledWith("/dashboard?foo=bar", { replace: true })
+    })
   })
 
   it("se descarta al hacer click en el botón cerrar", () => {

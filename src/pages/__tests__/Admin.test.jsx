@@ -1,10 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from "vitest"
 import { render, screen, fireEvent, waitFor } from "@testing-library/react"
 import Admin from "../Admin"
-import { adminApi } from "../../services/api"
+import { adminApi } from "../../services/adminApi"
 
-vi.mock("../../services/api", () => ({
-  default: {},
+vi.mock("../../services/adminApi", () => ({
   adminApi: {
     getUsers: vi.fn(),
     createUser: vi.fn(),
