@@ -1,0 +1,32 @@
+src/components/layout/__tests__/Sidebar.test.jsx
+  s_cec03f844adcac::t_17ed45cb4cb55c 24
+  s_cec03f844adcac::t_a2dd9242617877 3
+  s_cec03f844adcac::t_d785a14f8af7ea 10,15
+src/pages/Dashboard/components/__tests__/DashboardStats.test.jsx
+  s_cec03f844adcac::t_6419952acb33f5 6
+src/pages/Dashboard/components/__tests__/SourceSummary.test.jsx
+  s_cec03f844adcac::t_77e75340a8644a 54
+src/App.jsx
+  s_cec03f844adcac::t_530f1b693f9ccf 13
+  s_cec03f844adcac::t_3aaad626cd2e6d 14-15
+  s_cec03f844adcac::t_ee475722908250 16-51
+  s_cec03f844adcac::t_38c4ffed3e8e81 52
+vitest.config.js
+  s_cec03f844adcac::t_8f30a3b704beb7 10-12
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.1",
+  "base_commit_sha": "fa6be5df83be8521c2eaca0c51854de83117f3e2",
+  "prompts": {},
+  "sessions": {
+    "s_cec03f844adcac": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "823f6498-eff0-4e8d-a15d-de57dd4ce71e",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "martinexequi_meli <martinexequiel.diaz@mercadolibre.com>"
+    }
+  }
+}
