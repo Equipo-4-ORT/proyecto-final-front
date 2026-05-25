@@ -204,9 +204,10 @@ function ActivitiesTable({
             </thead>
 
             <tbody>
-              {sortedActivities.map((activity) => (
+              {sortedActivities.map((activity, index) => (
                 <ActivityRow
                   key={activity.id}
+                  rowNumber={index + 1}
                   activity={activity}
                   defaultActivityHours={defaultActivityHours}
                   isEditing={editingActivityId === activity.id}
