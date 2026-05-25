@@ -1,0 +1,25 @@
+src/pages/Dashboard/components/__tests__/ActivityRow.test.jsx
+  s_eec30c3a263e47::t_d6591dd4ada51c 28
+  s_eec30c3a263e47::t_7acd6c0bdb262b 51-55
+src/pages/Dashboard/components/ActivityRow.jsx
+  s_eec30c3a263e47::t_19b5b5f425caf1 15
+  s_eec30c3a263e47::t_4025151b2f3f15 33
+src/pages/Dashboard/components/ActivitiesTable.jsx
+  s_eec30c3a263e47::t_0c6bfbe14a46fb 207,210
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.1",
+  "base_commit_sha": "e01c1552605754dbc627b34c483dc90fa9f10742",
+  "prompts": {},
+  "sessions": {
+    "s_eec30c3a263e47": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "47aaa46c-b242-4019-940d-354bd0d544ee",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "martinexequi_meli <martinexequiel.diaz@mercadolibre.com>"
+    }
+  }
+}
