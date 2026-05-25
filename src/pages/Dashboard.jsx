@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import { useAuth } from '../hooks/useAuth'
@@ -65,6 +65,9 @@ function Dashboard() {
   const { user, logout } = useAuth()
 
   const [activities, setActivities] = useState([])
+  const activitiesRef = useRef(activities)
+  activitiesRef.current = activities
+
   const [isLoading, setIsLoading] = useState(true)
   const [loadError, setLoadError] = useState(null)
 
@@ -154,7 +157,7 @@ function Dashboard() {
 
   const handleUpdateActivity = useCallback(
     async (id, editingData) => {
-      const original = activities.find((activity) => activity.id === id)
+      const original = activitiesRef.current.find((activity) => activity.id === id)
       if (!original) {
         return { ok: false, message: 'La actividad ya no existe.' }
       }
@@ -168,11 +171,7 @@ function Dashboard() {
       )
 
       try {
-        const payload = buildUpdatePayload(
-          editingData,
-          original,
-          defaultActivityHours,
-        )
+        const payload = buildUpdatePayload(editingData, original, defaultActivityHours)
         const updated = await updateActivity(id, payload)
         const mapped = apiToActivity(updated)
         setActivities((prev) =>
@@ -191,18 +190,18 @@ function Dashboard() {
         return { ok: false, message }
       }
     },
-    [activities, defaultActivityHours],
+    [defaultActivityHours],
   )
 
   const handleDeleteActivity = useCallback(
     async (id) => {
-      const originalIndex = activities.findIndex(
+      const originalIndex = activitiesRef.current.findIndex(
         (activity) => activity.id === id,
       )
       if (originalIndex === -1) {
         return { ok: false, message: 'La actividad ya no existe.' }
       }
-      const original = activities[originalIndex]
+      const original = activitiesRef.current[originalIndex]
 
       setActivities((prev) => prev.filter((activity) => activity.id !== id))
 
@@ -224,7 +223,7 @@ function Dashboard() {
         return { ok: false, message }
       }
     },
-    [activities],
+    [],
   )
 
   const visibleActivities = filterByLocalDate(activities, selectedDate)
@@ -292,7 +291,6 @@ function Dashboard() {
       ) : (
         <ReportView
           activities={visibleActivities}
-          setActivities={setActivities}
           onAddActivity={handleAddActivity}
           onUpdateActivity={handleUpdateActivity}
           onDeleteActivity={handleDeleteActivity}

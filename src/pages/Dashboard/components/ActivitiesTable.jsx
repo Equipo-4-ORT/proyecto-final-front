@@ -31,7 +31,6 @@ function getTimeValue(time) {
 
 function ActivitiesTable({
   activities,
-  setActivities,
   onAddActivity,
   onUpdateActivity,
   onDeleteActivity,
@@ -102,30 +101,7 @@ function ActivitiesTable({
 
     setEditingErrors({})
     setActionError(null)
-
-    if (typeof onUpdateActivity === 'function') {
-      handleSaveEditWithApi(editingActivityId)
-      return
-    }
-
-    setActivities((prev) =>
-      prev.map((activity) =>
-        activity.id === editingActivityId
-          ? {
-              ...activity,
-              title: editingData.title?.trim() || '',
-              description: editingData.description?.trim() || '',
-              start: editingData.start,
-              end: editingData.end,
-              notes: editingData.notes?.trim() || '',
-            }
-          : activity,
-      ),
-    )
-
-    setEditingActivityId(null)
-    setEditingData(initialFormData)
-    setEditingErrors({})
+    handleSaveEditWithApi(editingActivityId)
   }
 
   function handleOpenDelete(activity) {
@@ -150,13 +126,6 @@ function ActivitiesTable({
 
     setActionError(null)
 
-    if (typeof onDeleteActivity !== 'function') {
-      setActivities((prev) =>
-        prev.filter((activity) => activity.id !== target.id),
-      )
-      return
-    }
-
     const result = await onDeleteActivity(target.id)
     if (result && result.ok === false) {
       setActionError(result.message || 'No pudimos eliminar la actividad.')
@@ -172,24 +141,6 @@ function ActivitiesTable({
 
     setFormErrors({})
     setActionError(null)
-
-    if (typeof onAddActivity !== 'function') {
-      const newActivity = {
-        id: crypto.randomUUID(),
-        source: formData.source,
-        title: formData.title.trim(),
-        description: formData.description.trim(),
-        start: formData.start,
-        end: formData.end,
-        status: 'pending',
-        notes: formData.notes.trim(),
-      }
-      setActivities((prev) => [...prev, newActivity])
-      setFormData(initialFormData)
-      setIsAdding(false)
-      return
-    }
-
     setIsSubmitting(true)
     try {
       const result = await onAddActivity(formData)
@@ -205,9 +156,6 @@ function ActivitiesTable({
   }
 
   async function handleSaveEditWithApi(targetId) {
-    const original = activities.find((activity) => activity.id === targetId)
-    if (!original) return
-
     const result = await onUpdateActivity(targetId, editingData)
     if (result && result.ok === false) {
       setActionError(result.message || 'No pudimos actualizar la actividad.')

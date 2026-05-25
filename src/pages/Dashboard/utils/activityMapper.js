@@ -47,40 +47,41 @@ export function apiToActivity(serverActivity) {
   }
 }
 
+function buildActivityPayload(dateString, formLikeData, sourceFallback, status, defaultActivityHours) {
+  const startTime = combineDateAndTime(dateString, formLikeData.start)
+
+  let endTime
+  if (formLikeData.end) {
+    endTime = combineDateAndTime(dateString, formLikeData.end)
+  } else {
+    const startDate = new Date(startTime)
+    endTime = new Date(startDate.getTime() + defaultActivityHours * 60 * 60 * 1000).toISOString()
+  }
+
+  const title = formLikeData.title?.trim() || ""
+  const description = formLikeData.description?.trim() || ""
+  const notes = formLikeData.notes?.trim() || ""
+
+  return {
+    activityType: title || sourceFallback,
+    startTime,
+    endTime,
+    metadata: {
+      category: sourceFallback,
+      title,
+      description,
+      notes,
+      status,
+    },
+  }
+}
+
 export function activityToApiPayload(
   formData,
   selectedDate,
   defaultActivityHours = DEFAULT_ACTIVITY_HOURS,
 ) {
-  const startTime = combineDateAndTime(selectedDate, formData.start)
-
-  let endTime
-  if (formData.end) {
-    endTime = combineDateAndTime(selectedDate, formData.end)
-  } else {
-    const startDate = new Date(startTime)
-    const endDate = new Date(
-      startDate.getTime() + defaultActivityHours * 60 * 60 * 1000,
-    )
-    endTime = endDate.toISOString()
-  }
-
-  const title = formData.title?.trim() || ""
-  const description = formData.description?.trim() || ""
-  const notes = formData.notes?.trim() || ""
-
-  return {
-    activityType: title || formData.source,
-    startTime,
-    endTime,
-    metadata: {
-      category: formData.source,
-      title,
-      description,
-      notes,
-      status: "pending",
-    },
-  }
+  return buildActivityPayload(selectedDate, formData, formData.source, "pending", defaultActivityHours)
 }
 
 export function buildOptimisticActivity(formData, id, selectedDate) {
@@ -105,35 +106,13 @@ export function buildUpdatePayload(
   defaultActivityHours = DEFAULT_ACTIVITY_HOURS,
 ) {
   const dateString = getLocalDateString(originalActivity.startTime)
-  const startTime = combineDateAndTime(dateString, editingData.start)
-
-  let endTime
-  if (editingData.end) {
-    endTime = combineDateAndTime(dateString, editingData.end)
-  } else {
-    const startDate = new Date(startTime)
-    const endDate = new Date(
-      startDate.getTime() + defaultActivityHours * 60 * 60 * 1000,
-    )
-    endTime = endDate.toISOString()
-  }
-
-  const title = editingData.title?.trim() || ""
-  const description = editingData.description?.trim() || ""
-  const notes = editingData.notes?.trim() || ""
-
-  return {
-    activityType: title || originalActivity.source,
-    startTime,
-    endTime,
-    metadata: {
-      category: originalActivity.source,
-      title,
-      description,
-      notes,
-      status: originalActivity.status || "pending",
-    },
-  }
+  return buildActivityPayload(
+    dateString,
+    editingData,
+    originalActivity.source,
+    originalActivity.status || "pending",
+    defaultActivityHours,
+  )
 }
 
 export function buildOptimisticUpdate(activity, editingData) {
@@ -150,9 +129,7 @@ export function buildOptimisticUpdate(activity, editingData) {
 
 export function filterByLocalDate(activities, selectedDate) {
   return activities.filter((activity) => {
-    if (!activity.startTime) {
-      return true
-    }
+    if (!activity.startTime) return false
     return getLocalDateString(activity.startTime) === selectedDate
   })
 }

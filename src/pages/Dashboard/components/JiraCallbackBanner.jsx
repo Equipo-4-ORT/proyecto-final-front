@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react"
-import { useLocation } from "react-router-dom"
+import { useLocation, useNavigate } from "react-router-dom"
 import { CheckCircle2, Info, X, XCircle } from "lucide-react"
 
 const VALID_JIRA_PARAMS = new Set(["connected", "cancelled", "error"])
@@ -48,7 +48,8 @@ const VARIANT_STYLES = {
 
 function JiraCallbackBanner() {
   const location = useLocation()
-  const [dismissedSearch, setDismissedSearch] = useState(null)
+  const navigate = useNavigate()
+  const [dismissed, setDismissed] = useState(false)
 
   const message = useMemo(() => {
     const params = new URLSearchParams(location.search)
@@ -65,10 +66,10 @@ function JiraCallbackBanner() {
     params.delete("reason")
     const remaining = params.toString()
     const cleanUrl = `${location.pathname}${remaining ? `?${remaining}` : ""}`
-    window.history.replaceState({}, document.title, cleanUrl)
-  }, [location.pathname, location.search])
+    navigate(cleanUrl, { replace: true })
+  }, [location.pathname, location.search, navigate])
 
-  if (!message || location.search === dismissedSearch) return null
+  if (!message || dismissed) return null
 
   const style = VARIANT_STYLES[message.variant]
   const Icon = style.icon
@@ -82,7 +83,7 @@ function JiraCallbackBanner() {
       <p className="flex-1 text-sm font-medium">{message.text}</p>
       <button
         type="button"
-        onClick={() => setDismissedSearch(location.search)}
+        onClick={() => setDismissed(true)}
         className="rounded-full p-1 hover:bg-black/5 transition"
         aria-label="Cerrar"
       >

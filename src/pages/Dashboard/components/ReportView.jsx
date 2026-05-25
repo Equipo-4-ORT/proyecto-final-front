@@ -10,7 +10,6 @@ function getReportStatus(activities) {
 
 function ReportView({
   activities,
-  setActivities,
   onAddActivity,
   onUpdateActivity,
   onDeleteActivity,
@@ -33,7 +32,6 @@ function ReportView({
 
       <ActivitiesTable
         activities={activities}
-        setActivities={setActivities}
         onAddActivity={onAddActivity}
         onUpdateActivity={onUpdateActivity}
         onDeleteActivity={onDeleteActivity}
