@@ -1,0 +1,23 @@
+src/services/__tests__/activitiesApi.test.js
+  s_edb2aa8bd09342::t_d53cfa6f975f6a 1-95
+src/pages/Dashboard/components/__tests__/EmptyState.test.jsx
+  s_edb2aa8bd09342::t_6d5021dcd172f7 1-23
+src/pages/Dashboard/components/__tests__/ReportView.test.jsx
+  s_edb2aa8bd09342::t_b003e8150fc3d1 1-57
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.1",
+  "base_commit_sha": "cce3b968f51abb0e546a62d3a5fc7d59c2f4810b",
+  "prompts": {},
+  "sessions": {
+    "s_edb2aa8bd09342": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e16d2fa6-81c5-4b24-b7ff-80acd99f4684",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "martinexequi_meli <martinexequiel.diaz@mercadolibre.com>"
+    }
+  }
+}
