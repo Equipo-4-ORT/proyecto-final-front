@@ -12,6 +12,7 @@ import {
 
 function ActivityRow({
   readOnly = false,
+  rowNumber,
   activity,
   defaultActivityHours,
   isEditing,
@@ -29,7 +30,7 @@ function ActivityRow({
   return (
     <tr className="border-b border-slate-100 hover:bg-slate-50 transition">
       <td className="px-4 py-3 text-slate-500">
-        {activity.id}
+        {rowNumber}
       </td>
 
       <td className="px-4 py-3">

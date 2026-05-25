@@ -16,6 +16,13 @@ vi.mock("../../hooks/useJiraConnection", () => ({
   }),
 }))
 
+vi.mock("../../services/activitiesApi", () => ({
+  listActivities: vi.fn().mockResolvedValue([]),
+  createActivity: vi.fn(),
+  updateActivity: vi.fn(),
+  deleteActivity: vi.fn(),
+}))
+
 import Dashboard from "../Dashboard"
 import { AuthProvider } from "../../contexts/AuthContext"
 
