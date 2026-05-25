@@ -1,0 +1,45 @@
+src/pages/Dashboard/components/ActivitiesTable.jsx
+  s_edb2aa8bd09342::t_e2ff6cedd51077 104
+src/pages/Dashboard/utils/activityMapper.js
+  s_edb2aa8bd09342::t_9b9693cd658d15 109-115
+  s_edb2aa8bd09342::t_b5e2bc91ef3b5d 50-51,54-55,58,61-63,66,70,74,79-84
+  s_edb2aa8bd09342::t_10e0e1451e0e42 132
+src/pages/__tests__/Admin.test.jsx
+  s_edb2aa8bd09342::t_0f5b8901e2c032 4,6
+src/__tests__/App.test.jsx
+  s_edb2aa8bd09342::t_2b73aada860cf5 11-15
+src/pages/Dashboard/components/JiraCallbackBanner.jsx
+  s_edb2aa8bd09342::t_b8ad6a78c9bfa1 51-52,69-70,72,86
+  s_edb2aa8bd09342::t_5f11d9af8d1425 2
+src/services/adminApi.js
+  s_edb2aa8bd09342::t_e9bb9278801e27 1-7
+src/pages/Admin.jsx
+  s_edb2aa8bd09342::t_1c9a6687046fe3 2
+src/pages/Dashboard/components/__tests__/JiraCallbackBanner.test.jsx
+  s_edb2aa8bd09342::t_55784214f6d51d 1,7-16,21,27,61,63-65,68,70-72
+src/pages/Dashboard/components/__tests__/ActivitiesTable.test.jsx
+  s_edb2aa8bd09342::t_018f704d5a0bb0 2,7-8,13-48,52-54,63-65,70,87,98,109,117-118,122,130,151,159,183,189-190
+src/pages/Dashboard.jsx
+  s_edb2aa8bd09342::t_e14b44c152abb2 68-70
+  s_edb2aa8bd09342::t_02b65782f76b37 198,204,226
+  s_edb2aa8bd09342::t_26ea04389714d4 1
+  s_edb2aa8bd09342::t_e5c7928f42fbc1 160,174,193
+src/pages/Dashboard/utils/__tests__/activityMapper.test.js
+  s_edb2aa8bd09342::t_cf478019ba1559 1-212
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.1",
+  "base_commit_sha": "769d29c9bc98a63141d7be79834cd1ac649a9429",
+  "prompts": {},
+  "sessions": {
+    "s_edb2aa8bd09342": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e16d2fa6-81c5-4b24-b7ff-80acd99f4684",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "martinexequi_meli <martinexequiel.diaz@mercadolibre.com>"
+    }
+  }
+}
