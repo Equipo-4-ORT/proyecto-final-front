@@ -22,7 +22,6 @@ import {
   DEFAULT_WORKDAY_HOURS,
 } from './Dashboard/utils/dashboardCalculations'
 
-
 import { getTodayDate } from '../utils/dateHelpers'
 
 function getStoredNumber(key, fallbackValue) {
@@ -62,12 +61,6 @@ function Dashboard() {
     localStorage.setItem('defaultActivityHours', defaultActivityHours)
   }, [defaultActivityHours])
 
-  useEffect(() => {
-    if (report?.activities) {
-      setActivities(report.activities)
-    }
-  }, [report])
-
   const totalActivities = activities.length
 
   const totalHours = getTotalHours(activities, defaultActivityHours)
@@ -86,6 +79,9 @@ function Dashboard() {
   )
 
   const sourceCounts = getSourceCounts(activities, SOURCES)
+
+  const displayedActivities =
+    report?.activities?.length > 0 ? report.activities : activities
 
   function handleExportExcel() {
     // TODO: reemplazar por llamada al backend — POST /reports/export con selectedDate y activities
@@ -176,10 +172,10 @@ function Dashboard() {
         <EmptyState onGenerate={handleGenerateReport} />
       ) : (
         <ReportView
-          activities={activities}
-          setActivities={setActivities}
-          defaultActivityHours={defaultActivityHours}
-        />
+  activities={displayedActivities}
+  setActivities={setActivities}
+  defaultActivityHours={defaultActivityHours}
+/>
       )}
 
       <SourceSummary

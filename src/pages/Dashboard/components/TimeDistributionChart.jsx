@@ -1,6 +1,22 @@
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts'
 import { formatDuration } from '../utils/dashboardCalculations'
 
+function CustomTooltip({ active, payload }) {
+  if (!active || !payload?.length) {
+    return null
+  }
+
+  const item = payload[0]
+
+  return (
+    <div className="rounded-xl border border-slate-200 bg-white px-3 py-2 shadow-lg">
+      <p className="font-medium text-slate-800">{item.name}</p>
+
+      <p className="text-sm text-slate-500">{formatDuration(item.value)}</p>
+    </div>
+  )
+}
+
 function TimeDistributionChart({ data, workdayHours }) {
   const chartData = data
     .filter((item) => item.minutes > 0)
@@ -29,21 +45,7 @@ function TimeDistributionChart({ data, workdayHours }) {
       </div>
     )
   }
-  function CustomTooltip({ active, payload }) {
-    if (!active || !payload?.length) {
-      return null
-    }
 
-    const item = payload[0]
-
-    return (
-      <div className="rounded-xl border border-slate-200 bg-white px-3 py-2 shadow-lg">
-        <p className="font-medium text-slate-800">{item.name}</p>
-
-        <p className="text-sm text-slate-500">{formatDuration(item.value)}</p>
-      </div>
-    )
-  }
   return (
     <div className="flex flex-col xl:flex-row items-center xl:items-start justify-between gap-6 min-h-[260px]">
       <div className="relative w-[220px] h-[220px] sm:w-[260px] sm:h-[260px]">
