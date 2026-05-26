@@ -26,7 +26,7 @@ function HistoryPage() {
   const { user, logout } = useAuth()
   const [searchParams, setSearchParams] = useSearchParams()
 
-  // 🟢 DERIVACIÓN DIRECTA DE ESTADOS (Adiós useState y useEffect conflictivos)
+  
   const fromDate = searchParams.get('from') || ''
   const toDate = searchParams.get('to') || ''
   const currentPage = Number(searchParams.get('page')) || 1
