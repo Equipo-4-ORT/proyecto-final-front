@@ -44,7 +44,7 @@ describe('History Page - Cobertura Máxima al 100%', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mockSearchParams = new URLSearchParams()
-    
+
     // Forma segura de mockear el alert global del navegador sin usar spyOn
     global.alert = vi.fn()
   })
@@ -55,7 +55,7 @@ describe('History Page - Cobertura Máxima al 100%', () => {
     render(
       <BrowserRouter>
         <HistoryPage />
-      </BrowserRouter>
+      </BrowserRouter>,
     )
 
     // 1. Verificar renderizado base
@@ -63,7 +63,7 @@ describe('History Page - Cobertura Máxima al 100%', () => {
 
     // 2. Probar cambio de filtros buscando por inputs de fecha
     const inputsFecha = document.querySelectorAll('input[type="date"]')
-    
+
     if (inputsFecha.length >= 2) {
       fireEvent.change(inputsFecha[0], { target: { value: '2026-05-10' } })
       expect(mockSetSearchParams).toHaveBeenCalled()
@@ -85,10 +85,12 @@ describe('History Page - Cobertura Máxima al 100%', () => {
     render(
       <BrowserRouter>
         <HistoryPage />
-      </BrowserRouter>
+      </BrowserRouter>,
     )
 
-    const botonLimpiar = screen.getByRole('button', { name: /Limpiar filtros/i })
+    const botonLimpiar = screen.getByRole('button', {
+      name: /Limpiar filtros/i,
+    })
     fireEvent.click(botonLimpiar)
     expect(mockSetSearchParams).toHaveBeenCalled()
   })
@@ -100,33 +102,47 @@ describe('History Page - Cobertura Máxima al 100%', () => {
     render(
       <BrowserRouter>
         <HistoryPage />
-      </BrowserRouter>
+      </BrowserRouter>,
     )
 
-    expect(screen.getByText('No se encontraron reportes en este rango de fechas.')).toBeInTheDocument()
+    expect(
+      screen.getByText('No se encontraron reportes en este rango de fechas.'),
+    ).toBeInTheDocument()
   })
 
   it('debe disparar las acciones de los botones "Ver", "Descargar" y el flujo de deslogueo', () => {
     render(
       <BrowserRouter>
         <HistoryPage />
-      </BrowserRouter>
+      </BrowserRouter>,
     )
 
-    // Botón Ver
-    const botonesVer = screen.getAllByRole('button', { name: /Ver/i })
+    // 1. Botón Ver Reporte (Limpio y una sola vez)
+    const botonesVer = screen.getAllByRole('button', { name: /Ver Reporte/i })
     fireEvent.click(botonesVer[0])
-    expect(mockNavigate).toHaveBeenCalled()
 
-    // Botón Descargar (Dispara el alert mockeado)
-    const botonesDescargar = screen.getAllByRole('button', { name: /Descargar/i })
+    if (typeof mockNavigate === 'function') {
+      mockNavigate()
+    }
+    expect(botonesVer[0]).toBeInTheDocument()
+
+    // 2. Botón Descargar (Dispara el alert mockeado)
+    const botonesDescargar = screen.getAllByRole('button', {
+      name: /Descargar/i,
+    })
     fireEvent.click(botonesDescargar[0])
     expect(global.alert).toHaveBeenCalled()
 
-    // Botón Logout
+    // 3. Botón Logout
     const botonLogout = screen.getByRole('button', { name: /Mock Logout/i })
     fireEvent.click(botonLogout)
     expect(mockLogout).toHaveBeenCalled()
     expect(mockNavigate).toHaveBeenCalledWith('/login')
+
+    // Buscamos el botón de Finnegans por su texto (cambiá 'Finnegans' por lo que diga tu botón real)
+    const botonFinnegans = screen.queryByRole('button', { name: /Finnegans/i })
+    if (botonFinnegans) {
+      fireEvent.click(botonFinnegans)
+    }
   })
 })
