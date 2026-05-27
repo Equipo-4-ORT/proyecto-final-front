@@ -1,0 +1,21 @@
+src/pages/Dashboard/utils/__tests__/activityMapper.test.js
+  s_f6099349ac0c7a::t_f2b335c0096b87 70-82
+src/pages/Dashboard/utils/activityMapper.js
+  s_f6099349ac0c7a::t_921f9c8ef714bf 40
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "959a5829a1909c14a590bb53d7fc5af606a2f97d",
+  "prompts": {},
+  "sessions": {
+    "s_f6099349ac0c7a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4014b089-203d-4dff-926d-ced2341b6ecf",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "martinexequi_meli <martinexequiel.diaz@mercadolibre.com>"
+    }
+  }
+}
