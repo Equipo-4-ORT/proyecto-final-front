@@ -67,7 +67,19 @@ describe("apiToActivity", () => {
     expect(result.startTime).toBe(ISO_START)
   })
 
-  it("uses activityType as title when metadata.title is absent", () => {
+  it("prefers metadata.title over activityType when both present (Jira enriched)", () => {
+    const server = {
+      id: "1",
+      source: "jira",
+      activityType: "transition",
+      startTime: ISO_START,
+      endTime: ISO_END,
+      metadata: { title: "Arreglar el login · In Progress → Done (PROJ-42)" },
+    }
+    expect(apiToActivity(server).title).toBe("Arreglar el login · In Progress → Done (PROJ-42)")
+  })
+
+  it("uses activityType as title when metadata.title is absent (backwards compat, rows viejos)", () => {
     const server = {
       id: "1",
       source: "jira",
