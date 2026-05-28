@@ -2,8 +2,31 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 
-import Dashboard from '../Dashboard'
-import { AuthProvider } from '../../contexts/AuthContext'
+vi.mock('../../hooks/useJiraConnection', () => ({
+  useJiraConnection: () => ({
+    status: {
+      connected: false,
+      siteUrl: null,
+      lastSyncAt: null,
+      reconnectRequired: false,
+    },
+    loading: false,
+    actionInFlight: null,
+    error: null,
+    lastSyncResult: null,
+    connect: vi.fn(),
+    disconnect: vi.fn(),
+    syncToday: vi.fn(),
+    refresh: vi.fn(),
+  }),
+}))
+
+vi.mock('../../services/activitiesApi', () => ({
+  listActivities: vi.fn().mockResolvedValue([]),
+  createActivity: vi.fn(),
+  updateActivity: vi.fn(),
+  deleteActivity: vi.fn(),
+}))
 
 // Mock reportsApi para evitar requests reales
 vi.mock('../../services/api', () => ({
@@ -12,6 +35,8 @@ vi.mock('../../services/api', () => ({
   },
 }))
 
+import Dashboard from '../Dashboard'
+import { AuthProvider } from '../../contexts/AuthContext'
 import { reportsApi } from '../../services/api'
 
 const renderDashboard = () =>

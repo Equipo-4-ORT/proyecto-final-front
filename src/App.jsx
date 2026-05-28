@@ -1,6 +1,5 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext'
-import RequireRole from './components/RequireRole'
 import PrivateRoute from './components/PrivateRoute'
 
 import Admin from './pages/Admin'

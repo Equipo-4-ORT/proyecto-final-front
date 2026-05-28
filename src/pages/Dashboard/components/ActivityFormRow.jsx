@@ -7,6 +7,7 @@ function ActivityFormRow({
   isAdding,
   formData,
   errors,
+  isSubmitting = false,
   onChange,
   onAdd,
   onCancel,
@@ -29,14 +30,16 @@ function ActivityFormRow({
               variant="success"
               className="flex-1 flex items-center justify-center gap-2"
               onClick={onAdd}
+              disabled={isSubmitting}
             >
               <Check size={18} />
-              <span>Agregar</span>
+              <span>{isSubmitting ? 'Guardando...' : 'Agregar'}</span>
             </Button>
 
             <Button
               className="flex-1 flex items-center justify-center gap-2 bg-red-600 text-white hover:bg-red-700"
               onClick={onCancel}
+              disabled={isSubmitting}
             >
               <X size={18} />
               <span>Cancelar</span>

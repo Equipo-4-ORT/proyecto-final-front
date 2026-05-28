@@ -1,9 +1,15 @@
-import { useEffect, useState } from 'react'
-import { adminApi } from '../services/api'
+import { useCallback, useEffect, useState } from 'react'
+import { adminApi } from '../services/adminApi'
 import { useAuth } from '../hooks/useAuth'
+import { getApiErrorMessage } from '../utils/apiErrors'
 import Modal from '../components/ui/Modal'
 import Button from '../components/ui/Button'
 import TextInput from '../components/ui/TextInput'
+
+const ADMIN_ERROR_MESSAGES = {
+  user_already_exists: 'Ya existe un usuario con ese email.',
+  invalid_email: 'El formato del email no es válido.',
+}
 
 const ROLE_LABELS = { ADMIN: 'Admin', EMPLOYEE: 'Empleado' }
 const STATUS_LABELS = { ACTIVE: 'Activo', INACTIVE: 'Inactivo' }
@@ -30,11 +36,7 @@ function Admin() {
   const [formError, setFormError] = useState(null)
   const [saving, setSaving] = useState(false)
 
-  useEffect(() => {
-    fetchUsers()
-  }, [])
-
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     setLoading(true)
     setFetchError(null)
     try {
@@ -45,7 +47,11 @@ function Admin() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
+
+  useEffect(() => {
+    fetchUsers()
+  }, [fetchUsers])
 
   const handleToggleStatus = async (id) => {
     setTogglingId(id)
@@ -84,8 +90,7 @@ function Admin() {
       setUsers((prev) => [newUser, ...prev])
       setModalOpen(false)
     } catch (err) {
-      const msg = err.response?.data?.message ?? 'Ocurrió un error al guardar.'
-      setFormError(msg)
+      setFormError(getApiErrorMessage(err, ADMIN_ERROR_MESSAGES, 'Ocurrió un error al guardar.'))
     } finally {
       setSaving(false)
     }

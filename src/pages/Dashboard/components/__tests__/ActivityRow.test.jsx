@@ -25,6 +25,7 @@ function renderRow(props = {}) {
     <table>
       <tbody>
         <ActivityRow
+          rowNumber={1}
           activity={baseActivity}
           defaultActivityHours={1}
           isEditing={false}
@@ -45,6 +46,11 @@ describe("ActivityRow", () => {
     expect(screen.getByText("Daily")).toBeInTheDocument()
     expect(screen.getByText("09:00")).toBeInTheDocument()
     expect(screen.getByText("10:00")).toBeInTheDocument()
+  })
+
+  it("renders the rowNumber prop in the first cell", () => {
+    renderRow({ rowNumber: 5 })
+    expect(screen.getByText("5")).toBeInTheDocument()
   })
 
   it("renders an unknown-source placeholder instead of hiding the row", () => {

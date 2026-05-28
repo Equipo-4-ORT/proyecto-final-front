@@ -8,10 +8,11 @@ import {
   vi,
 } from 'vitest'
 
-// El front no llega al backend en los tests: solo necesitamos que la ruta
-// /admin no rompa al montar el panel.
-vi.mock("../services/api", () => ({
-  default: {},
+// El front no llega al backend en los tests: evitamos que el cliente HTTP
+// falle por falta de VITE_API_URL y que el panel admin rompa al montar.
+vi.mock("../services/api", () => ({ default: {} }))
+
+vi.mock("../services/adminApi", () => ({
   adminApi: {
     getUsers: vi.fn(() => Promise.resolve([])),
     createUser: vi.fn(),
