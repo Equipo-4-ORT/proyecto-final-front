@@ -1,0 +1,20 @@
+src/pages/History/index.jsx
+  s_16110edebce1f6::t_544333a2d34074 67,72
+  s_16110edebce1f6::t_28a5d8a959ff61 69
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "b54a3c68132ac07b4743058dbafc602bb17f9edf",
+  "prompts": {},
+  "sessions": {
+    "s_16110edebce1f6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6dcdf566-db53-494b-8746-92c8f92a477b",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": null
+    }
+  }
+}
