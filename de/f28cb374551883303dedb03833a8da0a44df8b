@@ -1,0 +1,19 @@
+src/pages/__tests__/History.test.jsx
+  s_16110edebce1f6::t_46a82041e42014 40,46,58,60-61,63,67,77,82,94
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "def28cb374551883303dedb03833a8da0a44df8b",
+  "prompts": {},
+  "sessions": {
+    "s_16110edebce1f6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6dcdf566-db53-494b-8746-92c8f92a477b",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "martinexequi_meli <martinexequiel.diaz@mercadolibre.com>"
+    }
+  }
+}
