@@ -232,6 +232,7 @@ function Dashboard() {
   const sourceCounts = getSourceCounts(visibleActivities, SOURCES)
 
   function handleExportExcel() {
+    // TODO: implementar exportación real a Excel via el backend
     console.log('Exportar Excel', {
       selectedDate,
       activities: visibleActivities,

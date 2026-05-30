@@ -27,7 +27,7 @@ export function useReport(selectedDate) {
       })
       .catch((err) => {
         if (isMounted) {
-          console.error("Error crítico e inesperado en useReport:", err)
+          console.error("useReport: error al cargar el reporte del día", selectedDate)
           setError(err)
           setIsLoading(false)
         }
