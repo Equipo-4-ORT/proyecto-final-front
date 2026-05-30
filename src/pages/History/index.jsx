@@ -64,12 +64,12 @@ function HistoryPage() {
     navigate('/login')
   }
 
-  function handleDownload(record) {
+  function handleDownload() {
     // TODO(sprint-next): implementar descarga via GET /api/history/:date/export
-    showToast(`Descarga disponible próximamente.`, 'info')
+    showToast('Descarga disponible próximamente.', 'info')
   }
 
-  function handleExportFinnegans(record) {
+  function handleExportFinnegans() {
     // TODO(sprint-next): implementar integración via POST /api/history/:date/export-finnegans
     showToast('Integración con Finnegans disponible próximamente.', 'info')
   }
