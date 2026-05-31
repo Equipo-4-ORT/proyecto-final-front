@@ -10,7 +10,7 @@ import { Toast } from '../../components/ui/Toast'
 // La respuesta esperada es un array de { id, date, totalHours, status, iaReport }
 const RECORDS = []
 
-function HistoryPage() {
+function HistoryPage({ records = RECORDS, itemsPerPage = 20 }) {
   const navigate = useNavigate()
   const { user, logout } = useAuth()
   const [searchParams, setSearchParams] = useSearchParams()
@@ -21,9 +21,8 @@ function HistoryPage() {
   const fromDate = searchParams.get('from') || ''
   const toDate = searchParams.get('to') || ''
   const currentPage = Number(searchParams.get('page')) || 1
-  const itemsPerPage = 20
 
-  const filteredRecords = RECORDS.filter((record) => {
+  const filteredRecords = records.filter((record) => {
     if (fromDate && record.date < fromDate) return false
     if (toDate && record.date > toDate) return false
     return true

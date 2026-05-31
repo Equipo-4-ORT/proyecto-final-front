@@ -37,6 +37,30 @@ vi.mock('../Dashboard/components/StatusBadge', () => ({
   default: ({ status }) => <span>{status}</span>,
 }))
 
+const TEST_RECORDS = [
+  {
+    id: 1,
+    date: '2026-05-01',
+    totalHours: '7 h 30 min',
+    status: 'Aprobado',
+    iaReport: 'Reporte del día 1',
+  },
+  {
+    id: 2,
+    date: '2026-05-02',
+    totalHours: '8 h 0 min',
+    status: 'Pendiente',
+    iaReport: 'Reporte del día 2',
+  },
+  {
+    id: 3,
+    date: '2026-05-03',
+    totalHours: '9 h 10 min',
+    status: 'En revisión',
+    iaReport: 'Reporte del día 3',
+  },
+]
+
 describe('History Page', () => {
   beforeEach(() => {
     vi.clearAllMocks()
@@ -70,7 +94,7 @@ describe('History Page', () => {
 
     render(
       <BrowserRouter>
-        <HistoryPage />
+        <HistoryPage records={TEST_RECORDS} />
       </BrowserRouter>,
     )
 
@@ -91,6 +115,70 @@ describe('History Page', () => {
     ).toBeInTheDocument()
   })
 
+  it('renderiza filas y permite ver y cerrar un reporte', () => {
+    render(
+      <BrowserRouter>
+        <HistoryPage records={TEST_RECORDS} />
+      </BrowserRouter>,
+    )
+
+    expect(screen.getByText('2026-05-01')).toBeInTheDocument()
+
+    const botonesVer = screen.getAllByRole('button', { name: /Ver Reporte/i })
+    fireEvent.click(botonesVer[0])
+
+    expect(screen.getByText('Reporte del día 1')).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: /Cerrar/i }))
+    expect(screen.queryByText('Reporte del día 1')).not.toBeInTheDocument()
+  })
+
+  it('botón Descargar muestra toast de "próximamente"', () => {
+    render(
+      <BrowserRouter>
+        <HistoryPage records={TEST_RECORDS} />
+      </BrowserRouter>,
+    )
+
+    const botonesDescargar = screen.getAllByRole('button', { name: /Descargar/i })
+    fireEvent.click(botonesDescargar[0])
+
+    expect(screen.getByText('Descarga disponible próximamente.')).toBeInTheDocument()
+  })
+
+  it('botón Integrar con Finnegans muestra toast de "próximamente"', () => {
+    render(
+      <BrowserRouter>
+        <HistoryPage records={TEST_RECORDS} />
+      </BrowserRouter>,
+    )
+
+    const botonesVer = screen.getAllByRole('button', { name: /Ver Reporte/i })
+    fireEvent.click(botonesVer[0])
+
+    fireEvent.click(screen.getByRole('button', { name: /Integrar con Finnegans/i }))
+    expect(
+      screen.getByText('Integración con Finnegans disponible próximamente.'),
+    ).toBeInTheDocument()
+  })
+
+  it('la paginación navega entre páginas', () => {
+    render(
+      <BrowserRouter>
+        <HistoryPage records={TEST_RECORDS} itemsPerPage={2} />
+      </BrowserRouter>,
+    )
+
+    expect(screen.getByText(/Página/)).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: /Siguiente/i }))
+    expect(mockSetSearchParams).toHaveBeenCalled()
+
+    mockSearchParams.set('page', '2')
+    fireEvent.click(screen.getByRole('button', { name: /Anterior/i }))
+    expect(mockSetSearchParams).toHaveBeenCalled()
+  })
+
   it('ejecuta el flujo de deslogueo', () => {
     render(
       <BrowserRouter>
@@ -98,8 +186,7 @@ describe('History Page', () => {
       </BrowserRouter>,
     )
 
-    const botonLogout = screen.getByRole('button', { name: /Mock Logout/i })
-    fireEvent.click(botonLogout)
+    fireEvent.click(screen.getByRole('button', { name: /Mock Logout/i }))
     expect(mockLogout).toHaveBeenCalled()
     expect(mockNavigate).toHaveBeenCalledWith('/login')
   })
