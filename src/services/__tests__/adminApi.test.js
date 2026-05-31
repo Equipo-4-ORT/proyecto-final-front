@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 vi.mock('../api', () => ({
   default: {
@@ -14,34 +14,46 @@ import { adminApi } from '../adminApi'
 describe('adminApi', () => {
   beforeEach(() => vi.clearAllMocks())
 
-  it('getUsers llama a GET /api/admin/users y retorna data', async () => {
-    const usuarios = [{ id: 1, fullName: 'Ana', email: 'ana@test.com' }]
-    api.get.mockResolvedValue({ data: usuarios })
+  describe('getUsers', () => {
+    it('calls GET /api/admin/users and returns the data', async () => {
+      const users = [
+        { id: '1', name: 'User 1' },
+        { id: '2', name: 'User 2' },
+      ]
+      api.get.mockResolvedValue({ data: users })
 
-    const result = await adminApi.getUsers()
+      const result = await adminApi.getUsers()
 
-    expect(api.get).toHaveBeenCalledWith('/api/admin/users')
-    expect(result).toEqual(usuarios)
+      expect(api.get).toHaveBeenCalledWith('/api/admin/users')
+      expect(result).toEqual(users)
+    })
   })
 
-  it('createUser llama a POST /api/admin/users y retorna el usuario creado', async () => {
-    const payload = { fullName: 'Bruno', email: 'bruno@test.com' }
-    const created = { id: 2, ...payload, status: 'ACTIVE', role: 'EMPLOYEE' }
-    api.post.mockResolvedValue({ data: created })
+  describe('createUser', () => {
+    it('calls POST /api/admin/users with the payload and returns the created user', async () => {
+      const payload = { email: 'newuser@example.com', name: 'New User' }
+      const created = { id: 'abc-123', ...payload }
+      api.post.mockResolvedValue({ data: created })
 
-    const result = await adminApi.createUser(payload)
+      const result = await adminApi.createUser(payload)
 
-    expect(api.post).toHaveBeenCalledWith('/api/admin/users', payload)
-    expect(result).toEqual(created)
+      expect(api.post).toHaveBeenCalledWith('/api/admin/users', payload)
+      expect(result).toEqual(created)
+    })
   })
 
-  it('toggleStatus llama a PATCH /api/admin/users/:id/status y retorna el usuario actualizado', async () => {
-    const updated = { id: 3, status: 'INACTIVE' }
-    api.patch.mockResolvedValue({ data: updated })
+  describe('toggleStatus', () => {
+    it('calls PATCH /api/admin/users/:id/status and returns the updated user', async () => {
+      const userId = 'user-123'
+      const updated = { id: userId, status: 'inactive' }
+      api.patch.mockResolvedValue({ data: updated })
 
-    const result = await adminApi.toggleStatus(3)
+      const result = await adminApi.toggleStatus(userId)
 
-    expect(api.patch).toHaveBeenCalledWith('/api/admin/users/3/status')
-    expect(result).toEqual(updated)
+      expect(api.patch).toHaveBeenCalledWith(
+        `/api/admin/users/${userId}/status`,
+      )
+      expect(result).toEqual(updated)
+    })
   })
 })
