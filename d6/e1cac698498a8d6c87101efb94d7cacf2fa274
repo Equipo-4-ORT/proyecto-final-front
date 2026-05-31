@@ -1,0 +1,28 @@
+src/services/reportsService.js
+  s_954adaf472e366::t_8a459efbba9d72 1,6-11
+src/components/common/Toast.jsx
+  s_954adaf472e366::t_3d12b87aa19ae0 20-21
+src/pages/Dashboard.jsx
+  s_954adaf472e366::t_75b350c7c86b3c 41
+  s_954adaf472e366::t_20f0c15efeebe9 359-365
+  s_954adaf472e366::t_66994cfcf50476 244
+  s_954adaf472e366::t_4ff33601b072bd 245-247
+src/components/layout/AppLayout.jsx
+  s_954adaf472e366::t_a396488ac0a5d0 1,19-21,26,36
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "d6e1cac698498a8d6c87101efb94d7cacf2fa274",
+  "prompts": {},
+  "sessions": {
+    "s_954adaf472e366": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "eccfc2d6-0a45-40f1-b470-0ff6a2339119",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "martinexequi_meli <martinexequiel.diaz@mercadolibre.com>"
+    }
+  }
+}
