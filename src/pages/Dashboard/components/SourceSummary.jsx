@@ -54,7 +54,7 @@ function SourceSummary({ sourceSummary, workdayHours }) {
 
       <Card className="p-4 sm:p-6 min-h-[260px]">
         <h3 className="text-lg font-semibold text-slate-800 mb-4">
-          Distribución de tiempo
+          Tiempo por aplicación
         </h3>
 
         <TimeDistributionChart data={sourceSummary} workdayHours={workdayHours}/>
