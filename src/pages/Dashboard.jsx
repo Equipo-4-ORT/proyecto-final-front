@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 
 import { useAuth } from '../hooks/useAuth'
 import AppLayout from '../components/layout/AppLayout'
-import Loading from '../components/common/Loading'
+import Toast from '../components/common/Toast'
 import { SOURCES } from '../constants/sources'
-
+import { useReport } from '../hooks/useReport'
 import DashboardStats from './Dashboard/components/DashboardStats'
 import ReportView from './Dashboard/components/ReportView'
 import SourceSummary from './Dashboard/components/SourceSummary'
@@ -34,11 +34,11 @@ import {
 import {
   createActivity,
   deleteActivity,
-  listActivities,
   updateActivity,
 } from '../services/activitiesApi'
 import { getApiErrorMessage } from '../utils/apiErrors'
 import { getTodayDate } from '../utils/dateHelpers'
+import { generateReport } from '../services/reportsService'
 
 function getStoredNumber(key, fallbackValue) {
   const storedValue = localStorage.getItem(key)
@@ -61,17 +61,20 @@ const ACTIVITY_ERROR_MESSAGES = {
 
 function Dashboard() {
   const navigate = useNavigate()
-
   const { user, logout } = useAuth()
 
-  const [activities, setActivities] = useState([])
-  const activitiesRef = useRef(activities)
-  activitiesRef.current = activities
+  const [searchParams] = useSearchParams()
+  const urlDate = searchParams.get('date')
 
-  const [isLoading, setIsLoading] = useState(true)
+  const [activities, setActivities] = useState([])
+  const [selectedDate, setSelectedDate] = useState(urlDate || getTodayDate())
   const [loadError, setLoadError] = useState(null)
 
-  const [selectedDate, setSelectedDate] = useState(getTodayDate())
+  const activitiesRef = useRef(activities)
+
+  useEffect(() => {
+    activitiesRef.current = activities
+  }, [activities])
 
   const [workdayHours, setWorkdayHours] = useState(() =>
     getStoredNumber('workdayHours', DEFAULT_WORKDAY_HOURS),
@@ -80,6 +83,11 @@ function Dashboard() {
   const [defaultActivityHours, setDefaultActivityHours] = useState(() =>
     getStoredNumber('defaultActivityHours', DEFAULT_ACTIVITY_HOURS),
   )
+
+  const [generatingFrom, setGeneratingFrom] = useState(null)
+  const [toast, setToast] = useState(null)
+
+  const { data: report, isLoading, error } = useReport(selectedDate)
 
   useEffect(() => {
     localStorage.setItem('workdayHours', workdayHours)
@@ -90,36 +98,21 @@ function Dashboard() {
   }, [defaultActivityHours])
 
   useEffect(() => {
-    let canceled = false
-
-    async function loadActivities() {
-      setIsLoading(true)
-      setLoadError(null)
-
-      try {
-        const serverActivities = await listActivities()
-        if (canceled) return
-        setActivities(serverActivities.map(apiToActivity))
-      } catch (err) {
-        if (canceled) return
-        setLoadError(
-          getApiErrorMessage(
-            err,
-            ACTIVITY_ERROR_MESSAGES,
-            'No pudimos cargar las actividades.',
-          ),
-        )
-      } finally {
-        if (!canceled) setIsLoading(false)
-      }
+    if (report?.activities) {
+      const timer = setTimeout(() => {
+        setActivities(report.activities)
+        setLoadError(null)
+      }, 0)
+      return () => clearTimeout(timer)
     }
 
-    loadActivities()
-
-    return () => {
-      canceled = true
+    if (error) {
+      const timer = setTimeout(() => {
+        setLoadError('No pudimos sincronizar las actividades con el servidor.')
+      }, 0)
+      return () => clearTimeout(timer)
     }
-  }, [])
+  }, [report, error])
 
   const handleAddActivity = useCallback(
     async (formData) => {
@@ -242,53 +235,127 @@ function Dashboard() {
   )
   const sourceCounts = getSourceCounts(visibleActivities, SOURCES)
 
-  function handleExportExcel() {
-    // TODO: reemplazar por llamada al backend — POST /reports/export con selectedDate
+  function handleExportExcel(source) {
+    if (generatingFrom) return
+
+    setGeneratingFrom(source)
+    setToast(null)
+
+    generateReport({
+      date: selectedDate,
+      activities: visibleActivities,
+    })
+      .then(() => {
+        setToast({
+          type: 'success',
+          message: 'Informe generado exitosamente',
+        })
+      })
+      .catch((error) => {
+        console.error('Error al generar el informe:', error)
+        let errorMessage =
+          'Error al generar el informe. Por favor, intenta de nuevo.'
+
+        if (error.code === 'ECONNABORTED') {
+          errorMessage =
+            'Error al generar el informe. La solicitud tardó demasiado tiempo (máx 90 segundos). Intenta de nuevo.'
+        } else if (error?.response?.data?.message) {
+          errorMessage = error.response.data.message
+        }
+
+        setToast({
+          type: 'error',
+          message: errorMessage,
+        })
+      })
+      .finally(() => {
+        setGeneratingFrom(null)
+      })
   }
 
   function handleLogout() {
     logout()
-
     navigate('/login')
   }
 
-  return (
-    <AppLayout
-      user={user}
-      onLogout={handleLogout}
-      sourceCounts={sourceCounts}
-      selectedDate={selectedDate}
-      onDateChange={setSelectedDate}
-      onExportExcel={handleExportExcel}
-      workdayHours={workdayHours}
-      defaultActivityHours={defaultActivityHours}
-      onWorkdayHoursChange={setWorkdayHours}
-      onDefaultActivityHoursChange={setDefaultActivityHours}
-    >
-      <JiraCallbackBanner />
-
-      <JiraIntegrationCard />
-
-      <DashboardStats
-        totalActivities={totalActivities}
-        calendarEventCount={calendarEventCount}
-        totalHours={totalHours}
-        productivityPercentage={productivityPercentage}
+  if (isLoading) {
+    return (
+      <AppLayout
+        user={user}
+        onLogout={handleLogout}
+        sourceCounts={{}}
+        selectedDate={selectedDate}
+        onDateChange={setSelectedDate}
+        onExportExcel={handleExportExcel}
         workdayHours={workdayHours}
-      />
-
-      {loadError && (
-        <div
-          role="alert"
-          className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700"
-        >
-          {loadError}
+        defaultActivityHours={defaultActivityHours}
+        onWorkdayHoursChange={setWorkdayHours}
+        onDefaultActivityHoursChange={setDefaultActivityHours}
+      >
+        <div className="py-10 text-center text-slate-500">
+          Cargando reporte...
         </div>
-      )}
+      </AppLayout>
+    )
+  }
 
-      {isLoading ? (
-        <Loading message="Cargando actividades..." />
-      ) : (
+  if (error) {
+    return (
+      <AppLayout
+        user={user}
+        onLogout={handleLogout}
+        sourceCounts={{}}
+        selectedDate={selectedDate}
+        onDateChange={setSelectedDate}
+        onExportExcel={handleExportExcel}
+        workdayHours={workdayHours}
+        defaultActivityHours={defaultActivityHours}
+        onWorkdayHoursChange={setWorkdayHours}
+        onDefaultActivityHoursChange={setDefaultActivityHours}
+      >
+        <div className="py-10 text-center text-red-500">
+          Error al cargar el reporte.
+        </div>
+      </AppLayout>
+    )
+  }
+
+  return (
+    <>
+      <AppLayout
+        user={user}
+        onLogout={handleLogout}
+        sourceCounts={sourceCounts}
+        selectedDate={selectedDate}
+        onDateChange={setSelectedDate}
+        onExportExcel={handleExportExcel}
+        generatingFrom={generatingFrom}
+        workdayHours={workdayHours}
+        defaultActivityHours={defaultActivityHours}
+        onWorkdayHoursChange={setWorkdayHours}
+        onDefaultActivityHoursChange={setDefaultActivityHours}
+      >
+        <JiraCallbackBanner />
+
+        <JiraIntegrationCard />
+
+        <DashboardStats
+          totalActivities={totalActivities}
+          calendarEventCount={calendarEventCount}
+          totalHours={totalHours}
+          productivityPercentage={productivityPercentage}
+          workdayHours={workdayHours}
+        />
+
+        {loadError && (
+          <div
+            role="alert"
+            className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700"
+          >
+            {loadError}
+          </div>
+        )}
+
         <ReportView
           activities={visibleActivities}
           onAddActivity={handleAddActivity}
@@ -296,13 +363,21 @@ function Dashboard() {
           onDeleteActivity={handleDeleteActivity}
           defaultActivityHours={defaultActivityHours}
         />
-      )}
 
-      <SourceSummary
-        sourceSummary={sourceSummary}
-        workdayHours={workdayHours}
-      />
-    </AppLayout>
+        <SourceSummary
+          sourceSummary={sourceSummary}
+          workdayHours={workdayHours}
+        />
+      </AppLayout>
+
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
+    </>
   )
 }
 

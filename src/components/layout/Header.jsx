@@ -1,34 +1,25 @@
-import { useRef } from "react"
-import { CalendarDays, Download } from "lucide-react"
+import { useRef } from 'react'
+import { CalendarDays, Download } from 'lucide-react'
 
-import UserMenu from "./UserMenu"
-import Button from "../ui/Button"
+import UserMenu from './UserMenu'
+import Button from '../ui/Button'
 
-import { getTodayDate } from "../../utils/dateHelpers"
+import { getTodayDate } from '../../utils/dateHelpers'
 
 function formatDate(date) {
   const currentDate = new Date(`${date}T00:00:00`)
 
-  const day = currentDate.toLocaleDateString(
-    "es-AR",
-    {
-      day: "2-digit",
-    }
-  )
+  const day = currentDate.toLocaleDateString('es-AR', {
+    day: '2-digit',
+  })
 
-  const month = currentDate.toLocaleDateString(
-    "es-AR",
-    {
-      month: "long",
-    }
-  )
+  const month = currentDate.toLocaleDateString('es-AR', {
+    month: 'long',
+  })
 
-  const year = currentDate.toLocaleDateString(
-    "es-AR",
-    {
-      year: "numeric",
-    }
-  )
+  const year = currentDate.toLocaleDateString('es-AR', {
+    year: 'numeric',
+  })
 
   return `${day} de ${month.toLowerCase()}, ${year}`
 }
@@ -39,6 +30,7 @@ function Header({
   selectedDate,
   onDateChange,
   onExportExcel,
+  generatingFrom = null,
   workdayHours,
   defaultActivityHours,
   onWorkdayHoursChange,
@@ -55,9 +47,7 @@ function Header({
   return (
     <header className="bg-white border-b border-slate-200 px-4 sm:px-8 py-5 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
       <div>
-        <h2 className="text-4xl font-bold text-slate-900">
-          Dashboard
-        </h2>
+        <h2 className="text-4xl font-bold text-slate-900">Dashboard</h2>
 
         <p className="text-slate-500 text-sm mt-1">
           Gestión diaria de actividades y productividad.
@@ -82,10 +72,7 @@ function Header({
             shadow-sm
           "
         >
-          <CalendarDays
-            size={18}
-            className="text-slate-500"
-          />
+          <CalendarDays size={18} className="text-slate-500" />
 
           <span className="text-sm font-medium">
             {formatDate(selectedDate || today)}
@@ -96,9 +83,7 @@ function Header({
             type="date"
             value={selectedDate}
             max={today}
-            onChange={(event) =>
-              onDateChange(event.target.value)
-            }
+            onChange={(event) => onDateChange(event.target.value)}
             className="absolute opacity-0 pointer-events-none"
             tabIndex={-1}
           />
@@ -107,19 +92,27 @@ function Header({
         <Button
           variant="success"
           onClick={onExportExcel}
+          disabled={!!generatingFrom}
           className="
             w-full sm:w-auto
             h-14 px-6
             flex items-center justify-center gap-2
             rounded-2xl
             shadow-sm
+            disabled:opacity-50 disabled:cursor-not-allowed
           "
         >
-          <Download size={18} />
-
-          <span>
-            Descargar Excel
-          </span>
+          {generatingFrom === 'header' ? (
+            <>
+              <div className="h-5 w-5 rounded-full border-2 border-white border-t-transparent animate-spin" />
+              <span>Generando...</span>
+            </>
+          ) : (
+            <>
+              <Download size={18} />
+              <span>Descargar Excel</span>
+            </>
+          )}
         </Button>
 
         <UserMenu
@@ -127,12 +120,8 @@ function Header({
           onLogout={onLogout}
           workdayHours={workdayHours}
           defaultActivityHours={defaultActivityHours}
-          onWorkdayHoursChange={
-            onWorkdayHoursChange
-          }
-          onDefaultActivityHoursChange={
-            onDefaultActivityHoursChange
-          }
+          onWorkdayHoursChange={onWorkdayHoursChange}
+          onDefaultActivityHoursChange={onDefaultActivityHoursChange}
         />
       </div>
     </header>
