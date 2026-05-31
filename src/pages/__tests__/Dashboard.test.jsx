@@ -29,6 +29,7 @@ vi.mock('../../services/activitiesApi', () => ({
 }))
 
 vi.mock('../../services/reportsService', () => ({
+  getReportByDate: vi.fn().mockResolvedValue(null),
   generateReport: vi.fn().mockResolvedValue({}),
 }))
 
