@@ -1,0 +1,32 @@
+src/pages/History/index.jsx
+  s_16110edebce1f6::t_8339358f2a1f5b 13
+  s_16110edebce1f6::t_73fcd2fba7a74c 25
+src/pages/__tests__/History.test.jsx
+  s_16110edebce1f6::t_f70d13531e299b 40-63,97,118-181,189
+src/hooks/__tests__/useToast.test.js
+  s_16110edebce1f6::t_cfa23e3bdbaf49 1-37
+src/services/__tests__/adminApi.test.js
+  s_16110edebce1f6::t_8f22baa85a7657 1-47
+src/components/ui/__tests__/Toast.test.jsx
+  s_16110edebce1f6::t_f45193b67d67ae 1-58
+src/services/__tests__/reportsService.test.js
+  s_16110edebce1f6::t_ca2e17d369da3a 1-30
+src/utils/__tests__/apiErrors.test.js
+  s_16110edebce1f6::t_54c611307674dd 1-34
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "52ea3b0838abcf8ec59897691b6b9f1ffc4773ed",
+  "prompts": {},
+  "sessions": {
+    "s_16110edebce1f6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6dcdf566-db53-494b-8746-92c8f92a477b",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "martinexequi_meli <martinexequiel.diaz@mercadolibre.com>"
+    }
+  }
+}
