@@ -1,3 +1,4 @@
+import { useCallback } from 'react'
 import Sidebar from './Sidebar'
 import Header from './Header'
 
@@ -15,11 +16,14 @@ function AppLayout({
   onWorkdayHoursChange,
   onDefaultActivityHoursChange,
 }) {
+  const handleSidebarExport = useCallback(() => onExportExcel('sidebar'), [onExportExcel])
+  const handleHeaderExport = useCallback(() => onExportExcel('header'), [onExportExcel])
+
   return (
     <div className="min-h-screen bg-slate-100">
       <Sidebar
         sourceCounts={sourceCounts}
-        onExportExcel={() => onExportExcel('sidebar')}
+        onExportExcel={handleSidebarExport}
         generatingFrom={generatingFrom}
       />
 
@@ -29,7 +33,7 @@ function AppLayout({
           onLogout={onLogout}
           selectedDate={selectedDate}
           onDateChange={onDateChange}
-          onExportExcel={() => onExportExcel('header')}
+          onExportExcel={handleHeaderExport}
           generatingFrom={generatingFrom}
           workdayHours={workdayHours}
           defaultActivityHours={defaultActivityHours}

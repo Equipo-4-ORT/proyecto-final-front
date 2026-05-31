@@ -3,7 +3,6 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 
 import { useAuth } from '../hooks/useAuth'
 import AppLayout from '../components/layout/AppLayout'
-import Loading from '../components/common/Loading'
 import Toast from '../components/common/Toast'
 import { SOURCES } from '../constants/sources'
 import { useReport } from '../hooks/useReport'
@@ -39,7 +38,7 @@ import {
 } from '../services/activitiesApi'
 import { getApiErrorMessage } from '../utils/apiErrors'
 import { getTodayDate } from '../utils/dateHelpers'
-import { reportsApi } from '../services/api'
+import { generateReport } from '../services/reportsService'
 
 function getStoredNumber(key, fallbackValue) {
   const storedValue = localStorage.getItem(key)
@@ -242,11 +241,10 @@ function Dashboard() {
     setGeneratingFrom(source)
     setToast(null)
 
-    reportsApi
-      .generateReport({
-        date: selectedDate,
-        activities,
-      })
+    generateReport({
+      date: selectedDate,
+      activities: visibleActivities,
+    })
       .then(() => {
         setToast({
           type: 'success',
@@ -358,17 +356,13 @@ function Dashboard() {
           </div>
         )}
 
-        {isLoading ? (
-          <Loading message="Cargando actividades..." />
-        ) : (
-          <ReportView
-            activities={visibleActivities}
-            onAddActivity={handleAddActivity}
-            onUpdateActivity={handleUpdateActivity}
-            onDeleteActivity={handleDeleteActivity}
-            defaultActivityHours={defaultActivityHours}
-          />
-        )}
+        <ReportView
+          activities={visibleActivities}
+          onAddActivity={handleAddActivity}
+          onUpdateActivity={handleUpdateActivity}
+          onDeleteActivity={handleDeleteActivity}
+          defaultActivityHours={defaultActivityHours}
+        />
 
         <SourceSummary
           sourceSummary={sourceSummary}

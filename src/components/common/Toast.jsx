@@ -17,6 +17,8 @@ function Toast({ message, type = 'info', onClose }) {
 
   return (
     <div
+      role="alert"
+      aria-live="polite"
       className={`fixed top-4 right-4 max-w-md p-4 rounded-lg border ${bgColor} flex items-start gap-3 shadow-lg z-50`}
     >
       <Icon size={20} className={`flex-shrink-0 mt-0.5 ${textColor}`} />

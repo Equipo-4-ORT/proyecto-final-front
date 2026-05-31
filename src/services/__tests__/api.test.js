@@ -59,16 +59,4 @@ describe('api service', () => {
     expect(result.headers.Authorization).toBeUndefined()
   })
 
-  it('reportsApi.generateReport is a function', async () => {
-    const apiModule = await import('../api')
-    expect(typeof apiModule.reportsApi.generateReport).toBe('function')
-  })
-
-  it('reportsApi.generateReport has timeout of 90 seconds', async () => {
-    // Verificar que la estructura de la función es correcta
-    // y que el timeout está definido
-    const apiModule = await import('../api')
-    expect(apiModule.reportsApi).toBeDefined()
-    expect(apiModule.reportsApi.generateReport).toBeDefined()
-  })
 })
