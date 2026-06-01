@@ -21,9 +21,9 @@ const baseHookValue = {
   refresh: vi.fn(),
 }
 
-const setup = (override = {}) => {
+const setup = (override = {}, props = {}) => {
   mockUseJiraConnection.mockReturnValue({ ...baseHookValue, ...override })
-  return render(<JiraIntegrationCard />)
+  return render(<JiraIntegrationCard {...props} />)
 }
 
 describe("JiraIntegrationCard", () => {
@@ -112,6 +112,33 @@ describe("JiraIntegrationCard", () => {
       setup({ status: connectedStatus, actionInFlight: "sync" })
       const btn = screen.getByRole("button", { name: /sincronizando/i })
       expect(btn).toBeDisabled()
+    })
+  })
+
+  describe("onSynced", () => {
+    const connectedStatus = {
+      connected: true,
+      siteUrl: "https://acme.atlassian.net",
+      lastSyncAt: null,
+      reconnectRequired: false,
+    }
+
+    it("invoca onSynced cuando hay un resultado de sincronización", () => {
+      const onSynced = vi.fn()
+      setup(
+        {
+          status: connectedStatus,
+          lastSyncResult: { imported: 3, skippedDuplicates: 0 },
+        },
+        { onSynced },
+      )
+      expect(onSynced).toHaveBeenCalledTimes(1)
+    })
+
+    it("no invoca onSynced cuando todavía no hubo sincronización", () => {
+      const onSynced = vi.fn()
+      setup({ status: connectedStatus, lastSyncResult: null }, { onSynced })
+      expect(onSynced).not.toHaveBeenCalled()
     })
   })
 

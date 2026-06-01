@@ -6,3 +6,7 @@ export function getTodayDate() {
 
   return `${year}-${month}-${day}`
 }
+
+export function getUserTimeZone() {
+  return Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC"
+}
