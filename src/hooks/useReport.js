@@ -26,13 +26,13 @@ export function useReport(selectedDate) {
         }
       })
       .catch((err) => {
-        if (isMounted) {
-          console.error("useReport: error al cargar el reporte del día", selectedDate)
-          setError(err)
-          setIsLoading(false)
-        }
-      })
-
+  if (isMounted) {
+    // Agregamos más detalle para ver qué devolvió el back
+    console.error("Detalle del error:", err.response?.data || err.message);
+    setError(err);
+    setIsLoading(false);
+  }
+})
     return () => {
       isMounted = false
     }

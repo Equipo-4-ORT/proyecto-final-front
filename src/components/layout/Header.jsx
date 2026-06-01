@@ -31,13 +31,8 @@ function Header({
   onDateChange,
   onExportExcel,
   generatingFrom = null,
-  workdayHours,
-  defaultActivityHours,
-  onWorkdayHoursChange,
-  onDefaultActivityHoursChange,
 }) {
   const today = getTodayDate()
-
   const dateInputRef = useRef(null)
 
   function openDatePicker() {
@@ -118,10 +113,6 @@ function Header({
         <UserMenu
           user={user}
           onLogout={onLogout}
-          workdayHours={workdayHours}
-          defaultActivityHours={defaultActivityHours}
-          onWorkdayHoursChange={onWorkdayHoursChange}
-          onDefaultActivityHoursChange={onDefaultActivityHoursChange}
         />
       </div>
     </header>
