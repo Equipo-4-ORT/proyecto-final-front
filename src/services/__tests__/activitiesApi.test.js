@@ -28,6 +28,21 @@ describe("activitiesApi", () => {
       expect(result).toEqual([{ id: "1" }, { id: "2" }])
     })
 
+    it("passes date and timezone as query params when filtering by day", async () => {
+      api.get.mockResolvedValue({ data: [{ id: "1" }] })
+      const result = await listActivities({
+        date: "2026-05-30",
+        timezone: "America/Argentina/Buenos_Aires",
+      })
+      expect(api.get).toHaveBeenCalledWith("/api/activities", {
+        params: {
+          date: "2026-05-30",
+          timezone: "America/Argentina/Buenos_Aires",
+        },
+      })
+      expect(result).toEqual([{ id: "1" }])
+    })
+
     it("returns an empty array when the response data is not an array", async () => {
       api.get.mockResolvedValue({ data: null })
       const result = await listActivities()

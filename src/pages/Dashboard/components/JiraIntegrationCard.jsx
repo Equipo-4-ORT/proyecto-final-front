@@ -1,3 +1,4 @@
+import { useEffect } from "react"
 import { AlertTriangle, Link2, Link2Off, RefreshCw } from "lucide-react"
 import Badge from "../../../components/ui/Badge"
 import Button from "../../../components/ui/Button"
@@ -57,7 +58,7 @@ function SyncResult({ result }) {
   )
 }
 
-function JiraIntegrationCard() {
+function JiraIntegrationCard({ onSynced }) {
   const {
     status,
     loading,
@@ -68,6 +69,12 @@ function JiraIntegrationCard() {
     disconnect,
     syncToday,
   } = useJiraConnection()
+
+  useEffect(() => {
+    if (lastSyncResult && onSynced) {
+      onSynced()
+    }
+  }, [lastSyncResult, onSynced])
 
   const isConnected = Boolean(status?.connected)
   const reconnectRequired = Boolean(status?.reconnectRequired)
