@@ -27,7 +27,6 @@ export function useReport(selectedDate) {
       })
       .catch((err) => {
   if (isMounted) {
-    // Agregamos más detalle para ver qué devolvió el back
     console.error("Detalle del error:", err.response?.data || err.message);
     setError(err);
     setIsLoading(false);
