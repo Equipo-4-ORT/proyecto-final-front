@@ -3,7 +3,11 @@ import { Navigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 
 function PrivateRoute({ children, requiredRole }) {
-  const { isAuthenticated, user } = useAuth()
+  const { isAuthenticated, user, loading } = useAuth()
+
+  // Mientras /auth/me resuelve no sabemos si hay sesión: evitamos el flash de
+  // redirect-a-login antes de hidratar.
+  if (loading) return null
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />

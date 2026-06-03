@@ -1,59 +1,44 @@
-import { render } from "@testing-library/react"
-import { MemoryRouter } from "react-router-dom"
-import { vi } from "vitest"
-import {
-  describe,
-  test,
-  expect,
-  beforeEach,
-} from 'vitest'
+import { render, waitFor } from "@testing-library/react"
+import { describe, test, expect, beforeEach, vi } from 'vitest'
 
 import Callback from "../Callback"
-import { AuthProvider } from "../../contexts/AuthContext"
-
-const MOCK_JWT =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwiZW1haWwiOiJkZXZAdGVzdC5jb20iLCJyb2xlIjoiYWRtaW4iLCJleHAiOjk5OTk5OTk5OTl9.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
 
 const mockNavigate = vi.fn()
 
 vi.mock("react-router-dom", async () => {
   const actual = await vi.importActual("react-router-dom")
-
   return {
     ...actual,
     useNavigate: () => mockNavigate,
   }
 })
 
-function renderCallback(search = "") {
-  window.history.pushState({}, "Callback", `/callback${search}`)
-
-  return render(
-    <AuthProvider>
-      <MemoryRouter initialEntries={[`/callback${search}`]}>
-        <Callback />
-      </MemoryRouter>
-    </AuthProvider>
-  )
-}
+const refreshUser = vi.fn()
+vi.mock("../../hooks/useAuth", () => ({
+  useAuth: () => ({ refreshUser }),
+}))
 
 describe("Callback", () => {
   beforeEach(() => {
-    localStorage.clear()
-    mockNavigate.mockClear()
+    vi.clearAllMocks()
   })
 
-  test("saves token and navigates to dashboard when token is present", () => {
-    renderCallback(`?token=${MOCK_JWT}`)
+  test("hidrata la sesión (refreshUser) y navega a /dashboard", async () => {
+    refreshUser.mockResolvedValue({ id: "1", role: "EMPLOYEE" })
 
-    expect(localStorage.getItem("token")).toBe(MOCK_JWT)
+    render(<Callback />)
 
-    expect(mockNavigate).toHaveBeenCalledWith("/dashboard")
+    await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith("/dashboard"))
+    expect(refreshUser).toHaveBeenCalledTimes(1)
   })
 
-  test("navigates to login when token is missing", () => {
-    renderCallback()
+  test("si /auth/me falla, navega a /login?error=auth_failed", async () => {
+    refreshUser.mockRejectedValue(new Error("no session"))
 
-    expect(mockNavigate).toHaveBeenCalledWith("/login")
+    render(<Callback />)
+
+    await waitFor(() =>
+      expect(mockNavigate).toHaveBeenCalledWith("/login?error=auth_failed"),
+    )
   })
 })
