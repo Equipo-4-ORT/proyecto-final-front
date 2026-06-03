@@ -1,0 +1,36 @@
+src/contexts/AuthContext.jsx
+  s_b7ca45f47b6edc::t_708e054308cf83 1-2,5-6,8-9,11-28,30-40,43-49,54-60
+src/pages/__tests__/Dashboard.test.jsx
+  s_b7ca45f47b6edc::t_1a76268c974a98 36-44
+  s_b7ca45f47b6edc::t_291c3b8d27ec17 63,67
+src/__tests__/App.test.jsx
+  s_b7ca45f47b6edc::t_4f40f3b48d7efc 11-14,24-27,36-39,42,46,50,54,58-59,64-75,79-80,85,89,92
+CHANGELOG.md
+  s_b7ca45f47b6edc::t_8e0b4b6446a45c 8-17
+src/pages/__tests__/Callback.test.jsx
+  s_b7ca45f47b6edc::t_c702c835bbb26e 1-2,16-19,23,26-27,29,31-32,35-38,40-42
+src/services/api.js
+  s_b7ca45f47b6edc::t_86364e09d2ed5a 9,12-13,15-18,20-51
+src/pages/Callback.jsx
+  s_b7ca45f47b6edc::t_3caec7455ed513 2,6-7,10,13-16
+src/components/PrivateRoute.jsx
+  s_b7ca45f47b6edc::t_22f49668ffb6e3 6-10
+src/services/__tests__/api.test.js
+  s_b7ca45f47b6edc::t_dea848d1fdd862 3-9,14-24,27-28,36-39,58-63,65-66,69,71-78,81,83-85,88-100
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "14b003e7678109cb374c32b773e119e71f444864",
+  "prompts": {},
+  "sessions": {
+    "s_b7ca45f47b6edc": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6a606ccc-a8c7-430c-9568-135c4f094470",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "LicFuraca <martinexequield@gmail.com>"
+    }
+  }
+}
