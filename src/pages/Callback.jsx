@@ -1,25 +1,19 @@
 import { useEffect } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 
 import { useAuth } from '../hooks/useAuth'
 
+// Ya no recibe ?token= en la URL: las cookies se setearon en el redirect del
+// backend. Solo confirma que la sesión quedó y navega.
 function Callback() {
   const navigate = useNavigate()
-  const location = useLocation()
-  const { login } = useAuth()
+  const { refreshUser } = useAuth()
 
   useEffect(() => {
-    const params = new URLSearchParams(location.search)
-    const token = params.get('token')
-
-    if (token) { // lgtm[js/user-controlled-bypass] codeql[js/user-controlled-bypass]
-      login(token)
-      window.history.replaceState({}, document.title, '/callback')
-      navigate('/dashboard')
-    } else {
-      navigate('/login')
-    }
-  }, [location.search, navigate, login])
+    refreshUser()
+      .then(() => navigate('/dashboard'))
+      .catch(() => navigate('/login?error=auth_failed'))
+  }, [navigate, refreshUser])
 
   return <h1>Procesando login...</h1>
 }

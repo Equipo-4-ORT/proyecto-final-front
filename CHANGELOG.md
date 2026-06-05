@@ -5,6 +5,16 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Changed
+- **Auth migrada a cookies HttpOnly**: `api.js` usa `withCredentials: true` y un interceptor de response que renueva la sesión con `POST /auth/refresh` ante un 401 y reintenta (con coalescing); se eliminó el interceptor que leía el token de `localStorage`.
+- `AuthContext.jsx`: hidrata la sesión con `GET /auth/me` y expone `loading` + `refreshUser` (ya no decodifica el JWT en el cliente ni usa `localStorage`).
+- `PrivateRoute.jsx`: respeta `loading` para evitar el flash de redirect-a-login antes de hidratar.
+- `Callback.jsx`: simplificado, ya no lee `?token=` de la URL.
+- `main.jsx`: removido el import muerto de `AuthProvider`.
+
+### Security
+- El token de sesión ya no se guarda en `localStorage` ni se lee en el cliente: vive en cookies `HttpOnly` que maneja el browser (mitiga robo por XSS). Las preferencias no sensibles (`workdayHours`, `defaultActivityHours`) siguen en `localStorage`.
+
 ## [0.3.0] - 2026-05-17
 
 ### Added

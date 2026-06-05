@@ -1,27 +1,27 @@
-import { useState } from "react"
-import Card from "../../../components/ui/Card"
-import ActivityRow from "./ActivityRow"
-import ActivityFormRow from "./ActivityFormRow"
-import ActivityMobileCard from "./ActivityMobileCard"
-import { validateActivity } from "../utils/activityValidation"
-import { getActivityDurationMinutes } from "../utils/dashboardCalculations"
-import Modal from "../../../components/ui/Modal"
-import Button from "../../../components/ui/Button"
+import { useState } from 'react'
+import Card from '../../../components/ui/Card'
+import ActivityRow from './ActivityRow'
+import ActivityFormRow from './ActivityFormRow'
+import ActivityMobileCard from './ActivityMobileCard'
+import { validateActivity } from '../utils/activityValidation'
+import { getActivityDurationMinutes } from '../utils/dashboardCalculations'
+import Modal from '../../../components/ui/Modal'
+import Button from '../../../components/ui/Button'
 
 const initialFormData = {
-  source: "",
-  title: "",
-  description: "",
-  start: "",
-  end: "",
-  notes: "",
+  source: '',
+  title: '',
+  description: '',
+  start: '',
+  end: '',
+  notes: '',
 }
 
 function getTimeValue(time) {
-  if (!time || !time.includes(":")) {
+  if (!time || !time.includes(':')) {
     return Number.MAX_SAFE_INTEGER
   }
-  const [hours, minutes] = time.split(":").map(Number)
+  const [hours, minutes] = time.split(':').map(Number)
   if (Number.isNaN(hours) || Number.isNaN(minutes)) {
     return Number.MAX_SAFE_INTEGER
   }
@@ -29,11 +29,19 @@ function getTimeValue(time) {
   return hours * 60 + minutes
 }
 
-function ActivitiesTable({ activities, setActivities, defaultActivityHours }) {
-
+function ActivitiesTable({
+  activities,
+  onAddActivity,
+  onUpdateActivity,
+  onDeleteActivity,
+  defaultActivityHours,
+  readOnly = false,
+}) {
   const [isAdding, setIsAdding] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [formData, setFormData] = useState(initialFormData)
   const [formErrors, setFormErrors] = useState({})
+  const [actionError, setActionError] = useState(null)
   const [editingActivityId, setEditingActivityId] = useState(null)
   const [editingData, setEditingData] = useState(initialFormData)
   const [editingErrors, setEditingErrors] = useState({})
@@ -47,8 +55,10 @@ function ActivitiesTable({ activities, setActivities, defaultActivityHours }) {
 
     setFormErrors((prev) => ({
       ...prev,
-      [field]: "",
+      [field]: '',
     }))
+
+    setActionError(null)
   }
 
   function handleStartEdit(activity) {
@@ -56,11 +66,11 @@ function ActivitiesTable({ activities, setActivities, defaultActivityHours }) {
     setEditingErrors({})
     setEditingData({
       source: activity.source,
-      title: activity.title || "",
-      description: activity.description || "",
-      start: activity.start || "",
-      end: activity.end || "",
-      notes: activity.notes || "",
+      title: activity.title || '',
+      description: activity.description || '',
+      start: activity.start || '',
+      end: activity.end || '',
+      notes: activity.notes || '',
     })
   }
 
@@ -78,7 +88,7 @@ function ActivitiesTable({ activities, setActivities, defaultActivityHours }) {
 
     setEditingErrors((prev) => ({
       ...prev,
-      [field]: "",
+      [field]: '',
     }))
   }
 
@@ -89,24 +99,9 @@ function ActivitiesTable({ activities, setActivities, defaultActivityHours }) {
       return
     }
 
-    setActivities((prev) =>
-      prev.map((activity) =>
-        activity.id === editingActivityId
-          ? {
-              ...activity,
-              title: editingData.title?.trim() || "",
-              description: editingData.description?.trim() || "",
-              start: editingData.start,
-              end: editingData.end,
-              notes: editingData.notes?.trim() || "",
-            }
-          : activity
-      )
-    )
-
-    setEditingActivityId(null)
-    setEditingData(initialFormData)
     setEditingErrors({})
+    setActionError(null)
+    handleSaveEditWithApi(editingActivityId)
   }
 
   function handleOpenDelete(activity) {
@@ -117,69 +112,78 @@ function ActivitiesTable({ activities, setActivities, defaultActivityHours }) {
     setDeletingActivity(null)
   }
 
-  function handleConfirmDelete() {
-    setActivities((prev) =>
-      prev.filter(
-        (activity) => activity.id !== deletingActivity.id
-      )
-    )
+  async function handleConfirmDelete() {
+    const target = deletingActivity
+    if (!target) return
 
-    if (editingActivityId === deletingActivity.id) {
+    setDeletingActivity(null)
+
+    if (editingActivityId === target.id) {
       setEditingActivityId(null)
       setEditingData(initialFormData)
       setEditingErrors({})
     }
 
-    setDeletingActivity(null)
+    setActionError(null)
+
+    const result = await onDeleteActivity(target.id)
+    if (result && result.ok === false) {
+      setActionError(result.message || 'No pudimos eliminar la actividad.')
+    }
   }
 
-  function handleAddActivity() {
+  async function handleAddActivity() {
     const errors = validateActivity(formData)
     if (Object.keys(errors).length > 0) {
       setFormErrors(errors)
       return
-  }
-
-  // TODO: reemplazar este id local por el que devuelva el backend (crypto.randomUUID() como id temporal).
-  const newActivity = {
-    id:
-      activities.length > 0
-        ? Math.max(...activities.map((activity) => activity.id)) + 1
-        : 1,
-    source: formData.source,
-    title: formData.title.trim(),
-    description: formData.description.trim(),
-    start: formData.start,
-    end: formData.end,
-    notes: formData.notes.trim(),
-  }
-
-  //Reemplazar por llamada al backend cuando esté dispo
-  setActivities((prev) => [...prev, newActivity])
-
-  setFormData(initialFormData)
-  setFormErrors({})
-  setIsAdding(false)
-  }
-
-  const sortedActivities = [...activities].sort((firstActivity, secondActivity) => {
-    const startDifference =
-      getTimeValue(firstActivity.start) - getTimeValue(secondActivity.start)
-    if (startDifference !== 0) {
-      return startDifference
     }
 
-    return (
-      getActivityDurationMinutes(firstActivity, defaultActivityHours) -
-      getActivityDurationMinutes(secondActivity, defaultActivityHours)
-    )
-  })
+    setFormErrors({})
+    setActionError(null)
+    setIsSubmitting(true)
+    try {
+      const result = await onAddActivity(formData)
+      if (result && result.ok === false) {
+        setActionError(result.message || 'No pudimos crear la actividad.')
+        return
+      }
+      setFormData(initialFormData)
+      setIsAdding(false)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  async function handleSaveEditWithApi(targetId) {
+    const result = await onUpdateActivity(targetId, editingData)
+    if (result && result.ok === false) {
+      setActionError(result.message || 'No pudimos actualizar la actividad.')
+      return
+    }
+    setEditingActivityId(null)
+    setEditingData(initialFormData)
+    setEditingErrors({})
+  }
+
+  const sortedActivities = [...activities].sort(
+    (firstActivity, secondActivity) => {
+      const startDifference =
+        getTimeValue(firstActivity.start) - getTimeValue(secondActivity.start)
+      if (startDifference !== 0) {
+        return startDifference
+      }
+
+      return (
+        getActivityDurationMinutes(firstActivity, defaultActivityHours) -
+        getActivityDurationMinutes(secondActivity, defaultActivityHours)
+      )
+    },
+  )
 
   return (
     <Card className="p-6">
-      <h2 className="text-2xl font-bold text-slate-800">
-        Actividades del día
-      </h2>
+      <h2 className="text-2xl font-bold text-slate-800">Actividades del día</h2>
 
       <div className="hidden lg:block mt-5 rounded-xl border border-slate-200 overflow-hidden">
         <div className="overflow-x-auto overflow-y-auto max-h-[420px]">
@@ -193,15 +197,17 @@ function ActivitiesTable({ activities, setActivities, defaultActivityHours }) {
                 <th className="text-left px-4 py-3">Inicio</th>
                 <th className="text-left px-4 py-3">Fin</th>
                 <th className="text-left px-4 py-3">Duración hs</th>
+                <th className="text-left px-4 py-3">Estado</th>
                 <th className="text-left px-4 py-3">Notas</th>
-                <th className="text-left px-4 py-3">Acciones</th>
+                {!readOnly && <th className="text-left px-4 py-3">Acciones</th>}
               </tr>
             </thead>
 
             <tbody>
-              {sortedActivities.map((activity) => (
+              {sortedActivities.map((activity, index) => (
                 <ActivityRow
                   key={activity.id}
+                  rowNumber={index + 1}
                   activity={activity}
                   defaultActivityHours={defaultActivityHours}
                   isEditing={editingActivityId === activity.id}
@@ -212,6 +218,7 @@ function ActivitiesTable({ activities, setActivities, defaultActivityHours }) {
                   onEditingChange={handleEditingChange}
                   onSaveEdit={handleSaveEdit}
                   onDeleteClick={handleOpenDelete}
+                  readOnly={readOnly}
                 />
               ))}
             </tbody>
@@ -233,23 +240,39 @@ function ActivitiesTable({ activities, setActivities, defaultActivityHours }) {
             onEditingChange={handleEditingChange}
             onSaveEdit={handleSaveEdit}
             onDeleteClick={handleOpenDelete}
+            readOnly={readOnly}
           />
         ))}
       </div>
 
-      <ActivityFormRow
-        isAdding={isAdding}
-        formData={formData}
-        errors={formErrors}
-        onChange={handleChange}
-        onAdd={handleAddActivity}
-        onCancel={() => {
-          setIsAdding(false)
-          setFormData(initialFormData)
-          setFormErrors({})
-        }}
-        onStartAdding={() => setIsAdding(true)}
-      />
+      {!readOnly && (
+        <>
+          <ActivityFormRow
+            isAdding={isAdding}
+            formData={formData}
+            errors={formErrors}
+            isSubmitting={isSubmitting}
+            onChange={handleChange}
+            onAdd={handleAddActivity}
+            onCancel={() => {
+              setIsAdding(false)
+              setFormData(initialFormData)
+              setFormErrors({})
+              setActionError(null)
+            }}
+            onStartAdding={() => setIsAdding(true)}
+          />
+
+          {actionError && (
+            <p
+              role="alert"
+              className="mt-2 text-sm text-red-600"
+            >
+              {actionError}
+            </p>
+          )}
+        </>
+      )}
 
       <Modal
         isOpen={Boolean(deletingActivity)}
@@ -257,10 +280,7 @@ function ActivitiesTable({ activities, setActivities, defaultActivityHours }) {
         title="Eliminar actividad"
         actions={
           <>
-            <Button
-              variant="outline"
-              onClick={handleCloseDelete}
-            >
+            <Button variant="outline" onClick={handleCloseDelete}>
               Cancelar
             </Button>
 
@@ -283,7 +303,6 @@ function ActivitiesTable({ activities, setActivities, defaultActivityHours }) {
           </p>
         )}
       </Modal>
-
     </Card>
   )
 }

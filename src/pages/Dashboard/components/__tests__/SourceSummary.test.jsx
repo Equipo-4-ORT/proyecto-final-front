@@ -51,6 +51,6 @@ describe("SourceSummary", () => {
 
   it("renders the chart container", () => {
     render(<SourceSummary sourceSummary={sourceSummary} workdayHours={8} />)
-    expect(screen.getByText(/distribución de tiempo/i)).toBeInTheDocument()
+    expect(screen.getByText(/tiempo por aplicación/i)).toBeInTheDocument()
   })
 })

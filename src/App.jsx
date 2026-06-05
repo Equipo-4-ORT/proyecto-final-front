@@ -1,14 +1,12 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
-
 import { AuthProvider } from './contexts/AuthContext'
-
 import PrivateRoute from './components/PrivateRoute'
-
 import Admin from './pages/Admin'
 import Callback from './pages/Callback'
 import Dashboard from './pages/Dashboard'
 import Login from './pages/Login'
 import NotFound from './pages/NotFound'
+import HistoryPage from './pages/History'
 
 function App() {
   return (
@@ -31,9 +29,18 @@ function App() {
           />
 
           <Route
-            path="/admin"
+            path="/history"
             element={
               <PrivateRoute>
+                <HistoryPage />
+              </PrivateRoute>
+            }
+          />
+
+          <Route
+            path="/admin"
+            element={
+              <PrivateRoute requiredRole="ADMIN">
                 <Admin />
               </PrivateRoute>
             }

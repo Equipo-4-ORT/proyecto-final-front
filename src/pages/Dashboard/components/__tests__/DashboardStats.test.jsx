@@ -3,7 +3,7 @@ import { render, screen } from "@testing-library/react"
 import DashboardStats from "../DashboardStats"
 
 const defaultProps = {
-  totalActivities: 7,
+  totaldisplayedActivities: 7,
   calendarEventCount: 3,
   totalHours: 4.5,
   productivityPercentage: 56,

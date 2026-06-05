@@ -5,69 +5,90 @@ import {
   test,
   expect,
   beforeEach,
+  vi,
 } from 'vitest'
 
-const MOCK_JWT =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwiZW1haWwiOiJkZXZAdGVzdC5jb20iLCJyb2xlIjoiYWRtaW4iLCJleHAiOjk5OTk5OTk5OTl9.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+// La sesión ahora se hidrata con GET /auth/me (cookies HttpOnly), no con un token
+// en localStorage. Mockeamos el cliente api: get('/auth/me') decide si hay sesión.
+const apiMock = { get: vi.fn(), post: vi.fn() }
+vi.mock("../services/api", () => ({ default: apiMock }))
+
+vi.mock("../services/adminApi", () => ({
+  adminApi: {
+    getUsers: vi.fn(() => Promise.resolve([])),
+    createUser: vi.fn(),
+    toggleStatus: vi.fn(),
+  },
+}))
+
+// El rol viaja en mayúscula (enum Role { EMPLOYEE ADMIN }); PrivateRoute compara
+// contra "ADMIN".
+const employeeSession = { data: { user: { id: "1", email: "dev@test.com", role: "EMPLOYEE" } } }
+const adminSession = { data: { user: { id: "1", email: "admin@test.com", role: "ADMIN" } } }
 
 function renderAt(route) {
   window.history.pushState({}, "Test page", route)
-
   return render(<App />)
 }
 
 describe("App routing", () => {
   beforeEach(() => {
-    localStorage.clear()
+    vi.clearAllMocks()
+    // Por defecto: sin sesión (la hidratación falla con 401).
+    apiMock.get.mockRejectedValue({ response: { status: 401 } })
+    apiMock.post.mockResolvedValue({ data: { ok: true } })
   })
 
-  test("renders Login at /login", () => {
+  test("renders Login at /login", async () => {
     renderAt("/login")
 
     expect(
-      screen.getByRole("button", {
-        name: /continuar con google/i,
-      })
+      await screen.findByRole("button", { name: /continuar con google/i }),
     ).toBeInTheDocument()
   })
 
-  test("redirects protected routes to login when no token exists", () => {
+  test("redirects protected routes to login when there is no session", async () => {
     renderAt("/dashboard")
 
     expect(
-      screen.getByRole("button", {
-        name: /continuar con google/i,
-      })
+      await screen.findByRole("button", { name: /continuar con google/i }),
     ).toBeInTheDocument()
   })
 
-  test("renders Dashboard when token exists", () => {
-    localStorage.setItem("token", MOCK_JWT)
+  test("renders Dashboard when there is an active session", async () => {
+    apiMock.get.mockResolvedValue(employeeSession)
 
     renderAt("/dashboard")
 
     expect(
-      screen.getByRole("heading", {
-        name: /dashboard/i,
-      })
+      await screen.findByRole("heading", { name: /dashboard/i }),
     ).toBeInTheDocument()
   })
 
-  test("renders Admin when token exists", () => {
-    localStorage.setItem("token", MOCK_JWT)
+  test("redirects non-admin away from /admin", async () => {
+    // EMPLOYEE en /admin → PrivateRoute requiredRole ADMIN no matchea → /dashboard
+    apiMock.get.mockResolvedValue(employeeSession)
 
     renderAt("/admin")
 
     expect(
-      screen.getByRole("heading", {
-        name: /admin/i,
-      })
+      await screen.findByRole("heading", { name: /dashboard/i }),
     ).toBeInTheDocument()
   })
 
-  test("renders NotFound on unknown routes", () => {
+  test("renders Admin when the session is ADMIN", async () => {
+    apiMock.get.mockResolvedValue(adminSession)
+
+    renderAt("/admin")
+
+    expect(
+      await screen.findByRole("heading", { name: /panel de administración/i, level: 1 }),
+    ).toBeInTheDocument()
+  })
+
+  test("renders NotFound on unknown routes", async () => {
     renderAt("/unknown-route")
 
-    expect(screen.getByText(/404/i)).toBeInTheDocument()
+    expect(await screen.findByText(/404/i)).toBeInTheDocument()
   })
 })

@@ -1,25 +1,57 @@
 import { describe, it, expect, vi } from "vitest"
-import { render, screen, fireEvent, within } from "@testing-library/react"
+import { render, screen, fireEvent, within, waitFor } from "@testing-library/react"
 import { useState } from "react"
 import ActivitiesTable from "../ActivitiesTable"
 
 const seed = [
-  { id: 1, source: "calendar", title: "Reunión", description: "Daily", start: "09:00", end: "10:00", notes: "" },
-  { id: 2, source: "jira", title: "Bug fix", description: "AUTO-1", start: "11:00", end: "12:00", notes: "" },
+  { id: 1, source: "calendar", title: "Reunión", description: "Daily", start: "09:00", end: "10:00", notes: "", status: "pending" },
+  { id: 2, source: "jira", title: "Bug fix", description: "AUTO-1", start: "11:00", end: "12:00", notes: "", status: "pending" },
 ]
 
 function Harness({ initial = seed, onChange }) {
   const [activities, setActivities] = useState(initial)
+
+  const updateActivities = (updater) => {
+    setActivities((prev) => {
+      const next = typeof updater === "function" ? updater(prev) : updater
+      onChange?.(next)
+      return next
+    })
+  }
+
+  const onAddActivity = async (formData) => {
+    const newActivity = {
+      id: crypto.randomUUID(),
+      source: formData.source,
+      title: formData.title?.trim() || "",
+      description: formData.description?.trim() || "",
+      start: formData.start,
+      end: formData.end || "",
+      status: "pending",
+      notes: formData.notes?.trim() || "",
+    }
+    updateActivities((prev) => [...prev, newActivity])
+    return { ok: true, activity: newActivity }
+  }
+
+  const onUpdateActivity = async (id, editingData) => {
+    updateActivities((prev) =>
+      prev.map((a) => (a.id === id ? { ...a, ...editingData } : a)),
+    )
+    return { ok: true }
+  }
+
+  const onDeleteActivity = async (id) => {
+    updateActivities((prev) => prev.filter((a) => a.id !== id))
+    return { ok: true }
+  }
+
   return (
     <ActivitiesTable
       activities={activities}
-      setActivities={(updater) => {
-        setActivities((prev) => {
-          const next = typeof updater === "function" ? updater(prev) : updater
-          onChange?.(next)
-          return next
-        })
-      }}
+      onAddActivity={onAddActivity}
+      onUpdateActivity={onUpdateActivity}
+      onDeleteActivity={onDeleteActivity}
       defaultActivityHours={1}
     />
   )
@@ -28,16 +60,14 @@ function Harness({ initial = seed, onChange }) {
 describe("ActivitiesTable", () => {
   it("sorts activities by start time, then by duration", () => {
     const initial = [
-      { id: 1, source: "jira", title: "Long", description: "", start: "09:00", end: "11:00", notes: "" },
-      { id: 2, source: "jira", title: "Short", description: "", start: "09:00", end: "09:30", notes: "" },
-      { id: 3, source: "calendar", title: "Late", description: "", start: "12:00", end: "13:00", notes: "" },
+      { id: 1, source: "jira", title: "Long", description: "", start: "09:00", end: "11:00", notes: "", status: "pending" },
+      { id: 2, source: "jira", title: "Short", description: "", start: "09:00", end: "09:30", notes: "", status: "pending" },
+      { id: 3, source: "calendar", title: "Late", description: "", start: "12:00", end: "13:00", notes: "", status: "pending" },
     ]
     render(<Harness initial={initial} />)
     const titlesInOrder = screen.getAllByText(/^(Long|Short|Late)$/i)
-    // First occurrence is desktop table, second is mobile cards (both rendered by RTL).
-    // Just assert the relative order in the table body.
     const tableSection = screen.getByRole("table")
-    const rows = within(tableSection).getAllByRole("row").slice(1) // skip header
+    const rows = within(tableSection).getAllByRole("row").slice(1)
     expect(within(rows[0]).getByText("Short")).toBeInTheDocument()
     expect(within(rows[1]).getByText("Long")).toBeInTheDocument()
     expect(within(rows[2]).getByText("Late")).toBeInTheDocument()
@@ -54,23 +84,29 @@ describe("ActivitiesTable", () => {
     expect(screen.getByText(/indicá una hora de inicio/i)).toBeInTheDocument()
   })
 
-  it("adds a valid activity and assigns the next id", () => {
+  it("adds a valid activity with a generated id", async () => {
     let latest
     render(<Harness onChange={(next) => (latest = next)} />)
     fireEvent.click(screen.getByRole("button", { name: /\+ agregar actividad/i }))
     fireEvent.change(screen.getByRole("combobox"), { target: { value: "calendar" } })
     fireEvent.change(screen.getAllByPlaceholderText(/título/i)[0], { target: { value: "Nueva" } })
-    // The last two time inputs belong to the form row (start, end).
     const timeInputs = document.querySelectorAll('input[type="time"]')
     fireEvent.change(timeInputs[timeInputs.length - 2], { target: { value: "13:00" } })
     fireEvent.change(timeInputs[timeInputs.length - 1], { target: { value: "14:00" } })
     fireEvent.click(screen.getByRole("button", { name: /^agregar$/i }))
 
-    expect(latest).toHaveLength(3)
-    expect(latest.at(-1)).toMatchObject({ id: 3, source: "calendar", title: "Nueva", start: "13:00", end: "14:00" })
+    await waitFor(() => expect(latest).toHaveLength(3))
+    expect(latest.at(-1)).toMatchObject({
+      source: "calendar",
+      title: "Nueva",
+      start: "13:00",
+      end: "14:00",
+    })
+    expect(typeof latest.at(-1).id).toBe("string")
+    expect(latest.at(-1).id.length).toBeGreaterThan(0)
   })
 
-  it("starts with id 1 when the list is empty", () => {
+  it("creates the first activity when the list is empty", async () => {
     let latest
     render(<Harness initial={[]} onChange={(next) => (latest = next)} />)
     fireEvent.click(screen.getByRole("button", { name: /\+ agregar actividad/i }))
@@ -78,19 +114,20 @@ describe("ActivitiesTable", () => {
     const timeInputs = document.querySelectorAll('input[type="time"]')
     fireEvent.change(timeInputs[0], { target: { value: "09:00" } })
     fireEvent.click(screen.getByRole("button", { name: /^agregar$/i }))
-    expect(latest[0].id).toBe(1)
+
+    await waitFor(() => expect(latest).toHaveLength(1))
+    expect(typeof latest[0].id).toBe("string")
   })
 
-  it("opens, confirms and removes the activity via the delete modal", () => {
+  it("opens, confirms and removes the activity via the delete modal", async () => {
     let latest
     render(<Harness onChange={(next) => (latest = next)} />)
-    // First desktop row delete buttons (table + mobile both render delete buttons).
     fireEvent.click(screen.getAllByRole("button", { name: /eliminar actividad/i })[0])
     expect(screen.getByRole("dialog")).toBeInTheDocument()
     expect(screen.getByRole("heading", { name: /eliminar actividad/i })).toBeInTheDocument()
     fireEvent.click(screen.getByRole("button", { name: /^eliminar$/i }))
 
-    expect(latest).toHaveLength(1)
+    await waitFor(() => expect(latest).toHaveLength(1))
     expect(latest[0].id).toBe(2)
     expect(screen.queryByRole("dialog")).toBeNull()
   })
@@ -111,7 +148,7 @@ describe("ActivitiesTable", () => {
     expect(screen.queryByRole("dialog")).toBeNull()
   })
 
-  it("edits an activity and saves the new values", () => {
+  it("edits an activity and saves the new values", async () => {
     let latest
     render(<Harness onChange={(next) => (latest = next)} />)
     fireEvent.click(screen.getAllByRole("button", { name: /editar actividad/i })[0])
@@ -119,6 +156,7 @@ describe("ActivitiesTable", () => {
     fireEvent.change(titleInput, { target: { value: "Reunión editada" } })
     fireEvent.click(screen.getAllByRole("button", { name: /guardar edición/i })[0])
 
+    await waitFor(() => expect(latest).toBeDefined())
     const updated = latest.find((activity) => activity.id === 1)
     expect(updated.title).toBe("Reunión editada")
   })
@@ -128,7 +166,6 @@ describe("ActivitiesTable", () => {
     render(<Harness onChange={onChange} />)
     fireEvent.click(screen.getAllByRole("button", { name: /editar actividad/i })[0])
     const editTimeInputs = document.querySelectorAll('input[type="time"]')
-    // Edit row exposes two time inputs first.
     fireEvent.change(editTimeInputs[0], { target: { value: "12:00" } })
     fireEvent.change(editTimeInputs[1], { target: { value: "11:00" } })
     fireEvent.click(screen.getAllByRole("button", { name: /guardar edición/i })[0])
@@ -143,16 +180,15 @@ describe("ActivitiesTable", () => {
     expect(onChange).not.toHaveBeenCalled()
   })
 
-  it("keeps other rows' edit state untouched when deleting a different row", () => {
+  it("keeps other rows' edit state untouched when deleting a different row", async () => {
     let latest
     render(<Harness onChange={(next) => (latest = next)} />)
-    // Start editing id=1; this hides the delete button for that row.
     fireEvent.click(screen.getAllByRole("button", { name: /editar actividad/i })[0])
-    // Delete row 2 (the only one still showing a delete button).
     fireEvent.click(screen.getAllByRole("button", { name: /eliminar actividad/i })[0])
     fireEvent.click(screen.getByRole("button", { name: /^eliminar$/i }))
+
+    await waitFor(() => expect(latest).toBeDefined())
     expect(latest.find((activity) => activity.id === 2)).toBeUndefined()
-    // Row 1 is still in edit mode.
     expect(screen.getAllByRole("button", { name: /guardar edición/i }).length).toBeGreaterThan(0)
   })
 
