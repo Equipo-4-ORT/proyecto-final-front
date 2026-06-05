@@ -1,0 +1,19 @@
+src/__tests__/App.test.jsx
+  s_693e0422f7c6ca::t_63e71c752c3246 13
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "b243c1af1f0949b72c21b1fc530448d3b6f2f5cd",
+  "prompts": {},
+  "sessions": {
+    "s_693e0422f7c6ca": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b7b57d89-6c70-498c-8f6e-b12079c0a1e5",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "LicFuraca <martinexequield@gmail.com>"
+    }
+  }
+}
