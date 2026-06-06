@@ -7,6 +7,7 @@ import Dashboard from './pages/Dashboard'
 import Login from './pages/Login'
 import NotFound from './pages/NotFound'
 import HistoryPage from './pages/History'
+import Settings from './pages/Settings' 
 
 function App() {
   return (
@@ -33,6 +34,15 @@ function App() {
             element={
               <PrivateRoute>
                 <HistoryPage />
+              </PrivateRoute>
+            }
+          />
+
+          <Route
+            path="/settings"
+            element={
+              <PrivateRoute>
+                <Settings />
               </PrivateRoute>
             }
           />

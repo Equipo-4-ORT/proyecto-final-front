@@ -10,7 +10,7 @@ import {
 
 // La sesión ahora se hidrata con GET /auth/me (cookies HttpOnly), no con un token
 // en localStorage. Mockeamos el cliente api: get('/auth/me') decide si hay sesión.
-const apiMock = { get: vi.fn(), post: vi.fn() }
+const apiMock = vi.hoisted(() => ({ get: vi.fn(), post: vi.fn() }))
 vi.mock("../services/api", () => ({ default: apiMock }))
 
 vi.mock("../services/adminApi", () => ({

@@ -18,7 +18,9 @@ describe('reportsService', () => {
 
     const result = await getReportByDate('2026-05-30')
 
-    expect(api.get).toHaveBeenCalledWith('/api/reports/2026-05-30')
+    expect(api.get).toHaveBeenCalledWith('/api/reports', {
+      params: { from: '2026-05-30', to: '2026-05-30' },
+    })
     expect(result).toEqual(reportData)
   })
 

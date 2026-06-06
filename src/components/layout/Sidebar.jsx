@@ -111,7 +111,7 @@ function Sidebar({ sourceCounts, onExportExcel, generatingFrom = null }) {
                     px-2 py-1 rounded-lg
                   `}
                 >
-                  {sourceCounts[key]}
+                  {sourceCounts?.[key] || 0}
                 </span>
               </div>
             )

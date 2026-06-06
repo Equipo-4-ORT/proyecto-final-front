@@ -1,8 +1,15 @@
 import api from './api'
 
 export async function getReportByDate(date) {
-  const response = await api.get(`/api/reports/${date}`)
-  return response.data
+  const response = await api.get('/api/reports', {
+    params: {
+      from: date,
+      to: date
+    }
+  });
+  
+  // El backend de Felipe devuelve un objeto con { data: [...], meta: {...} }
+  return response.data;
 }
 
 export async function generateReport(data) {
