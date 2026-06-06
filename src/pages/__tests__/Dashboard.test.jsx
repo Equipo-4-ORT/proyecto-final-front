@@ -33,6 +33,11 @@ vi.mock('../../services/reportsService', () => ({
   generateReport: vi.fn().mockResolvedValue({}),
 }))
 
+vi.mock('../../services/userSettingsApi', () => ({
+  getUserSettings: vi.fn().mockResolvedValue(null),
+  updateUserSettings: vi.fn(),
+}))
+
 import Dashboard from '../Dashboard'
 import { AuthProvider } from '../../contexts/AuthContext'
 import { generateReport } from '../../services/reportsService'

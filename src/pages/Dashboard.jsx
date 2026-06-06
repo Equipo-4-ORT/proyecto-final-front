@@ -18,8 +18,6 @@ import {
   getSourceCounts,
   getSourceSummary,
   getTotalHours,
-  DEFAULT_ACTIVITY_HOURS,
-  DEFAULT_WORKDAY_HOURS,
 } from './Dashboard/utils/dashboardCalculations'
 
 import {
@@ -39,18 +37,7 @@ import {
 import { getApiErrorMessage } from '../utils/apiErrors'
 import { getTodayDate } from '../utils/dateHelpers'
 import { generateReport } from '../services/reportsService'
-
-function getStoredNumber(key, fallbackValue) {
-  const storedValue = localStorage.getItem(key)
-
-  if (!storedValue) {
-    return fallbackValue
-  }
-
-  const parsedValue = Number(storedValue)
-
-  return Number.isNaN(parsedValue) ? fallbackValue : parsedValue
-}
+import { useUserSettings } from '../hooks/useUserSettings'
 
 const ACTIVITY_ERROR_MESSAGES = {
   validation_error: 'Revisá los datos: hay campos requeridos o fechas inválidas.',
@@ -76,26 +63,12 @@ function Dashboard() {
     activitiesRef.current = activities
   }, [activities])
 
-  const [workdayHours, setWorkdayHours] = useState(() =>
-    getStoredNumber('workdayHours', DEFAULT_WORKDAY_HOURS),
-  )
-
-  const [defaultActivityHours, setDefaultActivityHours] = useState(() =>
-    getStoredNumber('defaultActivityHours', DEFAULT_ACTIVITY_HOURS),
-  )
+  const { workdayHours, defaultActivityHours } = useUserSettings()
 
   const [generatingFrom, setGeneratingFrom] = useState(null)
   const [toast, setToast] = useState(null)
 
   const { data: report, isLoading, error } = useReport(selectedDate)
-
-  useEffect(() => {
-    localStorage.setItem('workdayHours', workdayHours)
-  }, [workdayHours])
-
-  useEffect(() => {
-    localStorage.setItem('defaultActivityHours', defaultActivityHours)
-  }, [defaultActivityHours])
 
   useEffect(() => {
     if (report?.activities) {
@@ -287,10 +260,6 @@ function Dashboard() {
         selectedDate={selectedDate}
         onDateChange={setSelectedDate}
         onExportExcel={handleExportExcel}
-        workdayHours={workdayHours}
-        defaultActivityHours={defaultActivityHours}
-        onWorkdayHoursChange={setWorkdayHours}
-        onDefaultActivityHoursChange={setDefaultActivityHours}
       >
         <div className="py-10 text-center text-slate-500">
           Cargando reporte...
@@ -308,10 +277,6 @@ function Dashboard() {
         selectedDate={selectedDate}
         onDateChange={setSelectedDate}
         onExportExcel={handleExportExcel}
-        workdayHours={workdayHours}
-        defaultActivityHours={defaultActivityHours}
-        onWorkdayHoursChange={setWorkdayHours}
-        onDefaultActivityHoursChange={setDefaultActivityHours}
       >
         <div className="py-10 text-center text-red-500">
           Error al cargar el reporte.
@@ -330,10 +295,6 @@ function Dashboard() {
         onDateChange={setSelectedDate}
         onExportExcel={handleExportExcel}
         generatingFrom={generatingFrom}
-        workdayHours={workdayHours}
-        defaultActivityHours={defaultActivityHours}
-        onWorkdayHoursChange={setWorkdayHours}
-        onDefaultActivityHoursChange={setDefaultActivityHours}
       >
         <JiraCallbackBanner />
 

@@ -12,10 +12,7 @@ vi.mock("react-router-dom", async () => {
 
 const defaultProps = {
   user: { name: "Martín", email: "martin@example.com" },
-  workdayHours: 8,
-  defaultActivityHours: 1,
-  onWorkdayHoursChange: vi.fn(),
-  onDefaultActivityHoursChange: vi.fn(),
+  onLogout: vi.fn(),
 }
 
 const renderMenu = (overrides = {}) =>
@@ -28,77 +25,44 @@ const renderMenu = (overrides = {}) =>
 describe("UserMenu", () => {
   beforeEach(() => {
     mockNavigate.mockClear()
-    defaultProps.onWorkdayHoursChange.mockClear()
-    defaultProps.onDefaultActivityHoursChange.mockClear()
+    defaultProps.onLogout.mockClear()
   })
 
   it("renders user info closed by default", () => {
     renderMenu()
     expect(screen.getByText("Martín")).toBeInTheDocument()
     expect(screen.getByText("martin@example.com")).toBeInTheDocument()
-    expect(screen.queryByRole("heading", { name: /configuración/i })).toBeNull()
+    expect(screen.queryByRole("button", { name: /configuración/i })).toBeNull()
   })
 
   it("opens the menu when clicking the trigger", () => {
     renderMenu()
     fireEvent.click(screen.getByRole("button", { name: /martín/i }))
-    expect(screen.getByRole("heading", { name: /configuración/i })).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: /configuración/i })).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: /cerrar sesión/i })).toBeInTheDocument()
   })
 
   it("closes the menu when clicking outside", () => {
     renderMenu()
     fireEvent.click(screen.getByRole("button", { name: /martín/i }))
-    expect(screen.getByRole("heading", { name: /configuración/i })).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: /configuración/i })).toBeInTheDocument()
     fireEvent.mouseDown(document.body)
-    expect(screen.queryByRole("heading", { name: /configuración/i })).toBeNull()
+    expect(screen.queryByRole("button", { name: /configuración/i })).toBeNull()
   })
 
-  it("clamps workday hours to a minimum of 1 when decreasing past it", () => {
-    const onWorkdayHoursChange = vi.fn()
-    renderMenu({ workdayHours: 1, onWorkdayHoursChange })
-    fireEvent.click(screen.getByRole("button", { name: /martín/i }))
-    fireEvent.click(screen.getAllByRole("button", { name: "−" })[0])
-    expect(onWorkdayHoursChange).toHaveBeenCalledWith(1)
-  })
-
-  it("clamps workday hours to a maximum of 10 when increasing past it", () => {
-    const onWorkdayHoursChange = vi.fn()
-    renderMenu({ workdayHours: 10, onWorkdayHoursChange })
-    fireEvent.click(screen.getByRole("button", { name: /martín/i }))
-    fireEvent.click(screen.getAllByRole("button", { name: "+" })[0])
-    expect(onWorkdayHoursChange).toHaveBeenCalledWith(10)
-  })
-
-  it("clamps non-numeric input to 1", () => {
-    const onWorkdayHoursChange = vi.fn()
-    renderMenu({ onWorkdayHoursChange })
-    fireEvent.click(screen.getByRole("button", { name: /martín/i }))
-    const numberInputs = screen.getAllByRole("spinbutton")
-    fireEvent.change(numberInputs[0], { target: { value: "abc" } })
-    expect(onWorkdayHoursChange).toHaveBeenCalledWith(1)
-  })
-
-  it("clamps input above 10 to 10", () => {
-    const onWorkdayHoursChange = vi.fn()
-    renderMenu({ onWorkdayHoursChange })
-    fireEvent.click(screen.getByRole("button", { name: /martín/i }))
-    const numberInputs = screen.getAllByRole("spinbutton")
-    fireEvent.change(numberInputs[0], { target: { value: "99" } })
-    expect(onWorkdayHoursChange).toHaveBeenCalledWith(10)
-  })
-
-  it("navigates to /login on logout", () => {
+  it("navigates to /settings when clicking Configuración", () => {
     renderMenu()
     fireEvent.click(screen.getByRole("button", { name: /martín/i }))
-    fireEvent.click(screen.getByRole("button", { name: /cerrar sesión/i }))
-    expect(mockNavigate).toHaveBeenCalledWith("/login")
+    fireEvent.click(screen.getByRole("button", { name: /configuración/i }))
+    expect(mockNavigate).toHaveBeenCalledWith("/settings")
   })
 
-  it("changes the default activity hours through the second field", () => {
-    const onDefaultActivityHoursChange = vi.fn()
-    renderMenu({ defaultActivityHours: 3, onDefaultActivityHoursChange })
+  it("calls onLogout and navigates to /login on logout", () => {
+    const onLogout = vi.fn()
+    renderMenu({ onLogout })
     fireEvent.click(screen.getByRole("button", { name: /martín/i }))
-    fireEvent.click(screen.getAllByRole("button", { name: "+" })[1])
-    expect(onDefaultActivityHoursChange).toHaveBeenCalledWith(4)
+    fireEvent.click(screen.getByRole("button", { name: /cerrar sesión/i }))
+    expect(onLogout).toHaveBeenCalled()
+    expect(mockNavigate).toHaveBeenCalledWith("/login")
   })
 })

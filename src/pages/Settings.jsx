@@ -1,88 +1,128 @@
-import { useState, useEffect, useContext } from 'react';
-import AppLayout from "../components/layout/AppLayout";
-import Card from "../components/ui/Card";
-import Button from "../components/ui/Button";
-import TextInput from "../components/ui/TextInput";
-import { getUserSettings, updateUserSettings } from "../services/userSettingsApi";
-import { AuthContext } from '../contexts/auth-context'; // Ajusta esta ruta a donde esté tu archivo auth-context.js
+import { useState, useEffect } from 'react'
+import AppLayout from '../components/layout/AppLayout'
+import Card from '../components/ui/Card'
+import Button from '../components/ui/Button'
+import TextInput from '../components/ui/TextInput'
+import Toast from '../components/common/Toast'
+import { getUserSettings, updateUserSettings } from '../services/userSettingsApi'
 
 function Settings() {
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [formData, setFormData] = useState({ 
-    startTime: "", endTime: "", preventOverlap: false, defaultDuration: "" 
-  });
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [toast, setToast] = useState(null)
+  const [formData, setFormData] = useState({
+    startTime: '',
+    endTime: '',
+    preventOverlap: false,
+    defaultDuration: '',
+  })
 
   useEffect(() => {
     getUserSettings()
-      .then(data => { 
+      .then((data) => {
         setFormData({
-          startTime: data.workStartTime || "",
-          endTime: data.workEndTime || "",
+          startTime: data.workStartTime || '',
+          endTime: data.workEndTime || '',
           preventOverlap: data.avoidOverlaps || false,
-          defaultDuration: data.defaultDuration || "" 
-        });
+          defaultDuration: data.defaultDuration ?? '',
+        })
       })
-      .catch((err) => console.error("Error al cargar:", err))
-      .finally(() => setLoading(false));
-  }, []);
+      .catch((err) =>
+        console.error('Settings: error al cargar la configuración', err),
+      )
+      .finally(() => setLoading(false))
+  }, [])
 
   const handleSave = async () => {
-    setSaving(true);
+    setSaving(true)
     try {
       await updateUserSettings({
         workStartTime: formData.startTime,
         workEndTime: formData.endTime,
         avoidOverlaps: formData.preventOverlap,
-        defaultDuration: formData.defaultDuration
-      });
-      
-      console.log("¡Guardado con éxito!");
-      alert("Configuración actualizada con éxito");
+        defaultDuration: Number(formData.defaultDuration) || 0,
+      })
+      setToast({ type: 'success', message: 'Configuración actualizada con éxito' })
     } catch (error) {
-      console.error("Error al guardar:", error);
-      alert("Hubo un error al guardar los cambios.");
+      console.error('Settings: error al guardar la configuración', error)
+      setToast({ type: 'error', message: 'Hubo un error al guardar los cambios.' })
     } finally {
-      setSaving(false);
+      setSaving(false)
     }
-  };
+  }
 
-  if (loading) return <div className="p-10 text-center">Cargando...</div>;
+  if (loading) return <div className="p-10 text-center">Cargando...</div>
 
   return (
     <AppLayout>
       <div className="max-w-xl mx-auto">
         <Card className="p-6 space-y-6">
           <h2 className="text-xl font-bold text-slate-800">Configuración</h2>
-          
+
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1">
               <label className="text-xs font-semibold text-slate-500 uppercase">Inicio</label>
-              <TextInput type="time" value={formData.startTime} onChange={(e) => setFormData({...formData, startTime: e.target.value})} />
+              <TextInput
+                type="time"
+                value={formData.startTime}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, startTime: e.target.value }))
+                }
+              />
             </div>
             <div className="space-y-1">
               <label className="text-xs font-semibold text-slate-500 uppercase">Fin</label>
-              <TextInput type="time" value={formData.endTime} onChange={(e) => setFormData({...formData, endTime: e.target.value})} />
+              <TextInput
+                type="time"
+                value={formData.endTime}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, endTime: e.target.value }))
+                }
+              />
             </div>
           </div>
-          
+
           <div className="space-y-1">
-            <label className="text-xs font-semibold text-slate-500 uppercase">Duración default actividad</label>
-            <TextInput type="number" value={formData.defaultDuration} onChange={(e) => setFormData({...formData, defaultDuration: e.target.value})} />
+            <label className="text-xs font-semibold text-slate-500 uppercase">
+              Duración default actividad (horas)
+            </label>
+            <TextInput
+              type="number"
+              min={1}
+              step={1}
+              value={formData.defaultDuration}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, defaultDuration: e.target.value }))
+              }
+            />
           </div>
-          
+
           <label className="flex items-center gap-3 cursor-pointer">
-            <input type="checkbox" checked={formData.preventOverlap} onChange={(e) => setFormData({...formData, preventOverlap: e.target.checked})} />
+            <input
+              type="checkbox"
+              checked={formData.preventOverlap}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, preventOverlap: e.target.checked }))
+              }
+            />
             <span className="text-sm text-slate-700">Evitar solapamientos al consolidar</span>
           </label>
-          
+
           <Button onClick={handleSave} disabled={saving} className="w-full">
-            {saving ? "Guardando..." : "Guardar cambios"}
+            {saving ? 'Guardando...' : 'Guardar cambios'}
           </Button>
         </Card>
       </div>
+
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
     </AppLayout>
-  );
+  )
 }
 
-export default Settings;
+export default Settings

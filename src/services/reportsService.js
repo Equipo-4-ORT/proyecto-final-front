@@ -4,12 +4,11 @@ export async function getReportByDate(date) {
   const response = await api.get('/api/reports', {
     params: {
       from: date,
-      to: date
-    }
-  });
-  
-  // El backend de Felipe devuelve un objeto con { data: [...], meta: {...} }
-  return response.data;
+      to: date,
+    },
+  })
+
+  return response.data
 }
 
 export async function generateReport(data) {
