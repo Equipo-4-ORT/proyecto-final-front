@@ -37,7 +37,7 @@ export function apiToActivity(serverActivity) {
   return {
     id: serverActivity.id,
     source: isManual ? metadata.category || "manual" : serverActivity.source,
-    title: serverActivity.activityType || metadata.title || "",
+    title: metadata.title || serverActivity.activityType || "",
     description: metadata.description || "",
     start: getLocalTimeString(serverActivity.startTime),
     end: getLocalTimeString(serverActivity.endTime),

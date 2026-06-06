@@ -5,7 +5,7 @@ import { useAuth } from '../hooks/useAuth'
 import AppLayout from '../components/layout/AppLayout'
 import Toast from '../components/common/Toast'
 import { SOURCES } from '../constants/sources'
-import { useReport } from '../hooks/useReport'
+import { useActivities } from '../hooks/useActivities'
 import DashboardStats from './Dashboard/components/DashboardStats'
 import ReportView from './Dashboard/components/ReportView'
 import SourceSummary from './Dashboard/components/SourceSummary'
@@ -87,7 +87,12 @@ function Dashboard() {
   const [generatingFrom, setGeneratingFrom] = useState(null)
   const [toast, setToast] = useState(null)
 
-  const { data: report, isLoading, error } = useReport(selectedDate)
+  const {
+    data: dayActivities,
+    isLoading,
+    error,
+    refetch: refetchActivities,
+  } = useActivities(selectedDate)
 
   useEffect(() => {
     localStorage.setItem('workdayHours', workdayHours)
@@ -98,9 +103,9 @@ function Dashboard() {
   }, [defaultActivityHours])
 
   useEffect(() => {
-    if (report?.activities) {
+    if (dayActivities) {
       const timer = setTimeout(() => {
-        setActivities(report.activities)
+        setActivities(dayActivities)
         setLoadError(null)
       }, 0)
       return () => clearTimeout(timer)
@@ -112,7 +117,7 @@ function Dashboard() {
       }, 0)
       return () => clearTimeout(timer)
     }
-  }, [report, error])
+  }, [dayActivities, error])
 
   const handleAddActivity = useCallback(
     async (formData) => {
@@ -337,7 +342,7 @@ function Dashboard() {
       >
         <JiraCallbackBanner />
 
-        <JiraIntegrationCard />
+        <JiraIntegrationCard onSynced={refetchActivities} />
 
         <DashboardStats
           totalActivities={totalActivities}

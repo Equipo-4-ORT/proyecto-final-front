@@ -33,6 +33,15 @@ vi.mock('../../services/reportsService', () => ({
   generateReport: vi.fn().mockResolvedValue({}),
 }))
 
+// AuthProvider ahora hidrata con api.get('/auth/me') al montar: lo mockeamos para
+// no pegar a la red. Rechaza → sesión nula (mismo escenario que el test original).
+vi.mock('../../services/api', () => ({
+  default: {
+    get: vi.fn().mockRejectedValue(new Error('no session')),
+    post: vi.fn().mockResolvedValue({ data: {} }),
+  },
+}))
+
 import Dashboard from '../Dashboard'
 import { AuthProvider } from '../../contexts/AuthContext'
 import { generateReport } from '../../services/reportsService'
@@ -51,11 +60,11 @@ describe('Dashboard', () => {
     vi.clearAllMocks()
   })
 
-  it('renders the Dashboard heading in the header', () => {
+  it('renders the Dashboard heading in the header', async () => {
     renderDashboard()
 
     expect(
-      screen.getByRole('heading', {
+      await screen.findByRole('heading', {
         name: /^dashboard$/i,
         level: 2,
       }),
