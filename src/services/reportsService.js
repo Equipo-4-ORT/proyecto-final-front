@@ -8,7 +8,7 @@ export async function getReportByDate(date) {
     }
   });
   
-  // El backend de Felipe devuelve un objeto con { data: [...], meta: {...} }
+  
   return response.data;
 }
 
