@@ -7,13 +7,14 @@ import Button from '../components/ui/Button'
 import TextInput from '../components/ui/TextInput'
 import UserTable from './Admin/components/UserTable'
 import { Toast } from '../components/ui/Toast'
+import { useSearchParams } from 'react-router-dom'
 
 const ADMIN_ERROR_MESSAGES = {
   user_already_exists: 'Ya existe un usuario con ese email.',
   invalid_email: 'El formato del email no es válido.',
 }
 
-const EMPTY_FORM = { fullName: '', email: '', role: 'EMPLOYEE' }
+const EMPTY_FORM = { fullName: '', email: '' }
 
 function Admin() {
   const { user, logout } = useAuth()
@@ -29,6 +30,28 @@ function Admin() {
   const [toast, setToast] = useState(null)
   const [editingUser, setEditingUser] = useState(null)
   const [userToToggle, setUserToToggle] = useState(null)
+  const [searchParams, setSearchParams] = useSearchParams()
+
+  const searchQuery = searchParams.get('q') || ''
+  const roleFilter = searchParams.get('role') || 'ALL'
+  const statusFilter = searchParams.get('status') || 'ALL'
+
+  const filteredUsers = users.filter((u) => {
+    const matchesSearch =
+      u.fullName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      u.email?.toLowerCase().includes(searchQuery.toLowerCase())
+    const matchesRole = roleFilter === 'ALL' || u.role === roleFilter
+    const matchesStatus = statusFilter === 'ALL' || u.status === statusFilter
+
+    return matchesSearch && matchesRole && matchesStatus
+  })
+
+  const handleFilterChange = (key, value) => {
+    const newParams = new URLSearchParams(searchParams)
+    if (value === 'ALL' || value === '') newParams.delete(key)
+    else newParams.set(key, value)
+    setSearchParams(newParams)
+  }
 
   const fetchUsers = useCallback(async () => {
     setLoading(true)
@@ -79,7 +102,7 @@ function Admin() {
 
   const handleEdit = (user) => {
     setEditingUser(user)
-    setForm({ fullName: user.fullName, email: user.email, role: user.role })
+    setForm({ fullName: user.fullName, email: user.email })
     setModalOpen(true)
   }
 
@@ -90,7 +113,6 @@ function Admin() {
   }
 
   const handleSubmit = async () => {
-    // 1. Limpieza básica
     const email = form.email.trim()
     const fullName = form.fullName.trim()
 
@@ -166,9 +188,36 @@ function Admin() {
             <div className="p-10 text-center text-red-500">{fetchError}</div>
           )}
 
+          <div className="px-6 py-4 border-b border-slate-100 flex gap-3">
+            <input
+              placeholder="Buscar por nombre o email..."
+              className="flex-1 border border-slate-300 rounded-xl px-3 py-2 text-sm"
+              value={searchQuery}
+              onChange={(e) => handleFilterChange('q', e.target.value)}
+            />
+            <select
+              className="border border-slate-300 rounded-xl px-2 py-2 text-sm"
+              value={roleFilter}
+              onChange={(e) => handleFilterChange('role', e.target.value)}
+            >
+              <option value="ALL">Todos los roles</option>
+              <option value="ADMIN">Admin</option>
+              <option value="EMPLOYEE">Empleado</option>
+            </select>
+            <select
+              className="border border-slate-300 rounded-xl px-2 py-2 text-sm"
+              value={statusFilter}
+              onChange={(e) => handleFilterChange('status', e.target.value)}
+            >
+              <option value="ALL">Todos los estados</option>
+              <option value="ACTIVE">Activo</option>
+              <option value="INACTIVE">Inactivo</option>
+            </select>
+          </div>
+
           {!loading && !fetchError && users.length > 0 && (
             <UserTable
-              users={users}
+              users={filteredUsers}
               onToggleStatus={handleOpenToggle}
               onEdit={handleEdit}
               togglingId={togglingId}
@@ -218,19 +267,6 @@ function Admin() {
             onChange={handleChange}
             disabled={saving}
           />
-
-          <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium text-slate-700">Rol</label>
-            <select
-              name="role"
-              value={form.role}
-              onChange={handleChange}
-              className="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm"
-            >
-              <option value="EMPLOYEE">Empleado</option>
-              <option value="ADMIN">Administrador</option>
-            </select>
-          </div>
 
           {formError && (
             <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-4 py-3">
