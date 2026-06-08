@@ -1,13 +1,15 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
+// Mockeamos api
 vi.mock('../api', () => ({
   default: {
     get: vi.fn(),
+    post: vi.fn(), 
   },
 }))
 
 import api from '../api'
-import { getReportByDate } from '../reportsService'
+import { getReportByDate, generateReport } from '../reportsService'
 
 describe('reportsService', () => {
   beforeEach(() => {
@@ -42,5 +44,19 @@ describe('reportsService', () => {
     api.get.mockRejectedValue(new Error('Network error'))
 
     await expect(getReportByDate('2026-05-30')).rejects.toThrow('Network error')
+  })
+
+  // TEST PARA LA FUNCIÓN QUE FALTABA
+  it('generateReport llama al endpoint correcto con timeout', async () => {
+    const mockData = { some: 'data' }
+    // Aquí usamos el api.post que mockeamos arriba
+    api.post.mockResolvedValue({ data: { success: true } })
+    
+    const result = await generateReport(mockData)
+    
+    expect(api.post).toHaveBeenCalledWith('/api/reports/generate', mockData, {
+      timeout: 90000,
+    })
+    expect(result).toEqual({ success: true })
   })
 })

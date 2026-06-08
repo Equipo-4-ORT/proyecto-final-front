@@ -80,22 +80,45 @@ describe('api service', () => {
 
   it('does not retry twice (evita loop) si ya se reintentó', async () => {
     await import('../api')
-    const error = { config: { url: '/api/x', headers: {}, _retry: true }, response: { status: 401 } }
+    const error = {
+      config: { url: '/api/x', headers: {}, _retry: true },
+      response: { status: 401 },
+    }
     await expect(captured.onRejected(error)).rejects.toBe(error)
     expect(captured.instance.post).not.toHaveBeenCalled()
   })
 
   it('does not refresh on 401 from /auth/me', async () => {
     await import('../api')
-    const error = { config: { url: '/auth/me', headers: {} }, response: { status: 401 } }
+    const error = {
+      config: { url: '/auth/me', headers: {} },
+      response: { status: 401 },
+    }
     await expect(captured.onRejected(error)).rejects.toBe(error)
     expect(captured.instance.post).not.toHaveBeenCalled()
   })
 
   it('rejects non-401 errors without refreshing', async () => {
     await import('../api')
-    const error = { config: { url: '/api/x', headers: {} }, response: { status: 500 } }
+    const error = {
+      config: { url: '/api/x', headers: {} },
+      response: { status: 500 },
+    }
     await expect(captured.onRejected(error)).rejects.toBe(error)
     expect(captured.instance.post).not.toHaveBeenCalled()
   })
+})
+
+it('rejects errors without response (e.g., network error) immediately', async () => {
+  await import('../api')
+  const error = { config: { url: '/api/x' } }
+  await expect(captured.onRejected(error)).rejects.toBe(error)
+  expect(captured.instance.post).not.toHaveBeenCalled()
+})
+
+it('onFulfilled returns the response', async () => {
+  await import('../api')
+  const mockResponse = { data: 'ok' }
+  const result = captured.onFulfilled(mockResponse)
+  expect(result).toBe(mockResponse)
 })
