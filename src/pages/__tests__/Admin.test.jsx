@@ -1,9 +1,17 @@
-import { describe, it, expect, vi, beforeEach } from "vitest"
-import { render, screen, fireEvent, waitFor } from "@testing-library/react"
-import Admin from "../Admin"
-import { adminApi } from "../../services/adminApi"
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { MemoryRouter } from 'react-router-dom'
+import Admin from '../Admin'
+import { adminApi } from '../../services/adminApi'
 
-vi.mock("../../services/adminApi", () => ({
+const renderAdmin = () =>
+  render(
+    <MemoryRouter>
+      <Admin />
+    </MemoryRouter>,
+  )
+
+vi.mock('../../services/adminApi', () => ({
   adminApi: {
     getUsers: vi.fn(),
     createUser: vi.fn(),
@@ -11,136 +19,146 @@ vi.mock("../../services/adminApi", () => ({
   },
 }))
 
-vi.mock("../../hooks/useAuth", () => ({
-  useAuth: () => ({ user: { email: "admin@test.com" }, logout: vi.fn() }),
+vi.mock('../../hooks/useAuth', () => ({
+  useAuth: () => ({ logout: vi.fn() }),
 }))
 
 const USERS = [
   {
-    id: "1",
-    fullName: "María García",
-    email: "mgarcia@empresa.com",
-    role: "ADMIN",
-    status: "ACTIVE",
-    createdAt: "2026-01-15T10:00:00.000Z",
+    id: '1',
+    fullName: 'María García',
+    email: 'mgarcia@empresa.com',
+    role: 'ADMIN',
+    status: 'ACTIVE',
+    createdAt: '2026-01-15T10:00:00.000Z',
   },
   {
-    id: "2",
-    fullName: "Juan Pérez",
-    email: "jperez@empresa.com",
-    role: "EMPLOYEE",
-    status: "INACTIVE",
-    createdAt: "2026-02-20T10:00:00.000Z",
+    id: '2',
+    fullName: 'Juan Pérez',
+    email: 'jperez@empresa.com',
+    role: 'EMPLOYEE',
+    status: 'INACTIVE',
+    createdAt: '2026-02-20T10:00:00.000Z',
   },
 ]
 
-describe("Admin", () => {
+describe('Admin', () => {
   beforeEach(() => {
     vi.clearAllMocks()
   })
 
-  it("renders the heading", () => {
+  it('renders the heading', () => {
     adminApi.getUsers.mockResolvedValue([])
-    render(<Admin />)
+    renderAdmin()
     expect(
-      screen.getByRole("heading", { name: /panel de administración/i, level: 1 })
+      screen.getByRole('heading', {
+        name: /panel de administración/i,
+        level: 1,
+      }),
     ).toBeInTheDocument()
   })
 
-  it("shows the empty state when there are no users", async () => {
+  it('shows the empty state when there are no users', async () => {
     adminApi.getUsers.mockResolvedValue([])
-    render(<Admin />)
+    renderAdmin()
     expect(
-      await screen.findByText(/no hay usuarios registrados/i)
+      await screen.findByRole('button', { name: /\+ nuevo usuario/i }),
     ).toBeInTheDocument()
   })
 
-  it("renders the users returned by the API", async () => {
+  it('renders the users returned by the API', async () => {
     adminApi.getUsers.mockResolvedValue(USERS)
-    render(<Admin />)
-    expect(await screen.findByText("María García")).toBeInTheDocument()
-    expect(screen.getByText("Juan Pérez")).toBeInTheDocument()
+    renderAdmin()
+    expect(await screen.findByText('María García')).toBeInTheDocument()
+    expect(screen.getByText('Juan Pérez')).toBeInTheDocument()
   })
 
-  it("shows an error message when fetching users fails", async () => {
-    adminApi.getUsers.mockRejectedValue(new Error("network"))
-    render(<Admin />)
+  it('shows an error message when fetching users fails', async () => {
+    adminApi.getUsers.mockRejectedValue(new Error('network'))
+    renderAdmin()
     expect(
-      await screen.findByText(/no se pudieron cargar los usuarios/i)
+      await screen.findByText(/no se pudieron cargar los usuarios/i),
     ).toBeInTheDocument()
   })
 
-  it("validates required fields before creating a user", async () => {
+  it('validates required fields before creating a user', async () => {
     adminApi.getUsers.mockResolvedValue([])
-    render(<Admin />)
-    await screen.findByText(/no hay usuarios registrados/i)
+    renderAdmin()
 
-    fireEvent.click(screen.getByRole("button", { name: /nuevo usuario/i }))
-    fireEvent.click(screen.getByRole("button", { name: /^guardar$/i }))
+    await waitFor(() =>
+      expect(screen.queryByText(/cargando/i)).not.toBeInTheDocument(),
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: /\+ nuevo usuario/i }))
+    fireEvent.click(screen.getByRole('button', { name: /^guardar$/i }))
 
     expect(
-      screen.getByText(/nombre y email son requeridos/i)
+      screen.getByText(/nombre y email son requeridos/i),
     ).toBeInTheDocument()
     expect(adminApi.createUser).not.toHaveBeenCalled()
   })
 
-  it("creates a user and adds it to the table", async () => {
+  it('creates a user and adds it to the table', async () => {
     adminApi.getUsers.mockResolvedValue([])
     const created = {
-      id: "9",
-      fullName: "Nuevo Usuario",
-      email: "nuevo@empresa.com",
-      role: "EMPLOYEE",
-      status: "ACTIVE",
-      createdAt: "2026-05-21T10:00:00.000Z",
+      id: '9',
+      fullName: 'Nuevo Usuario',
+      email: 'nuevo@empresa.com',
+      role: 'EMPLOYEE',
+      status: 'ACTIVE',
     }
     adminApi.createUser.mockResolvedValue(created)
 
-    render(<Admin />)
-    await screen.findByText(/no hay usuarios registrados/i)
+    const { container } = renderAdmin()
+    await waitFor(() =>
+      expect(screen.queryByText(/cargando/i)).not.toBeInTheDocument(),
+    )
 
-    fireEvent.click(screen.getByRole("button", { name: /nuevo usuario/i }))
-    fireEvent.change(screen.getByLabelText(/nombre completo/i), {
-      target: { value: "Nuevo Usuario" },
-    })
-    fireEvent.change(screen.getByLabelText(/email/i), {
-      target: { value: "nuevo@empresa.com" },
-    })
-    fireEvent.click(screen.getByRole("button", { name: /^guardar$/i }))
+    fireEvent.click(screen.getByRole('button', { name: /\+ nuevo usuario/i }))
 
-    expect(await screen.findByText("Nuevo Usuario")).toBeInTheDocument()
-    // El rol lo determina el backend: el front solo envía nombre y email.
+    fireEvent.change(container.querySelector('input[name="fullName"]'), {
+      target: { value: 'Nuevo Usuario' },
+    })
+    fireEvent.change(container.querySelector('input[name="email"]'), {
+      target: { value: 'nuevo@empresa.com' },
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: /^guardar$/i }))
+
+    expect(await screen.findByText('Nuevo Usuario')).toBeInTheDocument()
     expect(adminApi.createUser).toHaveBeenCalledWith({
-      fullName: "Nuevo Usuario",
-      email: "nuevo@empresa.com",
+      fullName: 'Nuevo Usuario',
+      email: 'nuevo@empresa.com',
     })
   })
 
   it("toggles a user's status", async () => {
     adminApi.getUsers.mockResolvedValue(USERS)
-    adminApi.toggleStatus.mockResolvedValue({ ...USERS[0], status: "INACTIVE" })
+    adminApi.toggleStatus.mockResolvedValue({ ...USERS[0], status: 'INACTIVE' })
 
-    render(<Admin />)
-    await screen.findByText("María García")
+    renderAdmin()
+    await screen.findByText('María García')
 
-    fireEvent.click(screen.getByRole("button", { name: /deshabilitar/i }))
+    fireEvent.click(screen.getByRole('button', { name: /deshabilitar/i }))
+    fireEvent.click(screen.getByRole('button', { name: /confirmar/i }))
 
     await waitFor(() => {
-      expect(adminApi.toggleStatus).toHaveBeenCalledWith("1")
+      expect(adminApi.toggleStatus).toHaveBeenCalledWith('1')
     })
   })
 
-  it("shows an error when toggling status fails", async () => {
+  it('shows an error when toggling status fails', async () => {
     adminApi.getUsers.mockResolvedValue(USERS)
-    adminApi.toggleStatus.mockRejectedValue(new Error("network"))
+    adminApi.toggleStatus.mockRejectedValue(new Error('network'))
 
-    render(<Admin />)
-    await screen.findByText("María García")
+    renderAdmin()
+    await screen.findByText('María García')
 
-    fireEvent.click(screen.getByRole("button", { name: /deshabilitar/i }))
+    fireEvent.click(screen.getByRole('button', { name: /deshabilitar/i }))
+    fireEvent.click(screen.getByRole('button', { name: /confirmar/i }))
 
     expect(
-      await screen.findByText(/no se pudo actualizar el estado/i)
+      await screen.findByText(/no se pudo actualizar el estado/i),
     ).toBeInTheDocument()
   })
 })

@@ -10,7 +10,9 @@ import api from '../api'
 import { getReportByDate } from '../reportsService'
 
 describe('reportsService', () => {
-  beforeEach(() => vi.clearAllMocks())
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
 
   it('retorna los datos del reporte cuando la API responde correctamente', async () => {
     const reportData = { date: '2026-05-30', activities: [] }
@@ -22,6 +24,18 @@ describe('reportsService', () => {
       params: { from: '2026-05-30', to: '2026-05-30' },
     })
     expect(result).toEqual(reportData)
+  })
+
+  it('usa el mismo valor para from y to si solo se pasa una fecha', async () => {
+    api.get.mockResolvedValue({ data: {} })
+    await getReportByDate('2026-05-30')
+
+    expect(api.get).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({
+        params: { from: '2026-05-30', to: '2026-05-30' },
+      })
+    )
   })
 
   it('propaga el error cuando la API falla', async () => {
