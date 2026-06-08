@@ -17,7 +17,7 @@ const ADMIN_ERROR_MESSAGES = {
 const EMPTY_FORM = { fullName: '', email: '' }
 
 function Admin() {
-  const { user, logout } = useAuth()
+  const { logout } = useAuth()
   const [users, setUsers] = useState([])
   const [loading, setLoading] = useState(true)
   const [fetchError, setFetchError] = useState(null)
