@@ -78,8 +78,25 @@ function Admin() {
   }
 
   const handleSubmit = async () => {
-    if (!form.fullName.trim() || !form.email.trim()) {
+    const email = form.email.trim()
+    const fullName = form.fullName.trim()
+    const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+    if (!fullName || !email) {
       setFormError('Nombre y email son requeridos.')
+      return
+    }
+
+    if (!nameRegex.test(fullName)) {
+      setFormError(
+        'El campo nombre es inválido (no puede contener números ni signos).',
+      )
+      return
+    }
+
+    if (!emailRegex.test(email)) {
+      setFormError('El campo email es inválido')
       return
     }
 
