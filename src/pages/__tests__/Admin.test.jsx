@@ -75,7 +75,7 @@ describe('Admin', () => {
 
   it("shows an error message when fetching users fails", async () => {
     adminApi.getUsers.mockRejectedValue(new Error("network"))
-    render(<Admin />)
+    renderAdmin()
     expect(
       await screen.findByText(/no se pudieron cargar los usuarios/i)
     ).toBeInTheDocument()
@@ -84,7 +84,7 @@ describe('Admin', () => {
 
   it("validates required fields before creating a user", async () => {
     adminApi.getUsers.mockResolvedValue([])
-    render(<Admin />)
+    renderAdmin()
     await screen.findByText(/no hay usuarios registrados/i)
 
     fireEvent.click(screen.getByRole("button", { name: /nuevo usuario/i }))
@@ -98,7 +98,7 @@ describe('Admin', () => {
 
   it("rejects a name with numbers or symbols", async () => {
     adminApi.getUsers.mockResolvedValue([])
-    render(<Admin />)
+    renderAdmin()
     await screen.findByText(/no hay usuarios registrados/i)
 
     fireEvent.click(screen.getByRole("button", { name: /nuevo usuario/i }))
@@ -118,7 +118,7 @@ describe('Admin', () => {
 
   it("rejects an email with an invalid format", async () => {
     adminApi.getUsers.mockResolvedValue([])
-    render(<Admin />)
+    renderAdmin()
     await screen.findByText(/no hay usuarios registrados/i)
 
     fireEvent.click(screen.getByRole("button", { name: /nuevo usuario/i }))
@@ -148,7 +148,7 @@ describe('Admin', () => {
     }
     adminApi.createUser.mockResolvedValue(created)
 
-    render(<Admin />)
+    renderAdmin()
     await screen.findByText(/no hay usuarios registrados/i)
 
     fireEvent.click(screen.getByRole("button", { name: /nuevo usuario/i }))
@@ -180,7 +180,7 @@ describe('Admin', () => {
     }
     adminApi.createUser.mockResolvedValue(created)
 
-    render(<Admin />)
+    renderAdmin()
     await screen.findByText(/no hay usuarios registrados/i)
 
     fireEvent.click(screen.getByRole("button", { name: /nuevo usuario/i }))

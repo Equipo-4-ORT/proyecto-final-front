@@ -19,12 +19,6 @@ const EMPTY_FORM = { fullName: '', email: '' }
 const NAME_REGEX = /^[a-zA-ZáéíóúüÁÉÍÓÚÜñÑ\s'-]+$/
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
-const formatDate = (value) => {
-  if (!value) return '—'
-  const date = new Date(value)
-  return Number.isNaN(date.getTime()) ? '—' : date.toLocaleDateString('es-AR')
-}
-
 function Admin() {
   const { logout } = useAuth()
   const [users, setUsers] = useState([])
@@ -124,10 +118,6 @@ function Admin() {
   }
 
   const handleSubmit = async () => {
-    const email = form.email.trim()
-    const fullName = form.fullName.trim()
-
-    if (!fullName || !email) {
     const email = form.email.trim()
     const fullName = form.fullName.trim()
 
