@@ -7,8 +7,7 @@ export async function getReportByDate(date) {
       to: date
     }
   });
-  
-  
+
   return response.data;
 }
 

@@ -107,18 +107,18 @@ describe('api service', () => {
     await expect(captured.onRejected(error)).rejects.toBe(error)
     expect(captured.instance.post).not.toHaveBeenCalled()
   })
-})
 
-it('rejects errors without response (e.g., network error) immediately', async () => {
-  await import('../api')
-  const error = { config: { url: '/api/x' } }
-  await expect(captured.onRejected(error)).rejects.toBe(error)
-  expect(captured.instance.post).not.toHaveBeenCalled()
-})
+  it('rejects errors without response (e.g., network error) immediately', async () => {
+    await import('../api')
+    const error = { config: { url: '/api/x' } }
+    await expect(captured.onRejected(error)).rejects.toBe(error)
+    expect(captured.instance.post).not.toHaveBeenCalled()
+  })
 
-it('onFulfilled returns the response', async () => {
-  await import('../api')
-  const mockResponse = { data: 'ok' }
-  const result = captured.onFulfilled(mockResponse)
-  expect(result).toBe(mockResponse)
+  it('onFulfilled returns the response', async () => {
+    await import('../api')
+    const mockResponse = { data: 'ok' }
+    const result = captured.onFulfilled(mockResponse)
+    expect(result).toBe(mockResponse)
+  })
 })

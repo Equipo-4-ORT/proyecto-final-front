@@ -33,7 +33,7 @@ function Header({
   onExportExcel,
   generatingFrom = null,
 }) {
-  const location = useLocation() 
+  const location = useLocation()
   const isSettings = location.pathname === '/settings'
   const today = getTodayDate()
   const dateInputRef = useRef(null)
@@ -42,7 +42,7 @@ function Header({
     dateInputRef.current?.showPicker()
   }
 
-return (
+  return (
     <header className="bg-white border-b border-slate-200 px-4 sm:px-8 py-5 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
       <div>
         <h2 className="text-4xl font-bold text-slate-900">
@@ -50,8 +50,8 @@ return (
         </h2>
 
         <p className="text-slate-500 text-sm mt-1">
-          {isSettings 
-            ? 'Gestiona tus preferencias y horas de trabajo.' 
+          {isSettings
+            ? 'Gestiona tus preferencias y horas de trabajo.'
             : 'Gestión diaria de actividades y productividad.'}
         </p>
       </div>
@@ -77,7 +77,7 @@ return (
               tabIndex={-1}
             />
           </button>
-          
+
           <Button
             variant="success"
             onClick={onExportExcel}
@@ -103,7 +103,7 @@ return (
 
       {isSettings && (
         <div className="lg:w-auto">
-           <UserMenu user={user} onLogout={onLogout} />
+          <UserMenu user={user} onLogout={onLogout} />
         </div>
       )}
     </header>

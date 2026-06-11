@@ -62,7 +62,7 @@ describe('Admin', () => {
     adminApi.getUsers.mockResolvedValue([])
     renderAdmin()
     expect(
-      await screen.findByRole('button', { name: /\+ nuevo usuario/i }),
+      await screen.findByText(/no hay usuarios registrados/i),
     ).toBeInTheDocument()
   })
 
@@ -84,10 +84,7 @@ describe('Admin', () => {
   it('validates required fields before creating a user', async () => {
     adminApi.getUsers.mockResolvedValue([])
     renderAdmin()
-
-    await waitFor(() =>
-      expect(screen.queryByText(/cargando/i)).not.toBeInTheDocument(),
-    )
+    await screen.findByText(/no hay usuarios registrados/i)
 
     fireEvent.click(screen.getByRole('button', { name: /\+ nuevo usuario/i }))
     fireEvent.click(screen.getByRole('button', { name: /^guardar$/i }))
@@ -109,17 +106,15 @@ describe('Admin', () => {
     }
     adminApi.createUser.mockResolvedValue(created)
 
-    const { container } = renderAdmin()
-    await waitFor(() =>
-      expect(screen.queryByText(/cargando/i)).not.toBeInTheDocument(),
-    )
+    renderAdmin()
+    await screen.findByText(/no hay usuarios registrados/i)
 
     fireEvent.click(screen.getByRole('button', { name: /\+ nuevo usuario/i }))
 
-    fireEvent.change(container.querySelector('input[name="fullName"]'), {
+    fireEvent.change(screen.getByLabelText(/nombre completo/i), {
       target: { value: 'Nuevo Usuario' },
     })
-    fireEvent.change(container.querySelector('input[name="email"]'), {
+    fireEvent.change(screen.getByLabelText(/email/i), {
       target: { value: 'nuevo@empresa.com' },
     })
 

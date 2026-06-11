@@ -50,7 +50,9 @@ function Admin() {
     const newParams = new URLSearchParams(searchParams)
     if (value === 'ALL' || value === '') newParams.delete(key)
     else newParams.set(key, value)
-    setSearchParams(newParams)
+    // replace: true evita apilar cada tecla en el historial del navegador
+    // (y que el término de búsqueda —que puede ser un email— quede en él).
+    setSearchParams(newParams, { replace: true })
   }
 
   const fetchUsers = useCallback(async () => {
@@ -188,40 +190,54 @@ function Admin() {
             <div className="p-10 text-center text-red-500">{fetchError}</div>
           )}
 
-          <div className="px-6 py-4 border-b border-slate-100 flex gap-3">
-            <input
-              placeholder="Buscar por nombre o email..."
-              className="flex-1 border border-slate-300 rounded-xl px-3 py-2 text-sm"
-              value={searchQuery}
-              onChange={(e) => handleFilterChange('q', e.target.value)}
-            />
-            <select
-              className="border border-slate-300 rounded-xl px-2 py-2 text-sm"
-              value={roleFilter}
-              onChange={(e) => handleFilterChange('role', e.target.value)}
-            >
-              <option value="ALL">Todos los roles</option>
-              <option value="ADMIN">Admin</option>
-              <option value="EMPLOYEE">Empleado</option>
-            </select>
-            <select
-              className="border border-slate-300 rounded-xl px-2 py-2 text-sm"
-              value={statusFilter}
-              onChange={(e) => handleFilterChange('status', e.target.value)}
-            >
-              <option value="ALL">Todos los estados</option>
-              <option value="ACTIVE">Activo</option>
-              <option value="INACTIVE">Inactivo</option>
-            </select>
-          </div>
+          {!loading && !fetchError && users.length === 0 && (
+            <div className="p-10 text-center text-slate-400 text-sm">
+              No hay usuarios registrados todavía.
+            </div>
+          )}
 
           {!loading && !fetchError && users.length > 0 && (
-            <UserTable
-              users={filteredUsers}
-              onToggleStatus={handleOpenToggle}
-              onEdit={handleEdit}
-              togglingId={togglingId}
-            />
+            <>
+              <div className="px-6 py-4 border-b border-slate-100 flex gap-3">
+                <input
+                  placeholder="Buscar por nombre o email..."
+                  className="flex-1 border border-slate-300 rounded-xl px-3 py-2 text-sm"
+                  value={searchQuery}
+                  onChange={(e) => handleFilterChange('q', e.target.value)}
+                />
+                <select
+                  className="border border-slate-300 rounded-xl px-2 py-2 text-sm"
+                  value={roleFilter}
+                  onChange={(e) => handleFilterChange('role', e.target.value)}
+                >
+                  <option value="ALL">Todos los roles</option>
+                  <option value="ADMIN">Admin</option>
+                  <option value="EMPLOYEE">Empleado</option>
+                </select>
+                <select
+                  className="border border-slate-300 rounded-xl px-2 py-2 text-sm"
+                  value={statusFilter}
+                  onChange={(e) => handleFilterChange('status', e.target.value)}
+                >
+                  <option value="ALL">Todos los estados</option>
+                  <option value="ACTIVE">Activo</option>
+                  <option value="INACTIVE">Inactivo</option>
+                </select>
+              </div>
+
+              {filteredUsers.length > 0 ? (
+                <UserTable
+                  users={filteredUsers}
+                  onToggleStatus={handleOpenToggle}
+                  onEdit={handleEdit}
+                  togglingId={togglingId}
+                />
+              ) : (
+                <div className="p-10 text-center text-slate-400 text-sm">
+                  No se encontraron usuarios con esos filtros.
+                </div>
+              )}
+            </>
           )}
         </div>
       </main>
@@ -255,6 +271,7 @@ function Admin() {
           <TextInput
             label="Nombre completo"
             name="fullName"
+            placeholder="Ej: María García"
             value={form.fullName}
             onChange={handleChange}
             disabled={saving}
@@ -263,6 +280,7 @@ function Admin() {
             label="Email"
             name="email"
             type="email"
+            placeholder="Ej: mgarcia@empresa.com"
             value={form.email}
             onChange={handleChange}
             disabled={saving}

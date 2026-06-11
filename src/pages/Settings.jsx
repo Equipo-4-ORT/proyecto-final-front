@@ -7,11 +7,12 @@ import {
   getUserSettings,
   updateUserSettings,
 } from '../services/userSettingsApi'
-import { AuthContext } from '../contexts/auth-context'
+import { Toast } from '../components/ui/Toast'
 
 function Settings() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [toast, setToast] = useState(null)
   const [formData, setFormData] = useState({
     startTime: '',
     endTime: '',
@@ -43,11 +44,16 @@ function Settings() {
         defaultDuration: formData.defaultDuration,
       })
 
-      console.log('¡Guardado con éxito!')
-      alert('Configuración actualizada con éxito')
+      setToast({
+        message: 'Configuración actualizada con éxito',
+        variant: 'success',
+      })
     } catch (error) {
       console.error('Error al guardar:', error)
-      alert('Hubo un error al guardar los cambios.')
+      setToast({
+        message: 'Hubo un error al guardar los cambios.',
+        variant: 'error',
+      })
     } finally {
       setSaving(false)
     }
@@ -119,6 +125,14 @@ function Settings() {
           </Button>
         </Card>
       </div>
+
+      {toast && (
+        <Toast
+          message={toast.message}
+          variant={toast.variant}
+          onClose={() => setToast(null)}
+        />
+      )}
     </AppLayout>
   )
 }
