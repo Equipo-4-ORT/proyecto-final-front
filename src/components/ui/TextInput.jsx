@@ -1,11 +1,16 @@
 function TextInput({
   type = "text",
+  label,
+  id,
   placeholder = "",
   className = "",
   ...props
 }) {
-  return (
+  const inputId = id || props.name
+
+  const input = (
     <input
+      id={inputId}
       type={type}
       placeholder={placeholder}
       className={`
@@ -24,6 +29,17 @@ function TextInput({
       `}
       {...props}
     />
+  )
+
+  if (!label) return input
+
+  return (
+    <div className="flex flex-col gap-1">
+      <label htmlFor={inputId} className="text-sm font-medium text-slate-700">
+        {label}
+      </label>
+      {input}
+    </div>
   )
 }
 
