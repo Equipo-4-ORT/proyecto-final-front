@@ -16,6 +16,9 @@ const STATUS_LABELS = { ACTIVE: 'Activo', INACTIVE: 'Inactivo' }
 
 const EMPTY_FORM = { fullName: '', email: '' }
 
+const NAME_REGEX = /^[a-zA-ZáéíóúüÁÉÍÓÚÜñÑ\s'-]+$/
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
 const formatDate = (value) => {
   if (!value) return '—'
   const date = new Date(value)
@@ -80,30 +83,28 @@ function Admin() {
   const handleSubmit = async () => {
     const email = form.email.trim()
     const fullName = form.fullName.trim()
-    const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
     if (!fullName || !email) {
       setFormError('Nombre y email son requeridos.')
       return
     }
 
-    if (!nameRegex.test(fullName)) {
+    if (!NAME_REGEX.test(fullName)) {
       setFormError(
         'El campo nombre es inválido (no puede contener números ni signos).',
       )
       return
     }
 
-    if (!emailRegex.test(email)) {
-      setFormError('El campo email es inválido')
+    if (!EMAIL_REGEX.test(email)) {
+      setFormError('El campo email es inválido.')
       return
     }
 
     setSaving(true)
     setFormError(null)
     try {
-      const newUser = await adminApi.createUser(form)
+      const newUser = await adminApi.createUser({ fullName, email })
       setUsers((prev) => [newUser, ...prev])
       setModalOpen(false)
     } catch (err) {

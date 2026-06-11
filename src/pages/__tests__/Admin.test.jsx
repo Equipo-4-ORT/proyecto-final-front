@@ -84,6 +84,78 @@ describe("Admin", () => {
     expect(adminApi.createUser).not.toHaveBeenCalled()
   })
 
+  it("rejects a name with numbers or symbols", async () => {
+    adminApi.getUsers.mockResolvedValue([])
+    render(<Admin />)
+    await screen.findByText(/no hay usuarios registrados/i)
+
+    fireEvent.click(screen.getByRole("button", { name: /nuevo usuario/i }))
+    fireEvent.change(screen.getByLabelText(/nombre completo/i), {
+      target: { value: "Juan123" },
+    })
+    fireEvent.change(screen.getByLabelText(/email/i), {
+      target: { value: "juan@empresa.com" },
+    })
+    fireEvent.click(screen.getByRole("button", { name: /^guardar$/i }))
+
+    expect(
+      screen.getByText(/el campo nombre es inválido/i)
+    ).toBeInTheDocument()
+    expect(adminApi.createUser).not.toHaveBeenCalled()
+  })
+
+  it("rejects an email with an invalid format", async () => {
+    adminApi.getUsers.mockResolvedValue([])
+    render(<Admin />)
+    await screen.findByText(/no hay usuarios registrados/i)
+
+    fireEvent.click(screen.getByRole("button", { name: /nuevo usuario/i }))
+    fireEvent.change(screen.getByLabelText(/nombre completo/i), {
+      target: { value: "Juan Pérez" },
+    })
+    fireEvent.change(screen.getByLabelText(/email/i), {
+      target: { value: "juan-empresa.com" },
+    })
+    fireEvent.click(screen.getByRole("button", { name: /^guardar$/i }))
+
+    expect(
+      screen.getByText(/el campo email es inválido/i)
+    ).toBeInTheDocument()
+    expect(adminApi.createUser).not.toHaveBeenCalled()
+  })
+
+  it("accepts names with accents, apostrophes and hyphens", async () => {
+    adminApi.getUsers.mockResolvedValue([])
+    const created = {
+      id: "10",
+      fullName: "Anne-Marie O'Brien",
+      email: "anne@empresa.com",
+      role: "EMPLOYEE",
+      status: "ACTIVE",
+      createdAt: "2026-05-21T10:00:00.000Z",
+    }
+    adminApi.createUser.mockResolvedValue(created)
+
+    render(<Admin />)
+    await screen.findByText(/no hay usuarios registrados/i)
+
+    fireEvent.click(screen.getByRole("button", { name: /nuevo usuario/i }))
+    fireEvent.change(screen.getByLabelText(/nombre completo/i), {
+      target: { value: "  Anne-Marie O'Brien  " },
+    })
+    fireEvent.change(screen.getByLabelText(/email/i), {
+      target: { value: "  anne@empresa.com  " },
+    })
+    fireEvent.click(screen.getByRole("button", { name: /^guardar$/i }))
+
+    expect(await screen.findByText("Anne-Marie O'Brien")).toBeInTheDocument()
+    // Se envían los valores normalizados (sin espacios sobrantes).
+    expect(adminApi.createUser).toHaveBeenCalledWith({
+      fullName: "Anne-Marie O'Brien",
+      email: "anne@empresa.com",
+    })
+  })
+
   it("creates a user and adds it to the table", async () => {
     adminApi.getUsers.mockResolvedValue([])
     const created = {
