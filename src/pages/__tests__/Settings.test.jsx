@@ -90,7 +90,7 @@ describe("Settings", () => {
         defaultDuration: 2,
       })
     })
-    expect(window.alert).toHaveBeenCalledWith(expect.stringMatching(/éxito/i))
+    expect(await screen.findByText(/éxito/i)).toBeInTheDocument()
   })
 
   it("alerts the user when saving fails", async () => {
@@ -101,9 +101,7 @@ describe("Settings", () => {
     await screen.findByRole("heading", { name: /configuración/i })
     fireEvent.click(screen.getByRole("button", { name: /guardar cambios/i }))
 
-    await waitFor(() => {
-      expect(window.alert).toHaveBeenCalledWith(expect.stringMatching(/error/i))
-    })
+    expect(await screen.findByText(/error/i)).toBeInTheDocument()
     expect(console.error).toHaveBeenCalled()
   })
 })
