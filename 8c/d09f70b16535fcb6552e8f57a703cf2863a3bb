@@ -1,0 +1,44 @@
+src/services/reportsService.js
+  s_4df08bd4fd0169::t_f6c1ae2d0d536b 10
+src/pages/__tests__/Admin.test.jsx
+  s_4df08bd4fd0169::t_396d7a396b99c8 87
+  s_4df08bd4fd0169::t_f122cc83b16938 65
+  s_4df08bd4fd0169::t_cbca856b578a54 109-110,114,117
+src/pages/Settings.jsx
+  s_4df08bd4fd0169::t_d3383120531b39 15
+  s_4df08bd4fd0169::t_1fcc2b74c7e6a0 128-135
+  s_4df08bd4fd0169::t_18c4b1bb1b6b0c 10
+  s_4df08bd4fd0169::t_39b985ae11995d 47-50,53-56
+src/services/__tests__/api.test.js
+  s_4df08bd4fd0169::t_61ddcb95c9a307 111-116,118-123
+src/pages/Admin.jsx
+  s_4df08bd4fd0169::t_9d4ae82a164b13 193-197,200-240
+  s_4df08bd4fd0169::t_02d3202610bf02 53-55
+  s_4df08bd4fd0169::t_99022f5847c504 274,283
+src/components/layout/Header.jsx
+  s_4df08bd4fd0169::t_2744064d194bac 53-54
+  s_4df08bd4fd0169::t_164977480a1d0d 45
+  s_4df08bd4fd0169::t_33637a01ef5c54 36
+  s_4df08bd4fd0169::t_eb3a1c0ab93dea 80
+  s_4df08bd4fd0169::t_8e56536756c953 106
+src/hooks/__tests__/useReport.test.js
+  s_4df08bd4fd0169::t_713e660e4b4bb6 1-8,11-47
+src/components/ui/TextInput.jsx
+  s_4df08bd4fd0169::t_5848f1bf686b1d 3-4,9-11,13,33-43,46
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "8cd09f70b16535fcb6552e8f57a703cf2863a3bb",
+  "prompts": {},
+  "sessions": {
+    "s_4df08bd4fd0169": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e7d662d5-c1d3-4285-8381-a7c9ed2436b8",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "LicFuraca <martinexequield@gmail.com>"
+    }
+  }
+}
