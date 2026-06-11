@@ -16,6 +16,9 @@ const ADMIN_ERROR_MESSAGES = {
 
 const EMPTY_FORM = { fullName: '', email: '' }
 
+const NAME_REGEX = /^[a-zA-ZáéíóúüÁÉÍÓÚÜñÑ\s'-]+$/
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
 function Admin() {
   const { logout } = useAuth()
   const [users, setUsers] = useState([])
@@ -123,31 +126,23 @@ function Admin() {
       return
     }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (!emailRegex.test(email)) {
-      setFormError('El formato del email no es válido.')
+    if (!NAME_REGEX.test(fullName)) {
+      setFormError(
+        'El campo nombre es inválido (no puede contener números ni signos).',
+      )
+      return
+    }
+
+    if (!EMAIL_REGEX.test(email)) {
+      setFormError('El campo email es inválido.')
       return
     }
 
     setSaving(true)
+    setFormError(null)
     try {
-      if (editingUser) {
-        const updatedUser = await adminApi.updateUser(editingUser.id, form)
-        setUsers((prev) =>
-          prev.map((u) => (u.id === updatedUser.id ? updatedUser : u)),
-        )
-        setToast({
-          message: 'Usuario actualizado correctamente',
-          variant: 'success',
-        })
-      } else {
-        const newUser = await adminApi.createUser(form)
-        setUsers((prev) => [newUser, ...prev])
-        setToast({
-          message: 'Usuario creado correctamente',
-          variant: 'success',
-        })
-      }
+      const newUser = await adminApi.createUser({ fullName, email })
+      setUsers((prev) => [newUser, ...prev])
       setModalOpen(false)
       setForm(EMPTY_FORM)
       setEditingUser(null)
