@@ -8,10 +8,12 @@ import Login from './pages/Login'
 import NotFound from './pages/NotFound'
 import HistoryPage from './pages/History'
 import Settings from './pages/Settings' 
+import { ActivityProvider } from './contexts/ActivityContext';
 
 function App() {
   return (
     <AuthProvider>
+      <ActivityProvider>
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
@@ -59,6 +61,7 @@ function App() {
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
+      </ActivityProvider>
     </AuthProvider>
   )
 }
