@@ -53,7 +53,8 @@ function getStoredNumber(key, fallbackValue) {
 }
 
 const ACTIVITY_ERROR_MESSAGES = {
-  validation_error: 'Revisá los datos: hay campos requeridos o fechas inválidas.',
+  validation_error:
+    'Revisá los datos: hay campos requeridos o fechas inválidas.',
   unauthenticated: 'Sesión expirada. Volvé a iniciar sesión.',
   activity_not_found: 'La actividad ya no existe.',
   activity_forbidden: 'No tenés permisos sobre esta actividad.',
@@ -155,7 +156,9 @@ function Dashboard() {
 
   const handleUpdateActivity = useCallback(
     async (id, editingData) => {
-      const original = activitiesRef.current.find((activity) => activity.id === id)
+      const original = activitiesRef.current.find(
+        (activity) => activity.id === id,
+      )
       if (!original) {
         return { ok: false, message: 'La actividad ya no existe.' }
       }
@@ -169,7 +172,11 @@ function Dashboard() {
       )
 
       try {
-        const payload = buildUpdatePayload(editingData, original, defaultActivityHours)
+        const payload = buildUpdatePayload(
+          editingData,
+          original,
+          defaultActivityHours,
+        )
         const updated = await updateActivity(id, payload)
         const mapped = apiToActivity(updated)
         setActivities((prev) =>
@@ -191,38 +198,35 @@ function Dashboard() {
     [defaultActivityHours],
   )
 
-  const handleDeleteActivity = useCallback(
-    async (id) => {
-      const originalIndex = activitiesRef.current.findIndex(
-        (activity) => activity.id === id,
+  const handleDeleteActivity = useCallback(async (id) => {
+    const originalIndex = activitiesRef.current.findIndex(
+      (activity) => activity.id === id,
+    )
+    if (originalIndex === -1) {
+      return { ok: false, message: 'La actividad ya no existe.' }
+    }
+    const original = activitiesRef.current[originalIndex]
+
+    setActivities((prev) => prev.filter((activity) => activity.id !== id))
+
+    try {
+      await deleteActivity(id)
+      return { ok: true }
+    } catch (err) {
+      setActivities((prev) => {
+        const next = [...prev]
+        const insertAt = Math.min(originalIndex, next.length)
+        next.splice(insertAt, 0, original)
+        return next
+      })
+      const message = getApiErrorMessage(
+        err,
+        ACTIVITY_ERROR_MESSAGES,
+        'No pudimos eliminar la actividad.',
       )
-      if (originalIndex === -1) {
-        return { ok: false, message: 'La actividad ya no existe.' }
-      }
-      const original = activitiesRef.current[originalIndex]
-
-      setActivities((prev) => prev.filter((activity) => activity.id !== id))
-
-      try {
-        await deleteActivity(id)
-        return { ok: true }
-      } catch (err) {
-        setActivities((prev) => {
-          const next = [...prev]
-          const insertAt = Math.min(originalIndex, next.length)
-          next.splice(insertAt, 0, original)
-          return next
-        })
-        const message = getApiErrorMessage(
-          err,
-          ACTIVITY_ERROR_MESSAGES,
-          'No pudimos eliminar la actividad.',
-        )
-        return { ok: false, message }
-      }
-    },
-    [],
-  )
+      return { ok: false, message }
+    }
+  }, [])
 
   const visibleActivities = filterByLocalDate(activities, selectedDate)
 
@@ -258,14 +262,15 @@ function Dashboard() {
       })
       .catch((error) => {
         console.error('Error al generar el informe:', error)
+
         let errorMessage =
           'Error al generar el informe. Por favor, intenta de nuevo.'
 
-        if (error.code === 'ECONNABORTED') {
+        if (error?.response?.data?.error) {
+          errorMessage = error.response.data.error
+        } else if (error.code === 'ECONNABORTED') {
           errorMessage =
-            'Error al generar el informe. La solicitud tardó demasiado tiempo (máx 90 segundos). Intenta de nuevo.'
-        } else if (error?.response?.data?.message) {
-          errorMessage = error.response.data.message
+            'La solicitud tardó demasiado tiempo (máx 90 segundos). Intenta de nuevo.'
         }
 
         setToast({

@@ -262,16 +262,21 @@ function ActivitiesTable({
             }}
             onStartAdding={() => setIsAdding(true)}
           />
-
-          {actionError && (
-            <p
-              role="alert"
-              className="mt-2 text-sm text-red-600"
-            >
-              {actionError}
-            </p>
-          )}
         </>
+      )}
+
+      {actionError && (
+        <div className="fixed bottom-6 right-6 z-[9999]">
+          <div className="bg-red-600 text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 border border-red-700 transition-all duration-300">
+            <span className="font-semibold text-sm">{actionError}</span>
+            <button
+              onClick={() => setActionError(null)}
+              className="ml-4 hover:bg-red-700 p-1 rounded-full transition-colors"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
       )}
 
       <Modal
@@ -283,7 +288,6 @@ function ActivitiesTable({
             <Button variant="outline" onClick={handleCloseDelete}>
               Cancelar
             </Button>
-
             <Button
               className="bg-red-600 text-white hover:bg-red-700"
               onClick={handleConfirmDelete}
@@ -296,7 +300,6 @@ function ActivitiesTable({
         <p className="text-slate-600 leading-relaxed">
           ¿Seguro que querés eliminar esta actividad?
         </p>
-
         {deletingActivity?.title && (
           <p className="mt-3 font-semibold text-slate-800">
             {deletingActivity.title}
