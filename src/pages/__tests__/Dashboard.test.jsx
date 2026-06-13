@@ -13,10 +13,8 @@ vi.mock('../../hooks/useJiraConnection', () => ({
     loading: false,
     actionInFlight: null,
     error: null,
-    lastSyncResult: null,
     connect: vi.fn(),
     disconnect: vi.fn(),
-    syncToday: vi.fn(),
     refresh: vi.fn(),
   }),
 }))

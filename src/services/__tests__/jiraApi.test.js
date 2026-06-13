@@ -10,11 +10,9 @@ vi.mock("../api", () => ({
 
 import api from "../api"
 import {
-  buildTodayWindow,
   disconnectJira,
   getJiraAuthUrl,
   getJiraStatus,
-  triggerJiraSync,
 } from "../jiraApi"
 
 describe("jiraApi", () => {
@@ -75,45 +73,6 @@ describe("jiraApi", () => {
       api.delete.mockResolvedValueOnce({})
       await disconnectJira()
       expect(api.delete).toHaveBeenCalledWith("/api/jira/connection")
-    })
-  })
-
-  describe("triggerJiraSync", () => {
-    it("POST /api/jira/sync con el body de la ventana y devuelve data", async () => {
-      const body = { dateStart: "2026-05-19T00:00:00.000Z", dateEnd: "2026-05-19T12:00:00.000Z" }
-      const payload = { imported: 5, skippedDuplicates: 2, durationMs: 100 }
-      api.post.mockResolvedValueOnce({ data: payload })
-
-      const result = await triggerJiraSync(body)
-
-      expect(api.post).toHaveBeenCalledWith("/api/jira/sync", body)
-      expect(result).toEqual(payload)
-    })
-  })
-
-  describe("buildTodayWindow", () => {
-    it("construye [00:00 local, ahora) como ISO 8601", () => {
-      const now = new Date("2026-05-19T15:30:00")
-      const { dateStart, dateEnd } = buildTodayWindow(now)
-
-      const start = new Date(dateStart)
-      const end = new Date(dateEnd)
-
-      expect(start.getHours()).toBe(0)
-      expect(start.getMinutes()).toBe(0)
-      expect(start.getSeconds()).toBe(0)
-      expect(start.getMilliseconds()).toBe(0)
-      expect(end.getTime()).toBe(now.getTime())
-      expect(dateStart).toMatch(/T\d{2}:\d{2}/)
-      expect(dateEnd).toMatch(/T\d{2}:\d{2}/)
-    })
-
-    it("usa new Date() por default si no se pasa now", () => {
-      vi.useFakeTimers()
-      vi.setSystemTime(new Date("2026-05-19T10:15:00"))
-
-      const { dateEnd } = buildTodayWindow()
-      expect(new Date(dateEnd).getTime()).toBe(Date.now())
     })
   })
 })

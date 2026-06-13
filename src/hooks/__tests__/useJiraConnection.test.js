@@ -5,11 +5,6 @@ vi.mock("../../services/jiraApi", () => ({
   getJiraStatus: vi.fn(),
   getJiraAuthUrl: vi.fn(),
   disconnectJira: vi.fn(),
-  triggerJiraSync: vi.fn(),
-  buildTodayWindow: vi.fn(() => ({
-    dateStart: "2026-05-19T00:00:00.000Z",
-    dateEnd: "2026-05-19T12:00:00.000Z",
-  })),
 }))
 
 import * as jiraApi from "../../services/jiraApi"
@@ -127,44 +122,6 @@ describe("useJiraConnection", () => {
       })
 
       expect(result.current.error).toEqual({ scope: "disconnect", code: "upstream_error" })
-    })
-  })
-
-  describe("syncToday", () => {
-    it("llama triggerJiraSync con la ventana de hoy y guarda el resultado", async () => {
-      jiraApi.getJiraStatus.mockResolvedValueOnce(STATUS_CONNECTED)
-      const syncResult = { imported: 4, skippedDuplicates: 1, durationMs: 200 }
-      jiraApi.triggerJiraSync.mockResolvedValueOnce(syncResult)
-      jiraApi.getJiraStatus.mockResolvedValueOnce({ ...STATUS_CONNECTED, lastSyncAt: "2026-05-19T13:00:00.000Z" })
-
-      const { result } = renderHook(() => useJiraConnection())
-      await waitFor(() => expect(result.current.status?.connected).toBe(true))
-
-      await act(async () => {
-        await result.current.syncToday()
-      })
-
-      expect(jiraApi.triggerJiraSync).toHaveBeenCalledWith({
-        dateStart: "2026-05-19T00:00:00.000Z",
-        dateEnd: "2026-05-19T12:00:00.000Z",
-      })
-      expect(result.current.lastSyncResult).toEqual(syncResult)
-      expect(result.current.actionInFlight).toBeNull()
-    })
-
-    it("expone error con scope=sync si falla", async () => {
-      jiraApi.getJiraStatus.mockResolvedValue(STATUS_CONNECTED)
-      jiraApi.triggerJiraSync.mockRejectedValueOnce({ response: { data: { code: "reconnect_required" } } })
-
-      const { result } = renderHook(() => useJiraConnection())
-      await waitFor(() => expect(result.current.loading).toBe(false))
-
-      await act(async () => {
-        await result.current.syncToday()
-      })
-
-      expect(result.current.error).toEqual({ scope: "sync", code: "reconnect_required" })
-      expect(result.current.lastSyncResult).toBeNull()
     })
   })
 })
