@@ -55,7 +55,8 @@ function ActivityRow({
           />
         ) : (
           <div
-            className={`${
+            title={activity.title || undefined}
+            className={`max-w-[200px] truncate ${
               activity.title
                 ? "text-slate-700 not-italic"
                 : "text-slate-400 italic"
@@ -78,7 +79,8 @@ function ActivityRow({
           />
         ) : (
           <div
-            className={`${
+            title={activity.description || undefined}
+            className={`max-w-[280px] truncate ${
               activity.description
                 ? "text-slate-700 not-italic"
                 : "text-slate-400 italic"
