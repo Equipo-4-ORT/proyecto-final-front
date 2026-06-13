@@ -251,7 +251,6 @@ function Dashboard() {
 
     generateReport({
       date: selectedDate,
-      activities: visibleActivities,
     })
       .then((result) => {
         const sheetUrl = result?.xlsxUrl
