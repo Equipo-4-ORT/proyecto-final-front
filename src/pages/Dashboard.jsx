@@ -244,17 +244,35 @@ function Dashboard() {
     if (generatingFrom) return
 
     setGeneratingFrom(source)
-    setToast(null)
+    setToast({
+      type: 'info',
+      message: 'Generando el informe... Esto puede tardar hasta un minuto.',
+    })
 
     generateReport({
       date: selectedDate,
       activities: visibleActivities,
     })
-      .then(() => {
-        setToast({
-          type: 'success',
-          message: 'Informe generado exitosamente',
-        })
+      .then((result) => {
+        const sheetUrl = result?.xlsxUrl
+        if (sheetUrl) {
+          // Intento abrir en una pestaña nueva por conveniencia. Tras una espera
+          // larga el navegador suele bloquear el pop-up (no hay gesto directo del
+          // usuario), así que el link del Toast es el camino confiable.
+          window.open(sheetUrl, '_blank', 'noopener,noreferrer')
+          setToast({
+            type: 'success',
+            message: 'Informe generado exitosamente.',
+            actionHref: sheetUrl,
+            actionLabel: 'Abrir Google Sheet',
+          })
+        } else {
+          setToast({
+            type: 'success',
+            message:
+              'Informe generado, pero no pudimos crear el Google Sheet. Reconectá tu cuenta de Google e intentá de nuevo.',
+          })
+        }
       })
       .catch((error) => {
         console.error('Error al generar el informe:', error)
@@ -263,7 +281,7 @@ function Dashboard() {
 
         if (error.code === 'ECONNABORTED') {
           errorMessage =
-            'Error al generar el informe. La solicitud tardó demasiado tiempo (máx 90 segundos). Intenta de nuevo.'
+            'Error al generar el informe. La solicitud tardó demasiado tiempo (máx 2 minutos). Intenta de nuevo.'
         } else if (error?.response?.data?.message) {
           errorMessage = error.response.data.message
         }
@@ -379,6 +397,8 @@ function Dashboard() {
         <Toast
           message={toast.message}
           type={toast.type}
+          actionHref={toast.actionHref}
+          actionLabel={toast.actionLabel}
           onClose={() => setToast(null)}
         />
       )}
