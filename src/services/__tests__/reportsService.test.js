@@ -55,7 +55,7 @@ describe('reportsService', () => {
     const result = await generateReport(mockData)
     
     expect(api.post).toHaveBeenCalledWith('/api/reports/generate', mockData, {
-      timeout: 90000,
+      timeout: 120000,
     })
     expect(result).toEqual({ success: true })
   })
