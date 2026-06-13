@@ -2,7 +2,6 @@ import { Check, Pencil, Trash2, X } from "lucide-react"
 import Badge from "../../../components/ui/Badge"
 import TextInput from "../../../components/ui/TextInput"
 import { getSource } from "../../../constants/sources"
-import StatusBadge from './StatusBadge'
 
 import {
   formatDuration,
@@ -143,9 +142,6 @@ function ActivityRow({
             defaultActivityHours
           )
         )}
-      </td>
-      <td className="px-4 py-3">
-        <StatusBadge status={activity.status} />
       </td>
 
       <td className="px-4 py-3">

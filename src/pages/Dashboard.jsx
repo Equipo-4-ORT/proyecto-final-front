@@ -91,7 +91,6 @@ function Dashboard() {
     data: dayActivities,
     isLoading,
     error,
-    refetch: refetchActivities,
   } = useActivities(selectedDate)
 
   useEffect(() => {
@@ -359,7 +358,7 @@ function Dashboard() {
       >
         <JiraCallbackBanner />
 
-        <JiraIntegrationCard onSynced={refetchActivities} />
+        <JiraIntegrationCard />
 
         <DashboardStats
           totalActivities={totalActivities}
