@@ -59,4 +59,12 @@ export const SOURCES = {
     sidebarColor: "bg-green-600",
     chartColor: "#16a34a",
   },
+
+  otro: {
+    label: "Other",
+    icon: HelpCircle,
+    badgeColor: "slate",
+    sidebarColor: "bg-slate-400",
+    chartColor: "#94a3b8",
+  },
 }
