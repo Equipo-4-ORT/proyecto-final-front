@@ -38,8 +38,8 @@ function Settings() {
     }
 
     const duration = parseInt(formData.defaultDuration)
-    if (!duration || duration < 1) {
-      setToast({ message: 'La duración debe ser al menos 1 hora.', variant: 'error' })
+    if (!duration || duration < 1 || duration > 24) {
+      setToast({ message: 'La duración debe estar entre 1 y 24 horas.', variant: 'error' })
       return
     }
 
@@ -81,10 +81,13 @@ function Settings() {
           </div>
 
           <div className="space-y-1">
-            <label className="text-xs font-semibold text-slate-500 uppercase">Duración default actividad (horas)</label>
+            <label className="text-xs font-semibold text-slate-500 uppercase">
+              Duración default actividad (horas)
+            </label>
             <TextInput
               type="number"
               min="1"
+              max="24"
               value={formData.defaultDuration}
               onChange={(e) => setFormData({ ...formData, defaultDuration: e.target.value })}
             />
