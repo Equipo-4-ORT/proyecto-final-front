@@ -1,8 +1,8 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import {useEffect, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 
 import { useAuth } from '../hooks/useAuth'
-import { useActivityData } from '../contexts/ActivityContext' 
+import { useActivityData } from '../hooks/useActivityData';
 import AppLayout from '../components/layout/AppLayout'
 import Toast from '../components/common/Toast'
 import { SOURCES } from '../constants/sources'
@@ -22,9 +22,7 @@ import {
 } from './Dashboard/utils/dashboardCalculations'
 
 import {
-  apiToActivity,
   activityToApiPayload,
-  buildOptimisticUpdate,
   buildUpdatePayload,
   filterByLocalDate,
 } from './Dashboard/utils/activityMapper'
@@ -72,18 +70,12 @@ function Dashboard() {
   const activities = contextActivities || []
   const activitiesRef = useRef(activities)
 
-  const [activitiesState, setActivities] = useState(activities)
   const [loadError, setLoadError] = useState(null)
 
   const handleDateChange = (newDate) => {
-  setSelectedDate(newDate); 
-  setContextDate(newDate);  
-};
-
-  useEffect(() => {
-    activitiesRef.current = activities
-    setActivities(activities)
-  }, [activities])
+    setSelectedDate(newDate)
+    setContextDate(newDate)
+  }
 
   const [workdayHours, setWorkdayHours] = useState(() =>
     getStoredNumber('workdayHours', DEFAULT_WORKDAY_HOURS),
@@ -103,85 +95,71 @@ function Dashboard() {
     localStorage.setItem('defaultActivityHours', defaultActivityHours)
   }, [defaultActivityHours])
 
-  const handleAddActivity = useCallback(
-  async (formData) => {
-    setLoadError(null) 
+  const handleAddActivity = async (formData) => {
+    setLoadError(null);
     try {
       const payload = activityToApiPayload(
         formData,
         selectedDate,
-        defaultActivityHours,
-      )
-      await createActivity(payload)
-      await refreshActivities()
-      return { ok: true }
+        defaultActivityHours
+      );
+      await createActivity(payload);
+      await refreshActivities();
+      return { ok: true };
     } catch (err) {
       const message = getApiErrorMessage(
         err,
         ACTIVITY_ERROR_MESSAGES,
-        'No pudimos crear la actividad.',
-      )
-      setLoadError(message) 
-      return { ok: false, message }
+        'No pudimos crear la actividad.'
+      );
+      setLoadError(message);
+      return { ok: false, message };
     }
-  },
-  [selectedDate, defaultActivityHours, refreshActivities],
-)
+  };
 
-  const handleUpdateActivity = useCallback(
-    async (id, editingData) => {
-      setLoadError(null)
-      const original = activitiesRef.current.find((a) => a.id === id)
-      
-      try {
-        const payload = buildUpdatePayload(
-          editingData,
-          original,
-          defaultActivityHours,
-        )
-        await updateActivity(id, payload)
-        await refreshActivities()
-        return { ok: true }
-      } catch (err) {
-        const message = getApiErrorMessage(
-          err,
-          ACTIVITY_ERROR_MESSAGES,
-          'No pudimos actualizar la actividad.',
-        )
-        setLoadError(message) 
-        return {
-          ok: false,
-          message,
-        }
-      }
-    },
-    [defaultActivityHours, refreshActivities],
-  )
 
-  const handleDeleteActivity = useCallback(
-    async (id) => {
-      setLoadError(null) 
-      try {
-        await deleteActivity(id)
-        await refreshActivities()
-        return { ok: true }
-      } catch (err) {
-        const message = getApiErrorMessage(
-          err,
-          ACTIVITY_ERROR_MESSAGES,
-          'No pudimos eliminar la actividad.',
-        )
-        setLoadError(message) 
-        return {
-          ok: false,
-          message,
-        }
-      }
-    },
-    [refreshActivities],
-  )
+  const handleUpdateActivity = async (id, editingData) => {
+    setLoadError(null);
+    const original = activitiesRef.current.find((a) => a.id === id);
 
-  const visibleActivities = filterByLocalDate(activitiesState, selectedDate)
+    try {
+      const payload = buildUpdatePayload(
+        editingData,
+        original,
+        defaultActivityHours
+      );
+      await updateActivity(id, payload);
+      await refreshActivities();
+      return { ok: true };
+    } catch (err) {
+      const message = getApiErrorMessage(
+        err,
+        ACTIVITY_ERROR_MESSAGES,
+        'No pudimos actualizar la actividad.'
+      );
+      setLoadError(message);
+      return { ok: false, message };
+    }
+  };
+
+  const handleDeleteActivity = async (id) => {
+    setLoadError(null);
+    try {
+      await deleteActivity(id);
+      await refreshActivities();
+      return { ok: true };
+    } catch (err) {
+      const message = getApiErrorMessage(
+        err,
+        ACTIVITY_ERROR_MESSAGES,
+        'No pudimos eliminar la actividad.'
+      );
+      setLoadError(message);
+      return { ok: false, message };
+    }
+  };
+
+  const visibleActivities = filterByLocalDate(activities, selectedDate)
   const totalActivities = visibleActivities.length
   const totalHours = getTotalHours(visibleActivities, defaultActivityHours)
   const calendarEventCount = getCalendarEventCount(visibleActivities)
@@ -275,7 +253,7 @@ function Dashboard() {
     >
       <JiraCallbackBanner />
       <JiraIntegrationCard onSynced={refreshActivities} />
-      
+
       <DashboardStats
         totalActivities={totalActivities}
         calendarEventCount={calendarEventCount}

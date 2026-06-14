@@ -1,6 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
+import Dashboard from '../Dashboard'
+import { AuthProvider } from '../../contexts/AuthContext'
+import { ActivityContext } from '../../contexts/ActivityContextDef'; 
+import { generateReport } from '../../services/reportsService'
 
 vi.mock('../../hooks/useJiraConnection', () => ({
   useJiraConnection: () => ({
@@ -31,8 +35,6 @@ vi.mock('../../services/reportsService', () => ({
   generateReport: vi.fn().mockResolvedValue({}),
 }))
 
-// AuthProvider ahora hidrata con api.get('/auth/me') al montar: lo mockeamos para
-// no pegar a la red. Rechaza → sesión nula (mismo escenario que el test original).
 vi.mock('../../services/api', () => ({
   default: {
     get: vi.fn().mockRejectedValue(new Error('no session')),
@@ -40,16 +42,24 @@ vi.mock('../../services/api', () => ({
   },
 }))
 
-import Dashboard from '../Dashboard'
-import { AuthProvider } from '../../contexts/AuthContext'
-import { generateReport } from '../../services/reportsService'
-
 const renderDashboard = () =>
   render(
     <AuthProvider>
-      <MemoryRouter>
-        <Dashboard />
-      </MemoryRouter>
+      <ActivityContext.Provider
+        value={{
+          activities: [],
+          sourceCounts: {},
+          isLoading: false,
+          error: null,
+          refreshActivities: vi.fn(),
+          date: '2026-06-14',
+          setDate: vi.fn(),
+        }}
+      >
+        <MemoryRouter>
+          <Dashboard />
+        </MemoryRouter>
+      </ActivityContext.Provider>
     </AuthProvider>,
   )
 

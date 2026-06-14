@@ -1,6 +1,6 @@
 import { useContext } from 'react'
 import { AuthContext } from '../../contexts/auth-context'
-import { useActivityData } from '../../contexts/ActivityContext'
+import { useActivityData } from "../../hooks/useActivityData";
 import Sidebar from './Sidebar'
 import Header from './Header'
 

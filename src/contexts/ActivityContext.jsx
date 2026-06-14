@@ -1,10 +1,9 @@
-import { createContext, useContext, useState } from 'react';
+import { useState } from 'react';
+import { ActivityContext } from './ActivityContextDef'; 
 import { useActivities } from '../hooks/useActivities';
 import { getTodayDate } from '../utils/dateHelpers';
 import { getSourceCounts } from '../pages/Dashboard/utils/dashboardCalculations';
 import { SOURCES } from '../constants/sources';
-
-const ActivityContext = createContext();
 
 export function ActivityProvider({ children }) {
   const [date, setDate] = useState(getTodayDate());
@@ -26,5 +25,3 @@ export function ActivityProvider({ children }) {
     </ActivityContext.Provider>
   );
 }
-
-export const useActivityData = () => useContext(ActivityContext);

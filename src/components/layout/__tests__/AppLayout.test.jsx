@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest"
 import { render, screen } from "@testing-library/react"
 import { MemoryRouter } from "react-router-dom"
 import { AuthContext } from "../../../contexts/auth-context"
+import { ActivityContext } from '../../../contexts/ActivityContextDef'; 
 import AppLayout from "../AppLayout"
 
 const defaultProps = {
@@ -16,14 +17,15 @@ const authValue = {
   logout: () => {},
 }
 
-const renderLayout = (children) =>
-  render(
-    <MemoryRouter>
-      <AuthContext.Provider value={authValue}>
+const renderLayout = (children) => render(
+  <MemoryRouter>
+    <AuthContext.Provider value={authValue}>
+      <ActivityContext.Provider value={{ activities: [], sourceCounts: { calendar: 0, jira: 0, slides: 0, docs: 0, sheets: 0 } }}>
         <AppLayout {...defaultProps}>{children}</AppLayout>
-      </AuthContext.Provider>
-    </MemoryRouter>,
-  )
+      </ActivityContext.Provider>
+    </AuthContext.Provider>
+  </MemoryRouter>
+)
 
 describe("AppLayout", () => {
   it("renders children inside the main slot", () => {

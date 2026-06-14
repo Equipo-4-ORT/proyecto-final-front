@@ -8,7 +8,7 @@ import Login from './pages/Login'
 import NotFound from './pages/NotFound'
 import HistoryPage from './pages/History'
 import Settings from './pages/Settings'
-import { ActivityProvider } from './contexts/ActivityContext'
+import { ActivityProvider } from './contexts/ActivityContext';
 
 function App() {
   return (
