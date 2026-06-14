@@ -1,10 +1,8 @@
 import { useCallback, useEffect, useState } from "react"
 import {
-  buildTodayWindow,
   disconnectJira,
   getJiraAuthUrl,
   getJiraStatus,
-  triggerJiraSync,
 } from "../services/jiraApi"
 
 const extractErrorCode = (error) => {
@@ -21,7 +19,6 @@ export function useJiraConnection() {
   const [loading, setLoading] = useState(true)
   const [actionInFlight, setActionInFlight] = useState(null)
   const [error, setError] = useState(null)
-  const [lastSyncResult, setLastSyncResult] = useState(null)
 
   const refresh = useCallback(async () => {
     setLoading(true)
@@ -65,31 +62,13 @@ export function useJiraConnection() {
     }
   }, [refresh])
 
-  const syncToday = useCallback(async () => {
-    setActionInFlight("sync")
-    setError(null)
-    setLastSyncResult(null)
-    try {
-      const window = buildTodayWindow()
-      const result = await triggerJiraSync(window)
-      setLastSyncResult(result)
-      await refresh()
-    } catch (err) {
-      setError({ scope: "sync", code: extractErrorCode(err) })
-    } finally {
-      setActionInFlight(null)
-    }
-  }, [refresh])
-
   return {
     status,
     loading,
     actionInFlight,
     error,
-    lastSyncResult,
     connect,
     disconnect,
-    syncToday,
     refresh,
   }
 }

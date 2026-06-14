@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 
 import { useAuth } from '../hooks/useAuth'
-import { useActivityData } from '../contexts/ActivityContext' // <--- IMPORTANTE: Agregá este import
+import { useActivityData } from '../contexts/ActivityContext' 
 import AppLayout from '../components/layout/AppLayout'
 import Toast from '../components/common/Toast'
 import { SOURCES } from '../constants/sources'
@@ -57,11 +57,10 @@ function Dashboard() {
   const navigate = useNavigate()
   const { user, logout } = useAuth()
 
-  // Consumimos el contexto
   const {
     activities: contextActivities,
-    isLoading,
-    error,
+    isLoading: isContextLoading,
+    error: contextError,
     refreshActivities,
   } = useActivityData()
 
@@ -72,8 +71,12 @@ function Dashboard() {
   const activities = contextActivities || []
   const activitiesRef = useRef(activities)
 
+  const [activitiesState, setActivities] = useState(activities)
+  const [loadError, setLoadError] = useState(null)
+
   useEffect(() => {
     activitiesRef.current = activities
+    setActivities(activities)
   }, [activities])
 
   const [workdayHours, setWorkdayHours] = useState(() =>
@@ -85,6 +88,14 @@ function Dashboard() {
 
   const [generatingFrom, setGeneratingFrom] = useState(null)
   const [toast, setToast] = useState(null)
+
+  useEffect(() => {
+    localStorage.setItem('workdayHours', workdayHours)
+  }, [workdayHours])
+
+  useEffect(() => {
+    localStorage.setItem('defaultActivityHours', defaultActivityHours)
+  }, [defaultActivityHours])
 
   const handleAddActivity = useCallback(
     async (formData) => {
@@ -157,8 +168,7 @@ function Dashboard() {
     [refreshActivities],
   )
 
-  // Cálculos de UI
-  const visibleActivities = filterByLocalDate(activities, selectedDate)
+  const visibleActivities = filterByLocalDate(activitiesState, selectedDate)
   const totalActivities = visibleActivities.length
   const totalHours = getTotalHours(visibleActivities, defaultActivityHours)
   const calendarEventCount = getCalendarEventCount(visibleActivities)
@@ -175,14 +185,52 @@ function Dashboard() {
   function handleExportExcel(source) {
     if (generatingFrom) return
     setGeneratingFrom(source)
-    generateReport({ date: selectedDate, activities: visibleActivities })
-      .then(() =>
-        setToast({ type: 'success', message: 'Informe generado exitosamente' }),
-      )
-      .catch(() =>
-        setToast({ type: 'error', message: 'Error al generar el informe.' }),
-      )
-      .finally(() => setGeneratingFrom(null))
+    setToast({
+      type: 'info',
+      message: 'Generando el informe... Esto puede tardar hasta un minuto.',
+    })
+
+    generateReport({
+      date: selectedDate,
+    })
+      .then((result) => {
+        const sheetUrl = result?.xlsxUrl
+        if (sheetUrl) {
+          window.open(sheetUrl, '_blank', 'noopener,noreferrer')
+          setToast({
+            type: 'success',
+            message: 'Informe generado exitosamente.',
+            actionHref: sheetUrl,
+            actionLabel: 'Abrir Google Sheet',
+          })
+        } else {
+          setToast({
+            type: 'success',
+            message:
+              'Informe generado, pero no pudimos crear el Google Sheet. Reconectá tu cuenta de Google e intentá de nuevo.',
+          })
+        }
+      })
+      .catch((error) => {
+        console.error('Error al generar el informe:', error)
+        let errorMessage =
+          'Error al generar el informe. Por favor, intenta de nuevo.'
+
+        if (error.code === 'ECONNABORTED') {
+          errorMessage =
+            'Error al generar el informe. La solicitud tardó demasiado tiempo (máx 2 minutos). Intenta de nuevo.'
+        } else if (error?.response?.data?.message) {
+          errorMessage = error.response.data.message
+        }
+
+        setToast({
+          type: 'error',
+          message: errorMessage,
+        })
+      })
+      .finally(() => {
+        setGeneratingFrom(null)
+      })
   }
 
   function handleLogout() {
@@ -190,9 +238,9 @@ function Dashboard() {
     navigate('/login')
   }
 
-  if (isLoading)
+  if (isContextLoading)
     return <div className="py-10 text-center">Cargando reporte...</div>
-  if (error)
+  if (contextError)
     return (
       <div className="py-10 text-center text-red-500">
         Error al cargar el reporte.
@@ -214,6 +262,7 @@ function Dashboard() {
     >
       <JiraCallbackBanner />
       <JiraIntegrationCard onSynced={refreshActivities} />
+      
       <DashboardStats
         totalActivities={totalActivities}
         calendarEventCount={calendarEventCount}
@@ -221,6 +270,16 @@ function Dashboard() {
         productivityPercentage={productivityPercentage}
         workdayHours={workdayHours}
       />
+
+      {loadError && (
+        <div
+          role="alert"
+          className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 my-4"
+        >
+          {loadError}
+        </div>
+      )}
+
       <ReportView
         activities={visibleActivities}
         onAddActivity={handleAddActivity}
@@ -228,6 +287,7 @@ function Dashboard() {
         onDeleteActivity={handleDeleteActivity}
         defaultActivityHours={defaultActivityHours}
       />
+
       <SourceSummary
         sourceSummary={sourceSummary}
         workdayHours={workdayHours}
@@ -237,6 +297,8 @@ function Dashboard() {
         <Toast
           message={toast.message}
           type={toast.type}
+          actionHref={toast.actionHref}
+          actionLabel={toast.actionLabel}
           onClose={() => setToast(null)}
         />
       )}

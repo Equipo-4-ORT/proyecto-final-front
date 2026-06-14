@@ -13,10 +13,8 @@ vi.mock('../../hooks/useJiraConnection', () => ({
     loading: false,
     actionInFlight: null,
     error: null,
-    lastSyncResult: null,
     connect: vi.fn(),
     disconnect: vi.fn(),
-    syncToday: vi.fn(),
     refresh: vi.fn(),
   }),
 }))
@@ -82,8 +80,9 @@ describe('Dashboard', () => {
     })
   })
 
-  it('shows success toast when generateReport resolves', async () => {
-    generateReport.mockResolvedValueOnce({})
+  it('shows success toast with a link to the Sheet when generateReport returns a url', async () => {
+    const sheetUrl = 'https://docs.google.com/spreadsheets/d/abc123/edit'
+    generateReport.mockResolvedValueOnce({ xlsxUrl: sheetUrl })
     renderDashboard()
 
     const excelBtn = screen.getByRole('button', { name: /descargar excel/i })
@@ -94,5 +93,26 @@ describe('Dashboard', () => {
         screen.getByText(/informe generado exitosamente/i),
       ).toBeInTheDocument()
     })
+
+    const link = screen.getByRole('link', { name: /abrir google sheet/i })
+    expect(link).toHaveAttribute('href', sheetUrl)
+    expect(link).toHaveAttribute('target', '_blank')
+  })
+
+  it('warns when the report is generated but no Sheet url is returned', async () => {
+    generateReport.mockResolvedValueOnce({ xlsxUrl: null })
+    renderDashboard()
+
+    const excelBtn = screen.getByRole('button', { name: /descargar excel/i })
+    fireEvent.click(excelBtn)
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(/no pudimos crear el google sheet/i),
+      ).toBeInTheDocument()
+    })
+    expect(
+      screen.queryByRole('link', { name: /abrir google sheet/i }),
+    ).not.toBeInTheDocument()
   })
 })

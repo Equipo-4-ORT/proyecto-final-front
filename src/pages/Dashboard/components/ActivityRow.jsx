@@ -2,7 +2,6 @@ import { Check, Pencil, Trash2, X } from "lucide-react"
 import Badge from "../../../components/ui/Badge"
 import TextInput from "../../../components/ui/TextInput"
 import { getSource } from "../../../constants/sources"
-import StatusBadge from './StatusBadge'
 
 import {
   formatDuration,
@@ -55,7 +54,8 @@ function ActivityRow({
           />
         ) : (
           <div
-            className={`${
+            title={activity.title || undefined}
+            className={`max-w-[200px] truncate ${
               activity.title
                 ? "text-slate-700 not-italic"
                 : "text-slate-400 italic"
@@ -78,7 +78,8 @@ function ActivityRow({
           />
         ) : (
           <div
-            className={`${
+            title={activity.description || undefined}
+            className={`max-w-[280px] truncate ${
               activity.description
                 ? "text-slate-700 not-italic"
                 : "text-slate-400 italic"
@@ -141,9 +142,6 @@ function ActivityRow({
             defaultActivityHours
           )
         )}
-      </td>
-      <td className="px-4 py-3">
-        <StatusBadge status={activity.status} />
       </td>
 
       <td className="px-4 py-3">

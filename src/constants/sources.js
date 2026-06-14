@@ -61,11 +61,10 @@ export const SOURCES = {
   },
 
   otro: {
-    label: "Otro",
-    icon: HelpCircle, 
+    label: "Other",
+    icon: HelpCircle,
     badgeColor: "slate",
     sidebarColor: "bg-slate-400",
     chartColor: "#94a3b8",
-  }
-
+  },
 }
