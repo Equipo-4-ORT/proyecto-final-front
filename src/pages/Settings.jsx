@@ -34,7 +34,15 @@ function Settings() {
       .finally(() => setLoading(false))
   }, [])
 
-  const handleSave = async () => {
+  
+    const handleSave = async () => {
+    if (formData.startTime && formData.endTime && formData.startTime >= formData.endTime) {
+      setToast({
+        message: 'La hora de inicio debe ser menor a la hora de fin.',
+        variant: 'error',
+      });
+      return; 
+    }
     setSaving(true)
     try {
       await updateUserSettings({
@@ -57,7 +65,7 @@ function Settings() {
     } finally {
       setSaving(false)
     }
-  }
+  };
 
   if (loading) return <div className="p-10 text-center">Cargando...</div>
 
