@@ -35,6 +35,7 @@ function Header({
 }) {
   const location = useLocation()
   const isSettings = location.pathname === '/settings'
+  const isHistory = location.pathname === '/history'
   const today = getTodayDate()
   const dateInputRef = useRef(null)
 
@@ -46,17 +47,19 @@ function Header({
     <header className="bg-white border-b border-slate-200 px-4 sm:px-8 py-5 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
       <div>
         <h2 className="text-4xl font-bold text-slate-900">
-          {isSettings ? 'Configuración' : 'Dashboard'}
+          {isSettings ? 'Configuración' : isHistory ? 'Historial' : 'Dashboard'}
         </h2>
 
         <p className="text-slate-500 text-sm mt-1">
           {isSettings
             ? 'Gestiona tus preferencias y horas de trabajo.'
-            : 'Gestión diaria de actividades y productividad.'}
+            : isHistory 
+              ? 'Visualiza tus reportes consolidados anteriores.'
+              : 'Gestión diaria de actividades y productividad.'}
         </p>
       </div>
 
-      {!isSettings && (
+      {!isSettings && !isHistory && (
         <div className="w-full lg:w-auto flex flex-col sm:flex-row sm:items-center gap-3 lg:gap-4">
           <button
             type="button"
@@ -101,7 +104,7 @@ function Header({
         </div>
       )}
 
-      {isSettings && (
+      {(isSettings || isHistory) && (
         <div className="lg:w-auto">
           <UserMenu user={user} onLogout={onLogout} />
         </div>
