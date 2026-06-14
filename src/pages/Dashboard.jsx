@@ -104,33 +104,35 @@ function Dashboard() {
   }, [defaultActivityHours])
 
   const handleAddActivity = useCallback(
-    async (formData) => {
-      try {
-        const payload = activityToApiPayload(
-          formData,
-          selectedDate,
-          defaultActivityHours,
-        )
-        await createActivity(payload)
-        await refreshActivities()
-        return { ok: true }
-      } catch (err) {
-        return {
-          ok: false,
-          message: getApiErrorMessage(
-            err,
-            ACTIVITY_ERROR_MESSAGES,
-            'No pudimos crear la actividad.',
-          ),
-        }
-      }
-    },
-    [selectedDate, defaultActivityHours, refreshActivities],
-  )
+  async (formData) => {
+    setLoadError(null) 
+    try {
+      const payload = activityToApiPayload(
+        formData,
+        selectedDate,
+        defaultActivityHours,
+      )
+      await createActivity(payload)
+      await refreshActivities()
+      return { ok: true }
+    } catch (err) {
+      const message = getApiErrorMessage(
+        err,
+        ACTIVITY_ERROR_MESSAGES,
+        'No pudimos crear la actividad.',
+      )
+      setLoadError(message) 
+      return { ok: false, message }
+    }
+  },
+  [selectedDate, defaultActivityHours, refreshActivities],
+)
 
   const handleUpdateActivity = useCallback(
     async (id, editingData) => {
+      setLoadError(null)
       const original = activitiesRef.current.find((a) => a.id === id)
+      
       try {
         const payload = buildUpdatePayload(
           editingData,
@@ -141,13 +143,15 @@ function Dashboard() {
         await refreshActivities()
         return { ok: true }
       } catch (err) {
+        const message = getApiErrorMessage(
+          err,
+          ACTIVITY_ERROR_MESSAGES,
+          'No pudimos actualizar la actividad.',
+        )
+        setLoadError(message) 
         return {
           ok: false,
-          message: getApiErrorMessage(
-            err,
-            ACTIVITY_ERROR_MESSAGES,
-            'No pudimos actualizar la actividad.',
-          ),
+          message,
         }
       }
     },
@@ -156,18 +160,21 @@ function Dashboard() {
 
   const handleDeleteActivity = useCallback(
     async (id) => {
+      setLoadError(null) 
       try {
         await deleteActivity(id)
         await refreshActivities()
         return { ok: true }
       } catch (err) {
+        const message = getApiErrorMessage(
+          err,
+          ACTIVITY_ERROR_MESSAGES,
+          'No pudimos eliminar la actividad.',
+        )
+        setLoadError(message) 
         return {
           ok: false,
-          message: getApiErrorMessage(
-            err,
-            ACTIVITY_ERROR_MESSAGES,
-            'No pudimos eliminar la actividad.',
-          ),
+          message,
         }
       }
     },
