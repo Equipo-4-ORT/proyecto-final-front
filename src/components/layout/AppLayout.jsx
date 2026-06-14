@@ -8,6 +8,7 @@ function AppLayout({ children, sourceCounts, ...props }) {
   const { sourceCounts: contextSourceCounts } = useActivityData()
   const { user, logout } = useContext(AuthContext)
   const finalSourceCounts = sourceCounts || contextSourceCounts || {}
+  
 
   return (
     <div className="min-h-screen bg-slate-100">

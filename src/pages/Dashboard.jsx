@@ -59,6 +59,7 @@ function Dashboard() {
 
   const {
     activities: contextActivities,
+    setDate: setContextDate,
     isLoading: isContextLoading,
     error: contextError,
     refreshActivities,
@@ -73,6 +74,11 @@ function Dashboard() {
 
   const [activitiesState, setActivities] = useState(activities)
   const [loadError, setLoadError] = useState(null)
+
+  const handleDateChange = (newDate) => {
+  setSelectedDate(newDate); 
+  setContextDate(newDate);  
+};
 
   useEffect(() => {
     activitiesRef.current = activities
@@ -252,7 +258,7 @@ function Dashboard() {
       user={user}
       onLogout={handleLogout}
       selectedDate={selectedDate}
-      onDateChange={setSelectedDate}
+      onDateChange={handleDateChange}
       onExportExcel={handleExportExcel}
       generatingFrom={generatingFrom}
       workdayHours={workdayHours}
