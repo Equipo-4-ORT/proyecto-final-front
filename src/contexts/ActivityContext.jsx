@@ -8,7 +8,8 @@ const ActivityContext = createContext();
 
 export function ActivityProvider({ children }) {
   const [date, setDate] = useState(getTodayDate());
-  const { data: activities, isLoading, refetch } = useActivities(date);
+  
+  const { data: activities, isLoading, error, refetch } = useActivities(date);
   const sourceCounts = getSourceCounts(activities || [], SOURCES);
 
   return (
@@ -16,6 +17,7 @@ export function ActivityProvider({ children }) {
       activities, 
       sourceCounts, 
       isLoading, 
+      error, 
       refreshActivities: refetch,
       date, 
       setDate 
