@@ -1,4 +1,4 @@
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Navigate, Route, Routes, Outlet } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext'
 import PrivateRoute from './components/PrivateRoute'
 import Admin from './pages/Admin'
@@ -7,53 +7,39 @@ import Dashboard from './pages/Dashboard'
 import Login from './pages/Login'
 import NotFound from './pages/NotFound'
 import HistoryPage from './pages/History'
-import Settings from './pages/Settings' 
-import { ActivityProvider } from './contexts/ActivityContext';
+import Settings from './pages/Settings'
+import { ActivityProvider } from './contexts/ActivityContext'
 
 function App() {
   return (
     <AuthProvider>
-      <ActivityProvider>
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
-
           <Route path="/login" element={<Login />} />
-
           <Route path="/callback" element={<Callback />} />
 
           <Route
-            path="/dashboard"
             element={
               <PrivateRoute>
-                <Dashboard />
+                <ActivityProvider>
+                  <Outlet />
+                </ActivityProvider>
               </PrivateRoute>
             }
-          />
-
-          <Route
-            path="/history"
-            element={
-              <PrivateRoute>
-                <HistoryPage />
-              </PrivateRoute>
-            }
-          />
-
-          <Route
-            path="/settings"
-            element={
-              <PrivateRoute>
-                <Settings />
-              </PrivateRoute>
-            }
-          />
+          >
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/history" element={<HistoryPage />} />
+            <Route path="/settings" element={<Settings />} />
+          </Route>
 
           <Route
             path="/admin"
             element={
               <PrivateRoute requiredRole="ADMIN">
-                <Admin />
+                <ActivityProvider>
+                  <Admin />
+                </ActivityProvider>
               </PrivateRoute>
             }
           />
@@ -61,7 +47,6 @@ function App() {
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
-      </ActivityProvider>
     </AuthProvider>
   )
 }
