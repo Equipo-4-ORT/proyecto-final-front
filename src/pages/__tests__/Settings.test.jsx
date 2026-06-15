@@ -4,6 +4,7 @@ import { MemoryRouter } from "react-router-dom"
 import { AuthContext } from "../../contexts/auth-context"
 import Settings from "../Settings"
 import { getUserSettings, updateUserSettings } from "../../services/userSettingsApi"
+import { ActivityContext } from '../../contexts/ActivityContextDef'; 
 
 vi.mock("../../services/userSettingsApi", () => ({
   getUserSettings: vi.fn(),
@@ -15,14 +16,15 @@ const authValue = {
   logout: vi.fn(),
 }
 
-const renderSettings = () =>
-  render(
-    <MemoryRouter>
-      <AuthContext.Provider value={authValue}>
+const renderSettings = () => render(
+  <MemoryRouter>
+    <AuthContext.Provider value={authValue}>
+      <ActivityContext.Provider value={{ activities: [], sourceCounts: {}, isLoading: false }}>
         <Settings />
-      </AuthContext.Provider>
-    </MemoryRouter>,
-  )
+      </ActivityContext.Provider>
+    </AuthContext.Provider>
+  </MemoryRouter>
+)
 
 const SETTINGS = {
   workStartTime: "09:00",
