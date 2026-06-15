@@ -117,10 +117,16 @@ export function buildUpdatePayload(
     basePayload.activityType = originalActivity._originalActivityType
     basePayload.metadata = {
       ...originalActivity._originalMetadata, // Trae issue_key, time_spent, etc.
+      title: editingData.title?.trim() || "", 
       description: editingData.description?.trim() || "",
       notes: editingData.notes?.trim() || "",
       status: originalActivity.status || "pending"
     }
+  }
+  if (new Date(basePayload.endTime) <= new Date(basePayload.startTime)) {
+    const endObj = new Date(basePayload.endTime)
+    endObj.setDate(endObj.getDate() + 1)
+    basePayload.endTime = endObj.toISOString()
   }
 
   return basePayload
