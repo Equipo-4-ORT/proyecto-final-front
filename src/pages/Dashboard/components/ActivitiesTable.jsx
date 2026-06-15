@@ -34,7 +34,6 @@ function ActivitiesTable({
   onAddActivity,
   onUpdateActivity,
   onDeleteActivity,
-  defaultActivityHours,
   readOnly = false,
 }) {
   const [isAdding, setIsAdding] = useState(false)
@@ -175,8 +174,8 @@ function ActivitiesTable({
       }
 
       return (
-        getActivityDurationMinutes(firstActivity, defaultActivityHours) -
-        getActivityDurationMinutes(secondActivity, defaultActivityHours)
+        getActivityDurationMinutes(firstActivity) -
+        getActivityDurationMinutes(secondActivity)
       )
     },
   )
@@ -208,7 +207,6 @@ function ActivitiesTable({
                   key={activity.id}
                   rowNumber={index + 1}
                   activity={activity}
-                  defaultActivityHours={defaultActivityHours}
                   isEditing={editingActivityId === activity.id}
                   editingData={editingData}
                   editingErrors={editingErrors}
@@ -230,7 +228,6 @@ function ActivitiesTable({
           <ActivityMobileCard
             key={activity.id}
             activity={activity}
-            defaultActivityHours={defaultActivityHours}
             isEditing={editingActivityId === activity.id}
             editingData={editingData}
             editingErrors={editingErrors}

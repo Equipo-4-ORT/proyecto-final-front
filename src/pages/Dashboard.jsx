@@ -17,7 +17,7 @@ import {
   getProductivityPercentage,
   getSourceSummary,
   getTotalHours,
-  DEFAULT_ACTIVITY_HOURS,
+  getWorkdayHours,
   DEFAULT_WORKDAY_HOURS,
 } from './Dashboard/utils/dashboardCalculations'
 
@@ -35,13 +35,7 @@ import {
 import { getApiErrorMessage } from '../utils/apiErrors'
 import { getTodayDate } from '../utils/dateHelpers'
 import { generateReport } from '../services/reportsService'
-
-function getStoredNumber(key, fallbackValue) {
-  const storedValue = localStorage.getItem(key)
-  if (!storedValue) return fallbackValue
-  const parsedValue = Number(storedValue)
-  return Number.isNaN(parsedValue) ? fallbackValue : parsedValue
-}
+import { getUserSettings } from '../services/userSettingsApi'
 
 const ACTIVITY_ERROR_MESSAGES = {
   validation_error:
@@ -73,32 +67,35 @@ function Dashboard() {
     setContextDate(newDate)
   }
 
-  const [workdayHours, setWorkdayHours] = useState(() =>
-    getStoredNumber('workdayHours', DEFAULT_WORKDAY_HOURS),
-  )
-  const [defaultActivityHours, setDefaultActivityHours] = useState(() =>
-    getStoredNumber('defaultActivityHours', DEFAULT_ACTIVITY_HOURS),
-  )
-
   const [generatingFrom, setGeneratingFrom] = useState(null)
   const [toast, setToast] = useState(null)
 
-  useEffect(() => {
-    localStorage.setItem('workdayHours', workdayHours)
-  }, [workdayHours])
+  // Largo de la jornada (denominador de la productividad). Sale de la config del
+  // usuario; al volver de /settings el Dashboard se re-monta y toma el valor nuevo.
+  // El usuario siempre tiene una jornada por defecto (09:00-18:00) garantizada por
+  // la BD, así que un usuario recién creado que aún no abrió /settings ya da 9 h.
+  const [workdayHours, setWorkdayHours] = useState(DEFAULT_WORKDAY_HOURS)
 
   useEffect(() => {
-    localStorage.setItem('defaultActivityHours', defaultActivityHours)
-  }, [defaultActivityHours])
+    let cancelled = false
+    getUserSettings()
+      .then((settings) => {
+        if (!cancelled) {
+          setWorkdayHours(getWorkdayHours(settings.workStartTime, settings.workEndTime))
+        }
+      })
+      .catch(() => {
+        // Si falla la carga, mantenemos el fallback (DEFAULT_WORKDAY_HOURS).
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   const handleAddActivity = async (formData) => {
     setLoadError(null);
     try {
-      const payload = activityToApiPayload(
-        formData,
-        selectedDate,
-        defaultActivityHours
-      );
+      const payload = activityToApiPayload(formData, selectedDate);
       await createActivity(payload);
       await refreshActivities();
       return { ok: true };
@@ -124,11 +121,7 @@ function Dashboard() {
     }
 
     try {
-      const payload = buildUpdatePayload(
-        editingData,
-        original,
-        defaultActivityHours
-      );
+      const payload = buildUpdatePayload(editingData, original);
       await updateActivity(id, payload);
       await refreshActivities();
       return { ok: true };
@@ -162,17 +155,13 @@ function Dashboard() {
 
   const visibleActivities = filterByLocalDate(activities, selectedDate)
   const totalActivities = visibleActivities.length
-  const totalHours = getTotalHours(visibleActivities, defaultActivityHours)
+  const totalHours = getTotalHours(visibleActivities)
   const calendarEventCount = getCalendarEventCount(visibleActivities)
   const productivityPercentage = getProductivityPercentage(
     totalHours,
     workdayHours,
   )
-  const sourceSummary = getSourceSummary(
-    visibleActivities,
-    SOURCES,
-    defaultActivityHours,
-  )
+  const sourceSummary = getSourceSummary(visibleActivities, SOURCES)
 
   function handleExportExcel(source) {
     if (generatingFrom) return
@@ -247,10 +236,6 @@ function Dashboard() {
       onDateChange={handleDateChange}
       onExportExcel={handleExportExcel}
       generatingFrom={generatingFrom}
-      workdayHours={workdayHours}
-      defaultActivityHours={defaultActivityHours}
-      onWorkdayHoursChange={setWorkdayHours}
-      onDefaultActivityHoursChange={setDefaultActivityHours}
     >
       <JiraCallbackBanner />
       <JiraIntegrationCard onSynced={refreshActivities} />
@@ -277,7 +262,6 @@ function Dashboard() {
         onAddActivity={handleAddActivity}
         onUpdateActivity={handleUpdateActivity}
         onDeleteActivity={handleDeleteActivity}
-        defaultActivityHours={defaultActivityHours}
       />
 
       <SourceSummary

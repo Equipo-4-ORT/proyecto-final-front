@@ -3,10 +3,7 @@ import AppLayout from '../components/layout/AppLayout'
 import Card from '../components/ui/Card'
 import Button from '../components/ui/Button'
 import TextInput from '../components/ui/TextInput'
-import {
-  getUserSettings,
-  updateUserSettings,
-} from '../services/userSettingsApi'
+import { getUserSettings, updateUserSettings } from '../services/userSettingsApi'
 import { Toast } from '../components/ui/Toast'
 
 function Settings() {
@@ -17,7 +14,7 @@ function Settings() {
     startTime: '',
     endTime: '',
     preventOverlap: false,
-    defaultDuration: '',
+    defaultDuration: '30',
   })
 
   useEffect(() => {
@@ -27,7 +24,7 @@ function Settings() {
           startTime: data.workStartTime || '',
           endTime: data.workEndTime || '',
           preventOverlap: data.avoidOverlaps || false,
-          defaultDuration: data.defaultDuration || '',
+          defaultDuration: data.defaultDuration?.toString() || '30',
         })
       })
       .catch((err) => console.error('Error al cargar:', err))
@@ -35,25 +32,30 @@ function Settings() {
   }, [])
 
   const handleSave = async () => {
+    if (formData.startTime && formData.endTime && formData.startTime >= formData.endTime) {
+      setToast({ message: 'La hora de inicio debe ser menor a la hora de fin.', variant: 'error' })
+      return
+    }
+
+    const duration = parseInt(formData.defaultDuration)
+    if (!duration || duration < 1 || duration > 180) {
+      setToast({ message: 'La duración debe estar entre 1 y 180 minutos.', variant: 'error' })
+      return
+    }
+
     setSaving(true)
     try {
       await updateUserSettings({
         workStartTime: formData.startTime,
         workEndTime: formData.endTime,
         avoidOverlaps: formData.preventOverlap,
-        defaultDuration: formData.defaultDuration,
+        defaultDuration: duration,
       })
 
-      setToast({
-        message: 'Configuración actualizada con éxito',
-        variant: 'success',
-      })
+      setToast({ message: 'Configuración actualizada con éxito', variant: 'success' })
     } catch (error) {
       console.error('Error al guardar:', error)
-      setToast({
-        message: 'Hubo un error al guardar los cambios.',
-        variant: 'error',
-      })
+      setToast({ message: 'Hubo un error al guardar los cambios.', variant: 'error' })
     } finally {
       setSaving(false)
     }
@@ -69,55 +71,31 @@ function Settings() {
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1">
-              <label className="text-xs font-semibold text-slate-500 uppercase">
-                Inicio
-              </label>
-              <TextInput
-                type="time"
-                value={formData.startTime}
-                onChange={(e) =>
-                  setFormData({ ...formData, startTime: e.target.value })
-                }
-              />
+              <label className="text-xs font-semibold text-slate-500 uppercase">Inicio</label>
+              <TextInput type="time" value={formData.startTime} onChange={(e) => setFormData({ ...formData, startTime: e.target.value })} />
             </div>
             <div className="space-y-1">
-              <label className="text-xs font-semibold text-slate-500 uppercase">
-                Fin
-              </label>
-              <TextInput
-                type="time"
-                value={formData.endTime}
-                onChange={(e) =>
-                  setFormData({ ...formData, endTime: e.target.value })
-                }
-              />
+              <label className="text-xs font-semibold text-slate-500 uppercase">Fin</label>
+              <TextInput type="time" value={formData.endTime} onChange={(e) => setFormData({ ...formData, endTime: e.target.value })} />
             </div>
           </div>
 
           <div className="space-y-1">
             <label className="text-xs font-semibold text-slate-500 uppercase">
-              Duración default actividad
+              Duración default actividad (minutos)
             </label>
             <TextInput
               type="number"
+              min="1"
+              max="180"
               value={formData.defaultDuration}
-              onChange={(e) =>
-                setFormData({ ...formData, defaultDuration: e.target.value })
-              }
+              onChange={(e) => setFormData({ ...formData, defaultDuration: e.target.value })}
             />
           </div>
 
           <label className="flex items-center gap-3 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={formData.preventOverlap}
-              onChange={(e) =>
-                setFormData({ ...formData, preventOverlap: e.target.checked })
-              }
-            />
-            <span className="text-sm text-slate-700">
-              Evitar solapamientos al consolidar
-            </span>
+            <input type="checkbox" checked={formData.preventOverlap} onChange={(e) => setFormData({ ...formData, preventOverlap: e.target.checked })} />
+            <span className="text-sm text-slate-700">Evitar solapamientos al consolidar</span>
           </label>
 
           <Button onClick={handleSave} disabled={saving} className="w-full">
@@ -126,13 +104,7 @@ function Settings() {
         </Card>
       </div>
 
-      {toast && (
-        <Toast
-          message={toast.message}
-          variant={toast.variant}
-          onClose={() => setToast(null)}
-        />
-      )}
+      {toast && <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />}
     </AppLayout>
   )
 }

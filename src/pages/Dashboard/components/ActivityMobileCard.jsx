@@ -18,7 +18,6 @@ function getEndTimeClass(value) {
 
 function ActivityMobileCard({
   activity,
-  defaultActivityHours,
   isEditing,
   editingData,
   editingErrors,
@@ -209,7 +208,7 @@ function ActivityMobileCard({
                 <p
                   className={`font-semibold ${getEndTimeClass(activity.end)}`}
                 >
-                  {activity.end || getActivityEndTime(activity, defaultActivityHours)}
+                  {activity.end || getActivityEndTime(activity)}
                 </p>
               </div>
 
@@ -219,9 +218,7 @@ function ActivityMobileCard({
                 </p>
 
                 <p className="font-semibold text-slate-800">
-                  {formatDuration(
-                    getActivityDurationMinutes(activity, defaultActivityHours)
-                  )}
+                  {formatDuration(getActivityDurationMinutes(activity))}
                 </p>
               </div>
             </div>

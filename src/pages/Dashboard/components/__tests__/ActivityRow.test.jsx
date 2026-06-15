@@ -27,7 +27,6 @@ function renderRow(props = {}) {
         <ActivityRow
           rowNumber={1}
           activity={baseActivity}
-          defaultActivityHours={1}
           isEditing={false}
           editingData={{}}
           editingErrors={{}}
@@ -67,12 +66,11 @@ describe("ActivityRow", () => {
     expect(screen.getByText(/notas\.\.\./i)).toBeInTheDocument()
   })
 
-  it("renders the estimated end time when end is missing", () => {
-    renderRow({
-      activity: { ...baseActivity, end: "" },
-      defaultActivityHours: 2,
-    })
-    expect(screen.getByText("11:00")).toBeInTheDocument()
+  it("falls back to the start time in the end column when end is missing", () => {
+    renderRow({ activity: { ...baseActivity, end: "" } })
+    // Sin estimación: la columna Fin muestra el inicio, así que "09:00" aparece
+    // dos veces (Inicio + Fin).
+    expect(screen.getAllByText("09:00")).toHaveLength(2)
   })
 
   it("invokes onStartEdit when clicking the edit button", () => {

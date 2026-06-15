@@ -52,7 +52,6 @@ function Harness({ initial = seed, onChange }) {
       onAddActivity={onAddActivity}
       onUpdateActivity={onUpdateActivity}
       onDeleteActivity={onDeleteActivity}
-      defaultActivityHours={1}
     />
   )
 }

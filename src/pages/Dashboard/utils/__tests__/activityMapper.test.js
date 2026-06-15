@@ -140,14 +140,12 @@ describe("activityToApiPayload", () => {
     expect(typeof payload.endTime).toBe("string")
   })
 
-  it("calculates endTime from defaultActivityHours when end is empty", () => {
+  it("omits endTime when end is empty (the backend derives it from defaultDuration)", () => {
     const formData = { source: "jira", title: "Task", description: "", start: "09:00", end: "", notes: "" }
-    const payload = activityToApiPayload(formData, LOCAL_DATE, 2)
+    const payload = activityToApiPayload(formData, LOCAL_DATE)
 
-    const start = new Date(payload.startTime)
-    const end = new Date(payload.endTime)
-    const diffHours = (end - start) / (1000 * 60 * 60)
-    expect(diffHours).toBeCloseTo(2)
+    expect(payload.endTime).toBeUndefined()
+    expect(typeof payload.startTime).toBe("string")
   })
 
   it("falls back to source as activityType when title is empty", () => {
