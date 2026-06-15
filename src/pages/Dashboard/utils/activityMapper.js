@@ -42,6 +42,8 @@ export function apiToActivity(serverActivity) {
     status: metadata.status || "pending",
     notes: metadata.notes || "",
     startTime: serverActivity.startTime,
+    _originalActivityType: serverActivity.activityType,
+    _originalMetadata: metadata,
   }
 }
 
@@ -94,14 +96,34 @@ export function buildOptimisticActivity(formData, id, selectedDate) {
   }
 }
 
-export function buildUpdatePayload(editingData, originalActivity) {
+export function buildUpdatePayload(
+  editingData,
+  originalActivity,
+  defaultActivityHours = DEFAULT_ACTIVITY_HOURS,
+) {
   const dateString = getLocalDateString(originalActivity.startTime)
-  return buildActivityPayload(
+  
+  const basePayload = buildActivityPayload(
     dateString,
     editingData,
     originalActivity.source,
     originalActivity.status || "pending",
+    defaultActivityHours,
   )
+
+  // FIX: Si es una actividad que vino del backend (ej. Jira o Calendar),
+  // restauramos su activityType y preservamos su metadata original intacta.
+  if (originalActivity._originalActivityType) {
+    basePayload.activityType = originalActivity._originalActivityType
+    basePayload.metadata = {
+      ...originalActivity._originalMetadata, // Trae issue_key, time_spent, etc.
+      description: editingData.description?.trim() || "",
+      notes: editingData.notes?.trim() || "",
+      status: originalActivity.status || "pending"
+    }
+  }
+
+  return basePayload
 }
 
 export function buildOptimisticUpdate(activity, editingData) {
