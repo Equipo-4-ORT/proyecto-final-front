@@ -63,6 +63,10 @@ function Dashboard() {
   const navigate = useNavigate()
   const { user, logout } = useAuth()
 
+  console.log("DEBUG 1 - Objeto User:", user);
+  console.log("DEBUG 2 - defaultDuration del User:", user?.defaultDuration);
+
+
   const [searchParams] = useSearchParams()
   const urlDate = searchParams.get('date')
 
@@ -81,8 +85,14 @@ function Dashboard() {
   )
 
   const [defaultActivityHours, setDefaultActivityHours] = useState(() =>
-    getStoredNumber('defaultActivityHours', DEFAULT_ACTIVITY_HOURS),
+    user?.defaultDuration || getStoredNumber('defaultActivityHours', DEFAULT_ACTIVITY_HOURS),
   )
+
+  useEffect(() => {
+    if (user?.defaultDuration) {
+      setDefaultActivityHours(user.defaultDuration)
+    }
+  }, [user?.defaultDuration])
 
   const [generatingFrom, setGeneratingFrom] = useState(null)
   const [toast, setToast] = useState(null)
@@ -97,9 +107,11 @@ function Dashboard() {
     localStorage.setItem('workdayHours', workdayHours)
   }, [workdayHours])
 
-  useEffect(() => {
-    localStorage.setItem('defaultActivityHours', defaultActivityHours)
-  }, [defaultActivityHours])
+ useEffect(() => {
+    if (user?.defaultDuration) {
+      setDefaultActivityHours(user.defaultDuration)
+    }
+  }, [user?.defaultDuration])
 
   useEffect(() => {
     if (dayActivities) {
@@ -126,11 +138,16 @@ function Dashboard() {
       setActivities((prev) => [...prev, optimistic])
 
       try {
+        console.log("DEBUG 3 - Estado defaultActivityHours:", defaultActivityHours);
+
         const payload = activityToApiPayload(
           formData,
           selectedDate,
           defaultActivityHours,
         )
+
+        console.log("DEBUG 4 - Payload Final:", payload);
+
         const created = await createActivity(payload)
         const mapped = apiToActivity(created)
         setActivities((prev) =>

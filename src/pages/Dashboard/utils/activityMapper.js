@@ -50,6 +50,8 @@ export function apiToActivity(serverActivity) {
 function buildActivityPayload(dateString, formLikeData, sourceFallback, status, defaultActivityHours) {
   const startTime = combineDateAndTime(dateString, formLikeData.start)
 
+  console.log("DEBUG 5 - Horas recibidas en el mapper:", defaultActivityHours);
+
   let endTime
   if (formLikeData.end) {
     endTime = combineDateAndTime(dateString, formLikeData.end)
