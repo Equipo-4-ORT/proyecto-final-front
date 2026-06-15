@@ -13,7 +13,6 @@ function ActivityRow({
   readOnly = false,
   rowNumber,
   activity,
-  defaultActivityHours,
   isEditing,
   editingData,
   editingErrors,
@@ -126,22 +125,14 @@ function ActivityRow({
         ) : (
           activity.end || (
             <span className="text-slate-400 italic">
-              {getActivityEndTime(
-                activity,
-                defaultActivityHours
-              )}
+              {getActivityEndTime(activity)}
             </span>
           )
         )}
       </td>
 
       <td className="px-4 py-3 font-semibold">
-        {formatDuration(
-          getActivityDurationMinutes(
-            activity,
-            defaultActivityHours
-          )
-        )}
+        {formatDuration(getActivityDurationMinutes(activity))}
       </td>
 
       <td className="px-4 py-3">

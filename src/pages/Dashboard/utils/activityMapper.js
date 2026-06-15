@@ -1,5 +1,3 @@
-import { DEFAULT_ACTIVITY_HOURS } from "./dashboardCalculations"
-
 function pad2(value) {
   return String(value).padStart(2, "0")
 }
@@ -47,27 +45,16 @@ export function apiToActivity(serverActivity) {
   }
 }
 
-function buildActivityPayload(dateString, formLikeData, sourceFallback, status, defaultActivityHours) {
+function buildActivityPayload(dateString, formLikeData, sourceFallback, status) {
   const startTime = combineDateAndTime(dateString, formLikeData.start)
-
-  console.log("DEBUG 5 - Horas recibidas en el mapper:", defaultActivityHours);
-
-  let endTime
-  if (formLikeData.end) {
-    endTime = combineDateAndTime(dateString, formLikeData.end)
-  } else {
-    const startDate = new Date(startTime)
-    endTime = new Date(startDate.getTime() + defaultActivityHours * 60 * 60 * 1000).toISOString()
-  }
 
   const title = formLikeData.title?.trim() || ""
   const description = formLikeData.description?.trim() || ""
   const notes = formLikeData.notes?.trim() || ""
 
-  return {
+  const payload = {
     activityType: title || sourceFallback,
     startTime,
-    endTime,
     metadata: {
       category: sourceFallback,
       title,
@@ -76,14 +63,19 @@ function buildActivityPayload(dateString, formLikeData, sourceFallback, status, 
       status,
     },
   }
+
+  // El endTime solo se envía si el usuario lo cargó. Si no, el backend lo deriva
+  // de la duración por defecto del usuario (defaultDuration): la regla de negocio
+  // vive en el backend, no en el front.
+  if (formLikeData.end) {
+    payload.endTime = combineDateAndTime(dateString, formLikeData.end)
+  }
+
+  return payload
 }
 
-export function activityToApiPayload(
-  formData,
-  selectedDate,
-  defaultActivityHours = DEFAULT_ACTIVITY_HOURS,
-) {
-  return buildActivityPayload(selectedDate, formData, formData.source, "pending", defaultActivityHours)
+export function activityToApiPayload(formData, selectedDate) {
+  return buildActivityPayload(selectedDate, formData, formData.source, "pending")
 }
 
 export function buildOptimisticActivity(formData, id, selectedDate) {
@@ -102,18 +94,13 @@ export function buildOptimisticActivity(formData, id, selectedDate) {
   }
 }
 
-export function buildUpdatePayload(
-  editingData,
-  originalActivity,
-  defaultActivityHours = DEFAULT_ACTIVITY_HOURS,
-) {
+export function buildUpdatePayload(editingData, originalActivity) {
   const dateString = getLocalDateString(originalActivity.startTime)
   return buildActivityPayload(
     dateString,
     editingData,
     originalActivity.source,
     originalActivity.status || "pending",
-    defaultActivityHours,
   )
 }
 
