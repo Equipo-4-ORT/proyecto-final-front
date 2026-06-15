@@ -12,7 +12,6 @@ const defaultProps = {
   onAddActivity: noop,
   onUpdateActivity: noop,
   onDeleteActivity: noop,
-  defaultActivityHours: 1,
 }
 
 describe("ReportView", () => {

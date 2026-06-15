@@ -5,7 +5,6 @@ function ReportView({
   onAddActivity,
   onUpdateActivity,
   onDeleteActivity,
-  defaultActivityHours,
   readOnly = false,
 }) {
   return (
@@ -15,7 +14,6 @@ function ReportView({
         onAddActivity={onAddActivity}
         onUpdateActivity={onUpdateActivity}
         onDeleteActivity={onDeleteActivity}
-        defaultActivityHours={defaultActivityHours}
         readOnly={readOnly}
       />
     </div>
