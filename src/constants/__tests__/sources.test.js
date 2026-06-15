@@ -4,7 +4,7 @@ import { SOURCES, UNKNOWN_SOURCE, getSource } from "../sources"
 describe("SOURCES catalog", () => {
   it("defines the expected source keys", () => {
     expect(Object.keys(SOURCES)).toEqual(
-      expect.arrayContaining(["calendar", "jira", "slides", "docs", "sheets"]),
+      expect.arrayContaining(["calendar", "jira", "drive"]),
     )
   })
 

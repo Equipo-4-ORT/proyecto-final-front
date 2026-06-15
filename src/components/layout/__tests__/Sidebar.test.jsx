@@ -3,7 +3,7 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import Sidebar from '../Sidebar'
 
-const sourceCounts = { calendar: 3, jira: 2, slides: 0, docs: 1, sheets: 4 }
+const sourceCounts = { calendar: 3, jira: 2, drive: 4 }
 
 describe('Sidebar', () => {
   it('renders the app heading', () => {
@@ -17,6 +17,7 @@ describe('Sidebar', () => {
     render(<MemoryRouter><Sidebar sourceCounts={sourceCounts} onExportExcel={() => {}} /></MemoryRouter>)
     expect(screen.getByText('Calendar')).toBeInTheDocument()
     expect(screen.getByText('Jira')).toBeInTheDocument()
+    expect(screen.getByText('Drive')).toBeInTheDocument()
     expect(screen.getByText('3')).toBeInTheDocument()
     expect(screen.getByText('4')).toBeInTheDocument()
   })

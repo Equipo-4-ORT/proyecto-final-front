@@ -21,7 +21,7 @@ export const initialActivities = [
 
   {
     id: 3,
-    source: 'docs',
+    source: 'drive',
     title: 'Documentación',
     description: 'Actualizar README onboarding',
     start: '11:00',
@@ -41,7 +41,7 @@ export const initialActivities = [
 
   {
     id: 5,
-    source: 'slides',
+    source: 'drive',
     title: 'Presentación',
     description: 'Preparar demo para cliente',
     start: '13:00',
@@ -61,7 +61,7 @@ export const initialActivities = [
 
   {
     id: 7,
-    source: 'sheets',
+    source: 'drive',
     title: 'Estimaciones',
     description: 'Carga horas sprint actual',
     start: '15:30',
@@ -91,7 +91,7 @@ export const initialActivities = [
 
   {
     id: 10,
-    source: 'slides',
+    source: 'drive',
     title: 'UX Review',
     description: 'Correcciones visuales MVP',
     start: '17:15',
@@ -101,7 +101,7 @@ export const initialActivities = [
 
   {
     id: 11,
-    source: 'sheets',
+    source: 'drive',
     title: 'Métricas',
     description: 'Actualizar métricas semanales',
     start: '18:00',
