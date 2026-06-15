@@ -96,34 +96,30 @@ export function buildOptimisticActivity(formData, id, selectedDate) {
   }
 }
 
-export function buildUpdatePayload(
-  editingData,
-  originalActivity,
-  defaultActivityHours = DEFAULT_ACTIVITY_HOURS,
-) {
+export function buildUpdatePayload(editingData, originalActivity) {
   const dateString = getLocalDateString(originalActivity.startTime)
   
   const basePayload = buildActivityPayload(
     dateString,
     editingData,
     originalActivity.source,
-    originalActivity.status || "pending",
-    defaultActivityHours,
+    originalActivity.status || "pending"
   )
 
-  // FIX: Si es una actividad que vino del backend (ej. Jira o Calendar),
-  // restauramos su activityType y preservamos su metadata original intacta.
+  // Restauramos el activityType y metadata si es una actividad externa (ej. Jira o Calendar)
   if (originalActivity._originalActivityType) {
     basePayload.activityType = originalActivity._originalActivityType
     basePayload.metadata = {
-      ...originalActivity._originalMetadata, // Trae issue_key, time_spent, etc.
+      ...originalActivity._originalMetadata, 
       title: editingData.title?.trim() || "", 
       description: editingData.description?.trim() || "",
       notes: editingData.notes?.trim() || "",
       status: originalActivity.status || "pending"
     }
   }
-  if (new Date(basePayload.endTime) <= new Date(basePayload.startTime)) {
+
+  // Validación para evitar un Crash de Invalid Date si no hay endTime definido
+  if (basePayload.endTime && new Date(basePayload.endTime) <= new Date(basePayload.startTime)) {
     const endObj = new Date(basePayload.endTime)
     endObj.setDate(endObj.getDate() + 1)
     basePayload.endTime = endObj.toISOString()
