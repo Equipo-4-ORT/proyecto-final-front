@@ -195,7 +195,7 @@ function ActivitiesTable({
                 <th className="text-left px-4 py-3">Descripción</th>
                 <th className="text-left px-4 py-3">Inicio</th>
                 <th className="text-left px-4 py-3">Fin</th>
-                <th className="text-left px-4 py-3">Duración hs</th>
+                <th className="text-left px-4 py-3">Duración</th>
                 <th className="text-left px-4 py-3">Notas</th>
                 {!readOnly && <th className="text-left px-4 py-3">Acciones</th>}
               </tr>
