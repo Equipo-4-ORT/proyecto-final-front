@@ -82,14 +82,15 @@ function HistoryPage({ records = RECORDS, itemsPerPage = 20 }) {
             Historial de Reportes
           </h1>
           <p className="text-sm text-slate-400">
-            Visualiza los reportes consolidados por la IA de tus actividades diarias.
+            Visualiza los reportes consolidados por la IA de tus actividades
+            diarias.
           </p>
         </div>
 
         {/* Filtros */}
         <div className="flex flex-wrap items-center gap-4 rounded-xl border border-slate-800 bg-slate-900/40 p-4">
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-medium text-slate-400">Desde</label>
+            <label className="text-xs font-medium text-black">Desde</label>
             <input
               type="date"
               value={fromDate}
@@ -98,7 +99,7 @@ function HistoryPage({ records = RECORDS, itemsPerPage = 20 }) {
             />
           </div>
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-medium text-slate-400">Hasta</label>
+            <label className="text-xs font-medium text-black">Hasta</label>
             <input
               type="date"
               value={toDate}
@@ -109,7 +110,7 @@ function HistoryPage({ records = RECORDS, itemsPerPage = 20 }) {
           {(fromDate || toDate) && (
             <button
               onClick={() => updateQueryParams({ from: '', to: '', page: '1' })}
-              className="mt-5 text-xs text-blue-400 hover:text-blue-300 underline transition-colors"
+              className="mt-5 text-xs text-black hover:text-slate-600 underline transition-colors"
             >
               Limpiar filtros
             </button>
@@ -130,13 +131,16 @@ function HistoryPage({ records = RECORDS, itemsPerPage = 20 }) {
             <tbody className="divide-y divide-slate-800">
               {paginatedRecords.length === 0 ? (
                 <tr>
-                  <td colSpan="4" className="py-10 text-center text-slate-500">
+                  <td colSpan="4" className="py-10 text-center text-black">
                     No se encontraron reportes en este rango de fechas.
                   </td>
                 </tr>
               ) : (
                 paginatedRecords.map((record) => (
-                  <tr key={record.id} className="hover:bg-slate-800/20 transition-colors">
+                  <tr
+                    key={record.id}
+                    className="hover:bg-slate-800/20 transition-colors"
+                  >
                     <td className="whitespace-nowrap px-6 py-4 font-medium text-slate-200">
                       {record.date}
                     </td>
@@ -171,9 +175,18 @@ function HistoryPage({ records = RECORDS, itemsPerPage = 20 }) {
             <div className="flex items-center justify-between border-t border-slate-800 bg-slate-900/30 px-6 py-4 text-sm text-slate-400">
               <div>
                 Mostrando{' '}
-                <span className="font-semibold text-slate-200">{startIndex + 1}</span> al{' '}
-                <span className="font-semibold text-slate-200">{Math.min(endIndex, totalItems)}</span> de{' '}
-                <span className="font-semibold text-slate-200">{totalItems}</span> registros
+                <span className="font-semibold text-slate-200">
+                  {startIndex + 1}
+                </span>{' '}
+                al{' '}
+                <span className="font-semibold text-slate-200">
+                  {Math.min(endIndex, totalItems)}
+                </span>{' '}
+                de{' '}
+                <span className="font-semibold text-slate-200">
+                  {totalItems}
+                </span>{' '}
+                registros
               </div>
               <div className="flex items-center gap-2">
                 <button
@@ -184,7 +197,11 @@ function HistoryPage({ records = RECORDS, itemsPerPage = 20 }) {
                   Anterior
                 </button>
                 <span className="text-xs text-slate-400">
-                  Página <span className="text-slate-200 font-medium">{currentPage}</span> de {totalPages}
+                  Página{' '}
+                  <span className="text-slate-200 font-medium">
+                    {currentPage}
+                  </span>{' '}
+                  de {totalPages}
                 </span>
                 <button
                   onClick={() => handlePageChange(currentPage + 1)}
@@ -244,7 +261,11 @@ function HistoryPage({ records = RECORDS, itemsPerPage = 20 }) {
       )}
 
       {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={hideToast} />
+        <Toast
+          message={toast.message}
+          variant={toast.variant}
+          onClose={hideToast}
+        />
       )}
     </AppLayout>
   )
