@@ -95,6 +95,25 @@ describe("Settings", () => {
     expect(await screen.findByText(/éxito/i)).toBeInTheDocument()
   })
 
+  it("rejects non-integer or out-of-range durations and does not call the API", async () => {
+    getUserSettings.mockResolvedValue(SETTINGS)
+    updateUserSettings.mockResolvedValue({})
+    renderSettings()
+
+    await screen.findByRole("heading", { name: /configuración/i })
+
+    fireEvent.change(screen.getByRole("spinbutton"), { target: { value: "1.5" } })
+    fireEvent.click(screen.getByRole("button", { name: /guardar cambios/i }))
+
+    expect(await screen.findByText(/entero entre 1 y 24 horas/i)).toBeInTheDocument()
+    expect(updateUserSettings).not.toHaveBeenCalled()
+
+    fireEvent.change(screen.getByRole("spinbutton"), { target: { value: "25" } })
+    fireEvent.click(screen.getByRole("button", { name: /guardar cambios/i }))
+
+    expect(updateUserSettings).not.toHaveBeenCalled()
+  })
+
   it("alerts the user when saving fails", async () => {
     getUserSettings.mockResolvedValue(SETTINGS)
     updateUserSettings.mockRejectedValue(new Error("boom"))

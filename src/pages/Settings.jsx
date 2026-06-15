@@ -14,7 +14,7 @@ function Settings() {
     startTime: '',
     endTime: '',
     preventOverlap: false,
-    defaultDuration: '30',
+    defaultDuration: '1',
   })
 
   useEffect(() => {
@@ -24,7 +24,7 @@ function Settings() {
           startTime: data.workStartTime || '',
           endTime: data.workEndTime || '',
           preventOverlap: data.avoidOverlaps || false,
-          defaultDuration: data.defaultDuration?.toString() || '30',
+          defaultDuration: data.defaultDuration?.toString() || '1',
         })
       })
       .catch((err) => console.error('Error al cargar:', err))
@@ -37,9 +37,9 @@ function Settings() {
       return
     }
 
-    const duration = parseInt(formData.defaultDuration)
-    if (!duration || duration < 1 || duration > 180) {
-      setToast({ message: 'La duración debe estar entre 1 y 180 minutos.', variant: 'error' })
+    const duration = Number(formData.defaultDuration)
+    if (!Number.isInteger(duration) || duration < 1 || duration > 24) {
+      setToast({ message: 'La duración debe ser un número entero entre 1 y 24 horas.', variant: 'error' })
       return
     }
 
@@ -82,12 +82,13 @@ function Settings() {
 
           <div className="space-y-1">
             <label className="text-xs font-semibold text-slate-500 uppercase">
-              Duración default actividad (minutos)
+              Duración default actividad (horas)
             </label>
             <TextInput
               type="number"
               min="1"
-              max="180"
+              max="24"
+              step="1"
               value={formData.defaultDuration}
               onChange={(e) => setFormData({ ...formData, defaultDuration: e.target.value })}
             />
