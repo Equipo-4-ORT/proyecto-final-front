@@ -5,6 +5,8 @@ import Dashboard from '../Dashboard'
 import { AuthProvider } from '../../contexts/AuthContext'
 import { ActivityContext } from '../../contexts/ActivityContextDef'; 
 import { generateReport } from '../../services/reportsService'
+import { updateActivity } from '../../services/activitiesApi'
+import { getTodayDate } from '../../utils/dateHelpers'
 
 vi.mock('../../hooks/useJiraConnection', () => ({
   useJiraConnection: () => ({
@@ -42,7 +44,7 @@ vi.mock('../../services/api', () => ({
   },
 }))
 
-const renderDashboard = () =>
+const renderDashboard = (contextOverrides = {}) =>
   render(
     <AuthProvider>
       <ActivityContext.Provider
@@ -54,6 +56,7 @@ const renderDashboard = () =>
           refreshActivities: vi.fn(),
           date: '2026-06-14',
           setDate: vi.fn(),
+          ...contextOverrides,
         }}
       >
         <MemoryRouter>
@@ -107,6 +110,48 @@ describe('Dashboard', () => {
     const link = screen.getByRole('link', { name: /abrir google sheet/i })
     expect(link).toHaveAttribute('href', sheetUrl)
     expect(link).toHaveAttribute('target', '_blank')
+  })
+
+  it('actualiza una actividad existente leyendo el original del contexto', async () => {
+    // Regresión: el original se buscaba en un ref que quedaba stale y siempre
+    // devolvía undefined, por lo que toda edición fallaba. Debe encontrarse en
+    // las actividades del contexto y llamar a updateActivity + refreshActivities.
+    const refreshActivities = vi.fn().mockResolvedValue(undefined)
+    updateActivity.mockResolvedValueOnce({})
+
+    const activity = {
+      id: 'act-1',
+      source: 'calendar',
+      title: 'Reunión',
+      description: 'desc',
+      start: '10:00',
+      end: '11:00',
+      status: 'pending',
+      notes: '',
+      startTime: new Date(new Date().setHours(12, 0, 0, 0)).toISOString(),
+    }
+
+    renderDashboard({
+      activities: [activity],
+      date: getTodayDate(),
+      refreshActivities,
+    })
+
+    fireEvent.click(screen.getAllByLabelText(/editar actividad/i)[0])
+
+    const titleInput = screen.getAllByPlaceholderText('Título')[0]
+    fireEvent.change(titleInput, { target: { value: 'Reunión editada' } })
+
+    fireEvent.click(screen.getAllByLabelText(/guardar edición/i)[0])
+
+    await waitFor(() => {
+      expect(updateActivity).toHaveBeenCalledTimes(1)
+    })
+    expect(updateActivity).toHaveBeenCalledWith('act-1', expect.any(Object))
+    expect(refreshActivities).toHaveBeenCalled()
+    expect(
+      screen.queryByText(/no pudimos actualizar la actividad/i),
+    ).not.toBeInTheDocument()
   })
 
   it('warns when the report is generated but no Sheet url is returned', async () => {

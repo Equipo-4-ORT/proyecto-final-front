@@ -1,5 +1,5 @@
-import {useEffect, useRef, useState } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 import { useAuth } from '../hooks/useAuth'
 import { useActivityData } from '../hooks/useActivityData';
@@ -63,12 +63,8 @@ function Dashboard() {
     refreshActivities,
   } = useActivityData()
 
-  const [searchParams] = useSearchParams()
-  const urlDate = searchParams.get('date')
-
-  const [selectedDate, setSelectedDate] = useState(urlDate || getTodayDate())
+  const [selectedDate, setSelectedDate] = useState(getTodayDate())
   const activities = contextActivities || []
-  const activitiesRef = useRef(activities)
 
   const [loadError, setLoadError] = useState(null)
 
@@ -120,7 +116,12 @@ function Dashboard() {
 
   const handleUpdateActivity = async (id, editingData) => {
     setLoadError(null);
-    const original = activitiesRef.current.find((a) => a.id === id);
+    const original = activities.find((a) => a.id === id);
+    if (!original) {
+      const message = 'La actividad ya no existe.';
+      setLoadError(message);
+      return { ok: false, message };
+    }
 
     try {
       const payload = buildUpdatePayload(
