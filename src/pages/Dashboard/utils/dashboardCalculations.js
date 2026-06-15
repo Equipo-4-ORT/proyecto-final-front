@@ -1,5 +1,4 @@
-export const DEFAULT_WORKDAY_HOURS = 8
-export const DEFAULT_ACTIVITY_HOURS = 1
+export const DEFAULT_WORKDAY_HOURS = 9
 
 export function parseTimeToMinutes(time) {
   if (!time || !time.includes(":")) {
@@ -13,31 +12,15 @@ export function parseTimeToMinutes(time) {
   return hours * 60 + minutes
 }
 
-function formatMinutesToTime(totalMinutes) {
-  const hours = Math.floor(totalMinutes / 60)
-  const minutes = totalMinutes % 60
-
-  return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`
+export function getActivityEndTime(activity) {
+  // El backend garantiza endTime en toda actividad persistida; el front ya no
+  // estima duración. Si por algún motivo no hubiera fin, devolvemos el inicio.
+  return activity.end || activity.start
 }
 
-export function getActivityEndTime( activity, defaultActivityHours = DEFAULT_ACTIVITY_HOURS,) {
-  if (activity.end) {
-    return activity.end
-  }
+export function getActivityDurationMinutes(activity) {
   const startMinutes = parseTimeToMinutes(activity.start)
-  const estimatedEndMinutes = startMinutes + defaultActivityHours * 60
-
-  return formatMinutesToTime(estimatedEndMinutes)
-}
-
-export function getActivityDurationMinutes( activity, defaultActivityHours = DEFAULT_ACTIVITY_HOURS, ) {
-  const startMinutes = parseTimeToMinutes(activity.start)
-  let endMinutes
-  if (activity.end) {
-    endMinutes = parseTimeToMinutes(activity.end)
-  } else {
-    endMinutes = startMinutes + defaultActivityHours * 60
-  }
+  const endMinutes = activity.end ? parseTimeToMinutes(activity.end) : startMinutes
 
   return Math.max(endMinutes - startMinutes, 0)
 }
@@ -55,18 +38,36 @@ export function formatDuration(minutes) {
   return `${hours} h ${remainingMinutes} min`
 }
 
-export function getTotalMinutes(activities, defaultActivityHours = DEFAULT_ACTIVITY_HOURS, ) {
+export function getTotalMinutes(activities) {
   return activities.reduce((total, activity) => {
-    return total + getActivityDurationMinutes(activity, defaultActivityHours)
+    return total + getActivityDurationMinutes(activity)
   }, 0)
 }
 
-export function getTotalHours(activities,defaultActivityHours = DEFAULT_ACTIVITY_HOURS) {
-  return getTotalMinutes(activities, defaultActivityHours) / 60
+export function getTotalHours(activities) {
+  return getTotalMinutes(activities) / 60
 }
 
 export function getCalendarEventCount(activities) {
   return activities.filter((activity) => activity.source === "calendar").length
+}
+
+// Largo de la jornada laboral (en horas) a partir de la configuración del usuario
+// (workStartTime/workEndTime en "HH:MM"). El backend siempre provee estos valores
+// (tienen @default "09:00"/"18:00"), pero si faltaran caemos al default. Soporta
+// jornadas que cruzan la medianoche (ej. turno noche 21:00 → 02:00 = 5 h).
+export function getWorkdayHours(workStartTime, workEndTime) {
+  if (!workStartTime || !workEndTime) {
+    return DEFAULT_WORKDAY_HOURS
+  }
+  const start = parseTimeToMinutes(workStartTime)
+  const end = parseTimeToMinutes(workEndTime)
+  let minutes = end - start
+  if (minutes <= 0) {
+    minutes += 24 * 60
+  }
+
+  return minutes / 60
 }
 
 export function getProductivityPercentage(totalHours, workdayHours = DEFAULT_WORKDAY_HOURS,) {
@@ -75,15 +76,15 @@ export function getProductivityPercentage(totalHours, workdayHours = DEFAULT_WOR
   return Math.min(Math.max(percentage, 0), 100)
 }
 
-export function getSourceSummary(activities, sources, defaultActivityHours = DEFAULT_ACTIVITY_HOURS) {
-  const totalMinutes = getTotalMinutes(activities, defaultActivityHours)
+export function getSourceSummary(activities, sources) {
+  const totalMinutes = getTotalMinutes(activities)
 
   return Object.entries(sources).map(([sourceKey, source]) => {
     const sourceActivities = activities.filter(
       (activity) => activity.source === sourceKey
     )
 
-    const sourceMinutes = getTotalMinutes(sourceActivities, defaultActivityHours)
+    const sourceMinutes = getTotalMinutes(sourceActivities)
 
     const percentage = totalMinutes > 0
       ? Math.round((sourceMinutes / totalMinutes) * 100)

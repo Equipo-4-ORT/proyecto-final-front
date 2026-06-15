@@ -1,6 +1,5 @@
 import { describe, it, expect } from "vitest"
 import {
-  DEFAULT_ACTIVITY_HOURS,
   DEFAULT_WORKDAY_HOURS,
   parseTimeToMinutes,
   getActivityEndTime,
@@ -10,6 +9,7 @@ import {
   getTotalHours,
   getCalendarEventCount,
   getProductivityPercentage,
+  getWorkdayHours,
   getSourceSummary,
   getSourceCounts,
 } from "../dashboardCalculations"
@@ -47,18 +47,8 @@ describe("getActivityEndTime", () => {
     expect(getActivityEndTime({ start: "09:00", end: "10:30" })).toBe("10:30")
   })
 
-  it("estimates end using defaultActivityHours when end is missing", () => {
-    expect(getActivityEndTime({ start: "09:00", end: "" }, 2)).toBe("11:00")
-  })
-
-  it("uses DEFAULT_ACTIVITY_HOURS when no default is provided", () => {
-    expect(getActivityEndTime({ start: "09:00", end: "" })).toBe(
-      `${String(9 + DEFAULT_ACTIVITY_HOURS).padStart(2, "0")}:00`,
-    )
-  })
-
-  it("pads single-digit hours and minutes", () => {
-    expect(getActivityEndTime({ start: "08:05", end: "" }, 1)).toBe("09:05")
+  it("falls back to start when end is missing (the front no longer estimates)", () => {
+    expect(getActivityEndTime({ start: "09:00", end: "" })).toBe("09:00")
   })
 })
 
@@ -69,10 +59,10 @@ describe("getActivityDurationMinutes", () => {
     ).toBe(90)
   })
 
-  it("uses defaultActivityHours when end is missing", () => {
+  it("returns 0 when end is missing (the front no longer estimates)", () => {
     expect(
-      getActivityDurationMinutes({ start: "09:00", end: "" }, 2),
-    ).toBe(120)
+      getActivityDurationMinutes({ start: "09:00", end: "" }),
+    ).toBe(0)
   })
 
   it("never returns a negative duration", () => {
@@ -104,15 +94,11 @@ describe("getTotalMinutes & getTotalHours", () => {
   const activities = [
     { start: "09:00", end: "10:00" }, // 60
     { start: "10:00", end: "11:30" }, // 90
-    { start: "12:00", end: "" }, // default 1h = 60
+    { start: "12:00", end: "" }, // sin fin → 0
   ]
 
-  it("sums durations across activities", () => {
-    expect(getTotalMinutes(activities)).toBe(210)
-  })
-
-  it("uses custom default activity hours", () => {
-    expect(getTotalMinutes(activities, 2)).toBe(60 + 90 + 120)
+  it("sums durations across activities (end-less ones count as 0)", () => {
+    expect(getTotalMinutes(activities)).toBe(150)
   })
 
   it("returns 0 for empty input", () => {
@@ -120,7 +106,7 @@ describe("getTotalMinutes & getTotalHours", () => {
   })
 
   it("getTotalHours divides minutes by 60", () => {
-    expect(getTotalHours(activities)).toBe(210 / 60)
+    expect(getTotalHours(activities)).toBe(150 / 60)
   })
 })
 
@@ -156,6 +142,21 @@ describe("getProductivityPercentage", () => {
 
   it("uses DEFAULT_WORKDAY_HOURS by default", () => {
     expect(getProductivityPercentage(DEFAULT_WORKDAY_HOURS)).toBe(100)
+  })
+})
+
+describe("getWorkdayHours", () => {
+  it("computes the hours between start and end", () => {
+    expect(getWorkdayHours("09:00", "18:00")).toBe(9)
+  })
+
+  it("handles a workday that crosses midnight", () => {
+    expect(getWorkdayHours("21:00", "02:00")).toBe(5)
+  })
+
+  it("falls back to DEFAULT_WORKDAY_HOURS when a time is missing", () => {
+    expect(getWorkdayHours("", "18:00")).toBe(DEFAULT_WORKDAY_HOURS)
+    expect(getWorkdayHours("09:00", "")).toBe(DEFAULT_WORKDAY_HOURS)
   })
 })
 

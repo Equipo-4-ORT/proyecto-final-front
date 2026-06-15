@@ -7,10 +7,6 @@ const defaultProps = {
   selectedDate: '2026-05-13',
   onDateChange: () => {},
   onExportExcel: () => {},
-  workdayHours: 8,
-  defaultActivityHours: 1,
-  onWorkdayHoursChange: () => {},
-  onDefaultActivityHoursChange: () => {},
 }
 
 const renderHeader = (overrides = {}) =>
