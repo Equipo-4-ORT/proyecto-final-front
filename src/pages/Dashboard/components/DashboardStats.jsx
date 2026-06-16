@@ -3,7 +3,7 @@ import StatCard from '../../../components/ui/StatCard'
 import { formatDuration } from '../utils/dashboardCalculations'
 
 function DashboardStats({
-  totaldisplayedActivities,
+  totalActivities,
   calendarEventCount,
   totalHours,
   productivityPercentage,
@@ -14,7 +14,7 @@ function DashboardStats({
   const stats = [
     {
       title: 'Actividades cargadas',
-      value: totaldisplayedActivities,
+      value: totalActivities,
       subtitle: 'Desde todas las fuentes',
       icon: CalendarDays,
       color: 'blue',
