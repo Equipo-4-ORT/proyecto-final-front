@@ -117,7 +117,7 @@ describe("getCalendarEventCount", () => {
       { source: "calendar", title: "Meeting" },
       { source: "calendar", title: "1:1" },
       { source: "jira", title: "Reunión" },
-      { source: "docs", title: "Notas" },
+      { source: "drive", title: "Notas" },
     ]
     expect(getCalendarEventCount(activities)).toBe(3)
   })
