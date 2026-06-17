@@ -38,10 +38,6 @@ vi.mock('../../components/layout/AppLayout', () => ({
   ),
 }))
 
-vi.mock('../Dashboard/components/StatusBadge', () => ({
-  default: ({ status }) => <span>{status}</span>,
-}))
-
 // 3. Mock de la API (SOLUCIÓN AL ERROR DE HOISTING)
 // Primero declaramos el mock vacío para que Vitest lo eleve sin problemas
 vi.mock('../../services/reportsService', () => ({
@@ -54,21 +50,18 @@ const TEST_RECORDS = [
     id: 1,
     date: '2026-05-01',
     totalHours: '7 h 30 min',
-    status: 'Aprobado',
     xlsxUrl: 'http://docs.google.com/test1'
   },
   {
     id: 2,
     date: '2026-05-02',
     totalHours: '8 h 0 min',
-    status: 'Pendiente',
     xlsxUrl: null
   },
   {
     id: 3,
     date: '2026-05-03',
     totalHours: '9 h 10 min',
-    status: 'En revisión',
     xlsxUrl: 'http://docs.google.com/test3'
   },
 ]
@@ -150,7 +143,7 @@ describe('History Page', () => {
     })
   })
 
-  it('renderiza filas y permite ver y cerrar un reporte', async () => {
+  it('renderiza las filas con la fecha y las horas de cada registro', async () => {
     render(
       <BrowserRouter>
         <HistoryPage />
@@ -161,13 +154,8 @@ describe('History Page', () => {
       expect(screen.getByText('2026-05-01')).toBeInTheDocument()
     })
 
-    const botonesVer = screen.getAllByRole('button', { name: /Ver Detalles/i })
-    fireEvent.click(botonesVer[0])
-
-    expect(screen.getByText(/Reporte del 2026-05-01/i)).toBeInTheDocument()
-
-    fireEvent.click(screen.getByRole('button', { name: /Cerrar/i }))
-    expect(screen.queryByText(/Reporte del 2026-05-01/i)).not.toBeInTheDocument()
+    expect(screen.getByText('7 h 30 min')).toBeInTheDocument()
+    expect(screen.getByText('2026-05-03')).toBeInTheDocument()
   })
 
   it('botón Ver Excel deshabilita si no hay xlsxUrl y ejecuta window.open si lo hay', async () => {
@@ -193,26 +181,6 @@ describe('History Page', () => {
     expect(windowOpenSpy).toHaveBeenCalledWith('http://docs.google.com/test1', '_blank', 'noopener,noreferrer')
     
     windowOpenSpy.mockRestore()
-  })
-
-  it('botón Integrar con Finnegans muestra toast de "próximamente"', async () => {
-    render(
-      <BrowserRouter>
-        <HistoryPage />
-      </BrowserRouter>,
-    )
-
-    await waitFor(() => {
-      expect(screen.queryByText('Cargando historial...')).not.toBeInTheDocument()
-    })
-
-    const botonesVer = screen.getAllByRole('button', { name: /Ver Detalles/i })
-    fireEvent.click(botonesVer[0])
-
-    fireEvent.click(screen.getByRole('button', { name: /Integrar con Finnegans/i }))
-    expect(
-      screen.getByText('Integración con Finnegans disponible próximamente.'),
-    ).toBeInTheDocument()
   })
 
   it('la paginación navega entre páginas', async () => {

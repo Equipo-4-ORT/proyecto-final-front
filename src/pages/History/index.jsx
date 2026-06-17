@@ -1,17 +1,12 @@
-import { useState, useEffect, useCallback} from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
 import { useToast } from '../../hooks/useToast'
 import AppLayout from '../../components/layout/AppLayout'
-import StatusBadge from '../Dashboard/components/StatusBadge'
 import { Toast } from '../../components/ui/Toast'
 import { getHistory } from '../../services/reportsService'
 
-// TODO(sprint-next): reemplazar con llamada a GET /api/history
-// La respuesta esperada es un array de { id, date, totalHours, status, iaReport }
-
-
-function HistoryPage({itemsPerPage = 10}) {
+function HistoryPage({ itemsPerPage = 10 }) {
   const navigate = useNavigate()
   const { user, logout } = useAuth()
   const [searchParams, setSearchParams] = useSearchParams()
@@ -21,16 +16,15 @@ function HistoryPage({itemsPerPage = 10}) {
   const [isLoading, setIsLoading] = useState(true)
   const [totalItems, setTotalItems] = useState(0)
   const [totalPages, setTotalPages] = useState(1)
-  const [selectedReport, setSelectedReport] = useState(null)
 
   const fromDate = searchParams.get('from') || ''
   const toDate = searchParams.get('to') || ''
   const currentPage = Number(searchParams.get('page')) || 1
 
- const fetchHistory = useCallback(async () => {
+  const fetchHistory = useCallback(async () => {
     setIsLoading(true)
     try {
-     const result = await getHistory({
+      const result = await getHistory({
         page: currentPage,
         limit: itemsPerPage,
         from: fromDate,
@@ -44,8 +38,7 @@ function HistoryPage({itemsPerPage = 10}) {
     } finally {
       setIsLoading(false)
     }
-  }, [currentPage, itemsPerPage, fromDate, toDate])
-
+  }, [currentPage, itemsPerPage, fromDate, toDate, showToast])
 
   useEffect(() => {
     fetchHistory()
@@ -84,17 +77,12 @@ function HistoryPage({itemsPerPage = 10}) {
     navigate('/login')
   }
 
-function handleDownload(record) {
+  function handleDownload(record) {
     if (record.xlsxUrl) {
       window.open(record.xlsxUrl, '_blank', 'noopener,noreferrer')
     } else {
       showToast('El archivo Excel aún no está disponible para este reporte.', 'info')
     }
-  }
-
-  function handleExportFinnegans() {
-    // TODO(sprint-next): implementar integración via POST /api/history/:date/export-finnegans
-    showToast('Integración con Finnegans disponible próximamente.', 'info')
   }
 
   return (
@@ -142,7 +130,7 @@ function handleDownload(record) {
         </div>
 
         {/* Tabla */}
-      <div className="overflow-x-auto rounded-xl border border-slate-800 bg-slate-900/50 backdrop-blur-sm">
+        <div className="overflow-x-auto rounded-xl border border-slate-800 bg-slate-900/50 backdrop-blur-sm">
           <table className="w-full text-left text-sm text-slate-300">
             <thead className="bg-slate-800/60 text-xs uppercase text-slate-400">
               <tr>
@@ -179,14 +167,7 @@ function handleDownload(record) {
                     <td className="px-6 py-4 text-slate-300">
                       {record.totalHours}
                     </td>
-                    {/* Eliminamos el <td> del StatusBadge */}
-                    <td className="whitespace-nowrap px-6 py-4 text-center space-x-2">
-                      <button
-                        onClick={() => setSelectedReport(record)}
-                        className="rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-500 transition-colors"
-                      >
-                        Ver Detalles
-                      </button>
+                    <td className="whitespace-nowrap px-6 py-4 text-center">
                       <button
                         onClick={() => handleDownload(record)}
                         disabled={!record.xlsxUrl}
@@ -247,50 +228,6 @@ function handleDownload(record) {
           )}
         </div>
       </div>
-
-      {/* Modal reporte IA */}
- {selectedReport && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="w-full max-w-2xl rounded-xl border border-slate-700 bg-slate-900 p-6 shadow-2xl space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-              <div className="space-y-0.5">
-                <h3 className="text-lg font-bold text-slate-100">
-                  Reporte del {selectedReport.date}
-                </h3>
-                <div className="flex items-center gap-3 text-xs text-slate-400">
-                  <span>Horas calculadas: {selectedReport.totalHours}</span>
-                  <StatusBadge status={selectedReport.status} />
-                </div>
-              </div>
-              <button
-                onClick={() => setSelectedReport(null)}
-                className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition-colors"
-              >
-                ✕
-              </button>
-            </div>
-
-            <div className="rounded-lg bg-slate-950 p-4 text-sm text-slate-300 border border-slate-800 leading-relaxed text-center">
-              Para visualizar el resumen detallado generado por la IA o las actividades correspondientes a este reporte, haz clic en el botón "Ver Excel".
-            </div>
-
-            <div className="flex justify-end gap-3 pt-2 border-t border-slate-800">
-              <button
-                onClick={() => setSelectedReport(null)}
-                className="rounded-lg bg-slate-800 px-4 py-2 text-sm font-medium text-slate-300 hover:bg-slate-700 transition-colors"
-              >
-                Cerrar
-              </button>
-              <button
-                onClick={() => handleExportFinnegans(selectedReport)}
-                className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500 transition-colors"
-              >
-                Integrar con Finnegans
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {toast && (
         <Toast

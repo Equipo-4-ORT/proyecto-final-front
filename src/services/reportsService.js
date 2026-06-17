@@ -22,6 +22,6 @@ export async function generateReport(data) {
 }
 
 export async function getHistory(params) {
-  const response = await api.get('/api/reports', { params });
-  return response.data;
+  const response = await api.get('/api/reports', { params })
+  return response.data
 }
