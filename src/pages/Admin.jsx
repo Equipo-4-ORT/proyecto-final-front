@@ -141,8 +141,16 @@ function Admin() {
     setSaving(true)
     setFormError(null)
     try {
-      const newUser = await adminApi.createUser({ fullName, email })
-      setUsers((prev) => [newUser, ...prev])
+      if (editingUser) {
+        
+        const updatedUser = await adminApi.updateUser(editingUser.id, { fullName, email })
+        setUsers((prev) => prev.map((u) => (u.id === editingUser.id ? updatedUser : u)))
+      } else {
+        
+        const newUser = await adminApi.createUser({ fullName, email })
+        setUsers((prev) => [newUser, ...prev])
+      }
+      
       setModalOpen(false)
       setForm(EMPTY_FORM)
       setEditingUser(null)
