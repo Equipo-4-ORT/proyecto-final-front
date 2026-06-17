@@ -1,0 +1,19 @@
+src/pages/Dashboard/utils/__tests__/activityMapper.test.js
+  s_c3820f0868fc2d::t_ba5c1e6bee3637 199-251
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.8",
+  "base_commit_sha": "33d814bf3af7e27e945aa3169d9695c2bea80450",
+  "prompts": {},
+  "sessions": {
+    "s_c3820f0868fc2d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "585bdf7c-ecc9-487b-ae0e-71a06045230a",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "LicFuraca <martinexequield@gmail.com>"
+    }
+  }
+}
