@@ -200,6 +200,8 @@ function Dashboard() {
         if (error.code === 'ECONNABORTED') {
           errorMessage =
             'Error al generar el informe. La solicitud tardó demasiado tiempo (máx 2 minutos). Intenta de nuevo.'
+        } else if (error?.response?.data?.error) {
+          errorMessage = error.response.data.error
         } else if (error?.response?.data?.message) {
           errorMessage = error.response.data.message
         }
