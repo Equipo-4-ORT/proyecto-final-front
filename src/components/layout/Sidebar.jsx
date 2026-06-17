@@ -54,12 +54,10 @@ function Sidebar({ sourceCounts, onExportExcel, generatingFrom = null, selectedD
           Accesos rápidos
         </p>
 
-       <button
+        <button
           type="button"
           onClick={onExportExcel}
-          // Agregamos la condición para deshabilitar si no es hoy
           disabled={!!generatingFrom || selectedDate !== today}
-          // Agregamos el atributo title para dar feedback visual
           title={selectedDate !== today ? "Solo puedes generar reportes del día actual" : ""}
           className="
             flex items-center gap-3

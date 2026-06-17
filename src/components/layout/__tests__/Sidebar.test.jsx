@@ -5,11 +5,10 @@ import Sidebar from '../Sidebar'
 import { getTodayDate } from '../../../utils/dateHelpers'
 
 const sourceCounts = { calendar: 3, jira: 2, drive: 4 }
-const today = getTodayDate() // <-- Guardamos la fecha de hoy para los tests
+const today = getTodayDate()
 
 describe('Sidebar', () => {
   it('renders the app heading', () => {
-    // Agregamos selectedDate={today}
     render(<MemoryRouter><Sidebar sourceCounts={sourceCounts} selectedDate={today} onExportExcel={() => {}} /></MemoryRouter>)
     expect(
       screen.getByRole('heading', { name: /autolog/i }),

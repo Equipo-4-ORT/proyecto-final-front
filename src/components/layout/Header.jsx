@@ -84,9 +84,7 @@ function Header({
           <Button
             variant="success"
             onClick={onExportExcel}
-            // Agregamos la condición para deshabilitar si no es hoy
             disabled={!!generatingFrom || selectedDate !== today}
-            // Opcional: agregamos title para que el usuario entienda por qué está deshabilitado
             title={selectedDate !== today ? "Solo puedes generar reportes del día actual" : ""}
             className="w-full sm:w-auto h-14 px-6 flex items-center justify-center gap-2 rounded-2xl shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
           >
