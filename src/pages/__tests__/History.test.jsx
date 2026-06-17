@@ -1,8 +1,12 @@
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import HistoryPage from '../History'
 
+// NUEVO: Importamos la función directamente para poder modificar su respuesta en los tests
+import { getHistory } from '../../services/reportsService'
+
+// 1. Mocks de React Router
 const mockNavigate = vi.fn()
 const mockSetSearchParams = vi.fn()
 let mockSearchParams = new URLSearchParams()
@@ -16,6 +20,7 @@ vi.mock('react-router-dom', async () => {
   }
 })
 
+// 2. Mocks de Hooks
 const mockLogout = vi.fn()
 vi.mock('../../hooks/useAuth', () => ({
   useAuth: () => ({
@@ -33,41 +38,52 @@ vi.mock('../../components/layout/AppLayout', () => ({
   ),
 }))
 
-vi.mock('../Dashboard/components/StatusBadge', () => ({
-  default: ({ status }) => <span>{status}</span>,
+// 3. Mock de la API (SOLUCIÓN AL ERROR DE HOISTING)
+// Primero declaramos el mock vacío para que Vitest lo eleve sin problemas
+vi.mock('../../services/reportsService', () => ({
+  getHistory: vi.fn()
 }))
 
+// Luego declaramos los datos
 const TEST_RECORDS = [
   {
     id: 1,
     date: '2026-05-01',
     totalHours: '7 h 30 min',
-    status: 'Aprobado',
-    iaReport: 'Reporte del día 1',
+    xlsxUrl: 'http://docs.google.com/test1'
   },
   {
     id: 2,
     date: '2026-05-02',
     totalHours: '8 h 0 min',
-    status: 'Pendiente',
-    iaReport: 'Reporte del día 2',
+    xlsxUrl: null
   },
   {
     id: 3,
     date: '2026-05-03',
     totalHours: '9 h 10 min',
-    status: 'En revisión',
-    iaReport: 'Reporte del día 3',
+    xlsxUrl: 'http://docs.google.com/test3'
   },
 ]
+
 
 describe('History Page', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mockSearchParams = new URLSearchParams()
+    
+    // Inyectamos la respuesta por defecto ANTES de cada test, donde TEST_RECORDS ya existe
+    getHistory.mockResolvedValue({
+      data: TEST_RECORDS,
+      meta: {
+        total: 3,
+        page: 1,
+        totalPages: 2 // Forzamos 2 páginas para que la paginación aparezca
+      }
+    })
   })
 
-  it('renderiza la cabecera y los filtros de fecha', () => {
+  it('renderiza la cabecera y los filtros de fecha', async () => {
     mockSearchParams.set('page', '1')
 
     render(
@@ -77,6 +93,11 @@ describe('History Page', () => {
     )
 
     expect(screen.getByText('Historial de Reportes')).toBeInTheDocument()
+
+    // Esperamos a que termine de cargar
+    await waitFor(() => {
+      expect(screen.queryByText('Cargando historial...')).not.toBeInTheDocument()
+    })
 
     const inputsFecha = document.querySelectorAll('input[type="date"]')
     expect(inputsFecha.length).toBe(2)
@@ -88,88 +109,90 @@ describe('History Page', () => {
     expect(mockSetSearchParams).toHaveBeenCalled()
   })
 
-  it('muestra el botón "Limpiar filtros" y lo ejecuta cuando hay parámetros activos', () => {
+  it('muestra el botón "Limpiar filtros" y lo ejecuta cuando hay parámetros activos', async () => {
     mockSearchParams.set('from', '2026-05-01')
     mockSearchParams.set('to', '2026-05-15')
 
-    render(
-      <BrowserRouter>
-        <HistoryPage records={TEST_RECORDS} />
-      </BrowserRouter>,
-    )
-
-    const botonLimpiar = screen.getByRole('button', { name: /Limpiar filtros/i })
-    fireEvent.click(botonLimpiar)
-    expect(mockSetSearchParams).toHaveBeenCalled()
-  })
-
-  it('muestra el estado vacío cuando no hay registros', () => {
     render(
       <BrowserRouter>
         <HistoryPage />
       </BrowserRouter>,
     )
 
-    expect(
-      screen.getByText('No se encontraron reportes en este rango de fechas.'),
-    ).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.queryByText('Cargando historial...')).not.toBeInTheDocument()
+    })
+
+    const botonLimpiar = screen.getByRole('button', { name: /Limpiar filtros/i })
+    fireEvent.click(botonLimpiar)
+    expect(mockSetSearchParams).toHaveBeenCalled()
   })
 
-  it('renderiza filas y permite ver y cerrar un reporte', () => {
+  it('muestra el estado vacío cuando no hay registros', async () => {
+    // Sobrescribimos el mock SÓLO para este test, devolviendo un array vacío
+    getHistory.mockResolvedValueOnce({ data: [], meta: { total: 0, totalPages: 1 } })
+
     render(
       <BrowserRouter>
-        <HistoryPage records={TEST_RECORDS} />
+        <HistoryPage />
       </BrowserRouter>,
     )
 
-    expect(screen.getByText('2026-05-01')).toBeInTheDocument()
-
-    const botonesVer = screen.getAllByRole('button', { name: /Ver Reporte/i })
-    fireEvent.click(botonesVer[0])
-
-    expect(screen.getByText('Reporte del día 1')).toBeInTheDocument()
-
-    fireEvent.click(screen.getByRole('button', { name: /Cerrar/i }))
-    expect(screen.queryByText('Reporte del día 1')).not.toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByText('No se encontraron reportes en este rango de fechas.')).toBeInTheDocument()
+    })
   })
 
-  it('botón Descargar muestra toast de "próximamente"', () => {
+  it('renderiza las filas con la fecha y las horas de cada registro', async () => {
     render(
       <BrowserRouter>
-        <HistoryPage records={TEST_RECORDS} />
+        <HistoryPage />
       </BrowserRouter>,
     )
 
-    const botonesDescargar = screen.getAllByRole('button', { name: /Descargar/i })
+    await waitFor(() => {
+      expect(screen.getByText('2026-05-01')).toBeInTheDocument()
+    })
+
+    expect(screen.getByText('7 h 30 min')).toBeInTheDocument()
+    expect(screen.getByText('2026-05-03')).toBeInTheDocument()
+  })
+
+  it('botón Ver Excel deshabilita si no hay xlsxUrl y ejecuta window.open si lo hay', async () => {
+    const windowOpenSpy = vi.spyOn(window, 'open').mockImplementation(() => {})
+    
+    render(
+      <BrowserRouter>
+        <HistoryPage />
+      </BrowserRouter>,
+    )
+
+    await waitFor(() => {
+      expect(screen.queryByText('Cargando historial...')).not.toBeInTheDocument()
+    })
+
+    const botonesDescargar = screen.getAllByRole('button', { name: /Ver Excel/i })
+    
+    // El segundo elemento de TEST_RECORDS no tiene xlsxUrl, su botón debe estar deshabilitado
+    expect(botonesDescargar[1]).toBeDisabled()
+
+    // El primer elemento sí tiene, debe llamar a window.open
     fireEvent.click(botonesDescargar[0])
-
-    expect(screen.getByText('Descarga disponible próximamente.')).toBeInTheDocument()
+    expect(windowOpenSpy).toHaveBeenCalledWith('http://docs.google.com/test1', '_blank', 'noopener,noreferrer')
+    
+    windowOpenSpy.mockRestore()
   })
 
-  it('botón Integrar con Finnegans muestra toast de "próximamente"', () => {
+  it('la paginación navega entre páginas', async () => {
     render(
       <BrowserRouter>
-        <HistoryPage records={TEST_RECORDS} />
+        <HistoryPage itemsPerPage={2} />
       </BrowserRouter>,
     )
 
-    const botonesVer = screen.getAllByRole('button', { name: /Ver Reporte/i })
-    fireEvent.click(botonesVer[0])
-
-    fireEvent.click(screen.getByRole('button', { name: /Integrar con Finnegans/i }))
-    expect(
-      screen.getByText('Integración con Finnegans disponible próximamente.'),
-    ).toBeInTheDocument()
-  })
-
-  it('la paginación navega entre páginas', () => {
-    render(
-      <BrowserRouter>
-        <HistoryPage records={TEST_RECORDS} itemsPerPage={2} />
-      </BrowserRouter>,
-    )
-
-    expect(screen.getByText(/Página/)).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByText(/Página/)).toBeInTheDocument()
+    })
 
     fireEvent.click(screen.getByRole('button', { name: /Siguiente/i }))
     expect(mockSetSearchParams).toHaveBeenCalled()
@@ -179,12 +202,16 @@ describe('History Page', () => {
     expect(mockSetSearchParams).toHaveBeenCalled()
   })
 
-  it('ejecuta el flujo de deslogueo', () => {
+  it('ejecuta el flujo de deslogueo', async () => {
     render(
       <BrowserRouter>
         <HistoryPage />
       </BrowserRouter>,
     )
+
+    await waitFor(() => {
+      expect(screen.queryByText('Cargando historial...')).not.toBeInTheDocument()
+    })
 
     fireEvent.click(screen.getByRole('button', { name: /Mock Logout/i }))
     expect(mockLogout).toHaveBeenCalled()

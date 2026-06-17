@@ -1,38 +1,52 @@
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
 import { useToast } from '../../hooks/useToast'
 import AppLayout from '../../components/layout/AppLayout'
-import StatusBadge from '../Dashboard/components/StatusBadge'
 import { Toast } from '../../components/ui/Toast'
+import { getHistory } from '../../services/reportsService'
 
-// TODO(sprint-next): reemplazar con llamada a GET /api/history
-// La respuesta esperada es un array de { id, date, totalHours, status, iaReport }
-const RECORDS = []
-
-function HistoryPage({ records = RECORDS, itemsPerPage = 20 }) {
+function HistoryPage({ itemsPerPage = 10 }) {
   const navigate = useNavigate()
   const { user, logout } = useAuth()
   const [searchParams, setSearchParams] = useSearchParams()
   const { toast, showToast, hideToast } = useToast()
 
-  const [selectedReport, setSelectedReport] = useState(null)
+  const [records, setRecords] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [totalItems, setTotalItems] = useState(0)
+  const [totalPages, setTotalPages] = useState(1)
 
   const fromDate = searchParams.get('from') || ''
   const toDate = searchParams.get('to') || ''
   const currentPage = Number(searchParams.get('page')) || 1
 
-  const filteredRecords = records.filter((record) => {
-    if (fromDate && record.date < fromDate) return false
-    if (toDate && record.date > toDate) return false
-    return true
-  })
+  const fetchHistory = useCallback(async () => {
+    setIsLoading(true)
+    try {
+      const result = await getHistory({
+        page: currentPage,
+        limit: itemsPerPage,
+        from: fromDate,
+        to: toDate,
+      })
+      setRecords(result.data)
+      setTotalItems(result.meta.total)
+      setTotalPages(result.meta.totalPages)
+    } catch (error) {
+      showToast(error.response?.data?.error || 'Error al cargar el historial.', 'error')
+    } finally {
+      setIsLoading(false)
+    }
+  }, [currentPage, itemsPerPage, fromDate, toDate, showToast])
 
-  const totalItems = filteredRecords.length
-  const totalPages = Math.ceil(totalItems / itemsPerPage) || 1
+  useEffect(() => {
+    fetchHistory()
+  }, [fetchHistory])
+
   const startIndex = (currentPage - 1) * itemsPerPage
-  const endIndex = startIndex + itemsPerPage
-  const paginatedRecords = filteredRecords.slice(startIndex, endIndex)
+  const currentEndIndex = startIndex + records.length
+
 
   const updateQueryParams = (newParams) => {
     const current = Object.fromEntries(searchParams.entries())
@@ -63,14 +77,12 @@ function HistoryPage({ records = RECORDS, itemsPerPage = 20 }) {
     navigate('/login')
   }
 
-  function handleDownload() {
-    // TODO(sprint-next): implementar descarga via GET /api/history/:date/export
-    showToast('Descarga disponible próximamente.', 'info')
-  }
-
-  function handleExportFinnegans() {
-    // TODO(sprint-next): implementar integración via POST /api/history/:date/export-finnegans
-    showToast('Integración con Finnegans disponible próximamente.', 'info')
+  function handleDownload(record) {
+    if (record.xlsxUrl) {
+      window.open(record.xlsxUrl, '_blank', 'noopener,noreferrer')
+    } else {
+      showToast('El archivo Excel aún no está disponible para este reporte.', 'info')
+    }
   }
 
   return (
@@ -124,19 +136,27 @@ function HistoryPage({ records = RECORDS, itemsPerPage = 20 }) {
               <tr>
                 <th className="px-6 py-4">Fecha</th>
                 <th className="px-6 py-4">Horas Totales</th>
-                <th className="px-6 py-4">Estado</th>
+                {/* Eliminamos el <th> de Estado */}
                 <th className="px-6 py-4 text-center">Acciones</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800">
-              {paginatedRecords.length === 0 ? (
+              {isLoading ? (
                 <tr>
-                  <td colSpan="4" className="py-10 text-center text-black">
+                  {/* Cambiamos colSpan de 4 a 3 */}
+                  <td colSpan="3" className="py-10 text-center text-slate-400">
+                    Cargando historial...
+                  </td>
+                </tr>
+              ) : records.length === 0 ? (
+                <tr>
+                  {/* Cambiamos colSpan de 4 a 3 */}
+                  <td colSpan="3" className="py-10 text-center text-slate-400">
                     No se encontraron reportes en este rango de fechas.
                   </td>
                 </tr>
               ) : (
-                paginatedRecords.map((record) => (
+                records.map((record) => (
                   <tr
                     key={record.id}
                     className="hover:bg-slate-800/20 transition-colors"
@@ -147,21 +167,14 @@ function HistoryPage({ records = RECORDS, itemsPerPage = 20 }) {
                     <td className="px-6 py-4 text-slate-300">
                       {record.totalHours}
                     </td>
-                    <td className="px-6 py-4">
-                      <StatusBadge status={record.status} />
-                    </td>
-                    <td className="whitespace-nowrap px-6 py-4 text-center space-x-2">
-                      <button
-                        onClick={() => setSelectedReport(record)}
-                        className="rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-500 transition-colors"
-                      >
-                        Ver Reporte
-                      </button>
+                    <td className="whitespace-nowrap px-6 py-4 text-center">
                       <button
                         onClick={() => handleDownload(record)}
-                        className="rounded-lg border border-slate-700 bg-slate-800 px-3 py-1.5 text-xs font-medium text-slate-300 hover:bg-slate-700 transition-colors"
+                        disabled={!record.xlsxUrl}
+                        title={!record.xlsxUrl ? "El Excel aún no se ha generado" : ""}
+                        className="rounded-lg border border-slate-700 bg-slate-800 px-3 py-1.5 text-xs font-medium text-slate-300 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                       >
-                        Descargar
+                        Ver Excel
                       </button>
                     </td>
                   </tr>
@@ -171,16 +184,16 @@ function HistoryPage({ records = RECORDS, itemsPerPage = 20 }) {
           </table>
 
           {/* Paginación */}
-          {totalPages > 1 && (
+          {!isLoading && totalPages > 1 && (
             <div className="flex items-center justify-between border-t border-slate-800 bg-slate-900/30 px-6 py-4 text-sm text-slate-400">
               <div>
                 Mostrando{' '}
                 <span className="font-semibold text-slate-200">
-                  {startIndex + 1}
+                  {totalItems > 0 ? startIndex + 1 : 0}
                 </span>{' '}
                 al{' '}
                 <span className="font-semibold text-slate-200">
-                  {Math.min(endIndex, totalItems)}
+                  {currentEndIndex}
                 </span>{' '}
                 de{' '}
                 <span className="font-semibold text-slate-200">
@@ -215,50 +228,6 @@ function HistoryPage({ records = RECORDS, itemsPerPage = 20 }) {
           )}
         </div>
       </div>
-
-      {/* Modal reporte IA */}
-      {selectedReport && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="w-full max-w-2xl rounded-xl border border-slate-700 bg-slate-900 p-6 shadow-2xl space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-              <div className="space-y-0.5">
-                <h3 className="text-lg font-bold text-slate-100">
-                  Reporte del {selectedReport.date}
-                </h3>
-                <div className="flex items-center gap-3 text-xs text-slate-400">
-                  <span>Horas calculadas: {selectedReport.totalHours}</span>
-                  <StatusBadge status={selectedReport.status} />
-                </div>
-              </div>
-              <button
-                onClick={() => setSelectedReport(null)}
-                className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition-colors"
-              >
-                ✕
-              </button>
-            </div>
-
-            <div className="max-h-96 overflow-y-auto rounded-lg bg-slate-950 p-4 font-mono text-sm text-slate-300 whitespace-pre-line border border-slate-800 leading-relaxed">
-              {selectedReport.iaReport}
-            </div>
-
-            <div className="flex justify-end gap-3 pt-2 border-t border-slate-800">
-              <button
-                onClick={() => setSelectedReport(null)}
-                className="rounded-lg bg-slate-800 px-4 py-2 text-sm font-medium text-slate-300 hover:bg-slate-700 transition-colors"
-              >
-                Cerrar
-              </button>
-              <button
-                onClick={() => handleExportFinnegans(selectedReport)}
-                className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500 transition-colors"
-              >
-                Integrar con Finnegans
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {toast && (
         <Toast
