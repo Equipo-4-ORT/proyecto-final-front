@@ -196,6 +196,59 @@ describe("buildUpdatePayload", () => {
     const payload = buildUpdatePayload(editingData, noStatus, 1)
     expect(payload.metadata.status).toBe("pending")
   })
+
+  it("preserves the original activityType (immutable) and merges _originalMetadata", () => {
+    // El objeto real siempre viene de apiToActivity, que adjunta _original*
+    const fromServer = apiToActivity({
+      id: "abc",
+      source: "jira",
+      activityType: "JIRA-42",
+      startTime: ISO_START,
+      endTime: ISO_END,
+      metadata: {
+        category: "jira",
+        title: "Título viejo",
+        description: "desc vieja",
+        notes: "nota vieja",
+        status: "review",
+      },
+    })
+    const editingData = {
+      title: "Título nuevo",
+      description: "desc nueva",
+      start: "09:00",
+      end: "10:00",
+      notes: "nota nueva",
+    }
+    const payload = buildUpdatePayload(editingData, fromServer)
+
+    // activityType se mantiene inmutable; el título editado viaja por separado
+    expect(payload.activityType).toBe("JIRA-42")
+    expect(payload.title).toBe("Título nuevo")
+    // el merge preserva la category original y pisa los campos editados
+    expect(payload.metadata.category).toBe("jira")
+    expect(payload.metadata.title).toBe("Título nuevo")
+    expect(payload.metadata.description).toBe("desc nueva")
+    expect(payload.metadata.notes).toBe("nota nueva")
+    expect(payload.metadata.status).toBe("review")
+  })
+
+  it("rolls endTime to the next day when end is not after start (cross-midnight)", () => {
+    const editingData = { title: "Guardia", description: "", start: "23:00", end: "01:00", notes: "" }
+    const payload = buildUpdatePayload(editingData, original)
+    const start = new Date(payload.startTime)
+    const end = new Date(payload.endTime)
+    expect(end.getTime()).toBeGreaterThan(start.getTime())
+    expect(end.getTime() - start.getTime()).toBe(2 * 60 * 60 * 1000) // 23:00 → 01:00 = 2h
+  })
+
+  it("keeps endTime on the same day when end is after start", () => {
+    const editingData = { title: "X", description: "", start: "09:00", end: "10:00", notes: "" }
+    const payload = buildUpdatePayload(editingData, original)
+    const start = new Date(payload.startTime)
+    const end = new Date(payload.endTime)
+    expect(end.getTime() - start.getTime()).toBe(60 * 60 * 1000)
+  })
 })
 
 describe("buildOptimisticActivity", () => {

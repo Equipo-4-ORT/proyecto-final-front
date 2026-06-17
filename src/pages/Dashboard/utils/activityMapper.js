@@ -35,13 +35,15 @@ export function apiToActivity(serverActivity) {
   return {
     id: serverActivity.id,
     source: isManual ? metadata.category || "manual" : serverActivity.source,
-    title: metadata.title || serverActivity.activityType || "",
+    title: serverActivity.title || metadata.title || serverActivity.activityType || "",
     description: metadata.description || "",
     start: getLocalTimeString(serverActivity.startTime),
     end: getLocalTimeString(serverActivity.endTime),
     status: metadata.status || "pending",
     notes: metadata.notes || "",
     startTime: serverActivity.startTime,
+    _originalActivityType: serverActivity.activityType,
+    _originalMetadata: metadata,
   }
 }
 
@@ -53,6 +55,7 @@ function buildActivityPayload(dateString, formLikeData, sourceFallback, status) 
   const notes = formLikeData.notes?.trim() || ""
 
   const payload = {
+    title,
     activityType: title || sourceFallback,
     startTime,
     metadata: {
@@ -95,13 +98,36 @@ export function buildOptimisticActivity(formData, id, selectedDate) {
 }
 
 export function buildUpdatePayload(editingData, originalActivity) {
-  const dateString = getLocalDateString(originalActivity.startTime)
-  return buildActivityPayload(
+const dateString = getLocalDateString(originalActivity.startTime)
+  
+  const basePayload = buildActivityPayload(
     dateString,
     editingData,
     originalActivity.source,
-    originalActivity.status || "pending",
+    originalActivity.status || "pending"
   )
+  if (originalActivity._originalActivityType) {
+    basePayload.activityType = originalActivity._originalActivityType
+  }
+
+  if (originalActivity._originalMetadata) {
+    basePayload.metadata = {
+      ...originalActivity._originalMetadata, 
+      title: editingData.title?.trim() || "", 
+      description: editingData.description?.trim() || "",
+      notes: editingData.notes?.trim() || "",
+      status: originalActivity.status || "pending"
+    }
+  }
+
+  if (basePayload.endTime && new Date(basePayload.endTime) <= new Date(basePayload.startTime)) {
+    const endObj = new Date(basePayload.endTime)
+    endObj.setDate(endObj.getDate() + 1)
+    basePayload.endTime = endObj.toISOString()
+  }
+
+  return basePayload
+  
 }
 
 export function buildOptimisticUpdate(activity, editingData) {
