@@ -142,26 +142,28 @@ function handleDownload(record) {
         </div>
 
         {/* Tabla */}
-       <div className="overflow-x-auto rounded-xl border border-slate-800 bg-slate-900/50 backdrop-blur-sm">
+      <div className="overflow-x-auto rounded-xl border border-slate-800 bg-slate-900/50 backdrop-blur-sm">
           <table className="w-full text-left text-sm text-slate-300">
             <thead className="bg-slate-800/60 text-xs uppercase text-slate-400">
               <tr>
                 <th className="px-6 py-4">Fecha</th>
                 <th className="px-6 py-4">Horas Totales</th>
-                <th className="px-6 py-4">Estado</th>
+                {/* Eliminamos el <th> de Estado */}
                 <th className="px-6 py-4 text-center">Acciones</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800">
               {isLoading ? (
                 <tr>
-                  <td colSpan="4" className="py-10 text-center text-slate-400">
+                  {/* Cambiamos colSpan de 4 a 3 */}
+                  <td colSpan="3" className="py-10 text-center text-slate-400">
                     Cargando historial...
                   </td>
                 </tr>
               ) : records.length === 0 ? (
                 <tr>
-                  <td colSpan="4" className="py-10 text-center text-slate-400">
+                  {/* Cambiamos colSpan de 4 a 3 */}
+                  <td colSpan="3" className="py-10 text-center text-slate-400">
                     No se encontraron reportes en este rango de fechas.
                   </td>
                 </tr>
@@ -177,9 +179,7 @@ function handleDownload(record) {
                     <td className="px-6 py-4 text-slate-300">
                       {record.totalHours}
                     </td>
-                    <td className="px-6 py-4">
-                      <StatusBadge status={record.status} />
-                    </td>
+                    {/* Eliminamos el <td> del StatusBadge */}
                     <td className="whitespace-nowrap px-6 py-4 text-center space-x-2">
                       <button
                         onClick={() => setSelectedReport(record)}
