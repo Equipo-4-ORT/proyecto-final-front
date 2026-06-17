@@ -20,3 +20,8 @@ export async function generateReport(data) {
   })
   return response.data
 }
+
+export async function getHistory(params) {
+  const response = await api.get('/api/reports', { params });
+  return response.data;
+}
