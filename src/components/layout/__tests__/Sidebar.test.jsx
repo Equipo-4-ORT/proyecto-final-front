@@ -2,19 +2,21 @@ import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import Sidebar from '../Sidebar'
+import { getTodayDate } from '../../../utils/dateHelpers'
 
 const sourceCounts = { calendar: 3, jira: 2, drive: 4 }
+const today = getTodayDate()
 
 describe('Sidebar', () => {
   it('renders the app heading', () => {
-    render(<MemoryRouter><Sidebar sourceCounts={sourceCounts} onExportExcel={() => {}} /></MemoryRouter>)
+    render(<MemoryRouter><Sidebar sourceCounts={sourceCounts} selectedDate={today} onExportExcel={() => {}} /></MemoryRouter>)
     expect(
       screen.getByRole('heading', { name: /autolog/i }),
     ).toBeInTheDocument()
   })
 
   it('renders one row per source with its count', () => {
-    render(<MemoryRouter><Sidebar sourceCounts={sourceCounts} onExportExcel={() => {}} /></MemoryRouter>)
+    render(<MemoryRouter><Sidebar sourceCounts={sourceCounts} selectedDate={today} onExportExcel={() => {}} /></MemoryRouter>)
     expect(screen.getByText('Calendar')).toBeInTheDocument()
     expect(screen.getByText('Jira')).toBeInTheDocument()
     expect(screen.getByText('Drive')).toBeInTheDocument()
@@ -24,7 +26,7 @@ describe('Sidebar', () => {
 
   it('invokes onExportExcel when clicking the export button', () => {
     const onExportExcel = vi.fn()
-    render(<MemoryRouter><Sidebar sourceCounts={sourceCounts} onExportExcel={onExportExcel} /></MemoryRouter>)
+    render(<MemoryRouter><Sidebar sourceCounts={sourceCounts} selectedDate={today} onExportExcel={onExportExcel} /></MemoryRouter>)
     fireEvent.click(screen.getByRole('button', { name: /exportar/i }))
     expect(onExportExcel).toHaveBeenCalledTimes(1)
   })
@@ -34,6 +36,7 @@ describe('Sidebar', () => {
       <MemoryRouter>
         <Sidebar
           sourceCounts={sourceCounts}
+          selectedDate={today}
           onExportExcel={() => {}}
           generatingFrom="sidebar"
         />
@@ -48,6 +51,7 @@ describe('Sidebar', () => {
       <MemoryRouter>
         <Sidebar
           sourceCounts={sourceCounts}
+          selectedDate={today}
           onExportExcel={() => {}}
           generatingFrom={null}
         />
@@ -62,6 +66,7 @@ describe('Sidebar', () => {
       <MemoryRouter>
         <Sidebar
           sourceCounts={sourceCounts}
+          selectedDate={today}
           onExportExcel={() => {}}
           generatingFrom="sidebar"
         />
@@ -76,6 +81,7 @@ describe('Sidebar', () => {
       <MemoryRouter>
         <Sidebar
           sourceCounts={sourceCounts}
+          selectedDate={today}
           onExportExcel={() => {}}
           generatingFrom={null}
         />

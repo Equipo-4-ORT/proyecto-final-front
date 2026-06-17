@@ -84,7 +84,8 @@ function Header({
           <Button
             variant="success"
             onClick={onExportExcel}
-            disabled={!!generatingFrom}
+            disabled={!!generatingFrom || selectedDate !== today}
+            title={selectedDate !== today ? "Solo puedes generar reportes del día actual" : ""}
             className="w-full sm:w-auto h-14 px-6 flex items-center justify-center gap-2 rounded-2xl shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {generatingFrom === 'header' ? (
