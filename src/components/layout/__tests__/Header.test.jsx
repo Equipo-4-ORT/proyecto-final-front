@@ -2,9 +2,10 @@ import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import Header from '../Header'
+import { getTodayDate } from '../../../utils/dateHelpers'
 
 const defaultProps = {
-  selectedDate: '2026-05-13',
+  selectedDate: getTodayDate(),
   onDateChange: () => {},
   onExportExcel: () => {},
 }
@@ -50,7 +51,7 @@ describe('Header', () => {
     const original = HTMLInputElement.prototype.showPicker
     HTMLInputElement.prototype.showPicker = showPicker
     try {
-      renderHeader()
+      renderHeader({ selectedDate: '2026-05-13' })
       const formattedDateBtn = screen
         .getByText(/13 de mayo, 2026/i)
         .closest('button')

@@ -1,8 +1,11 @@
 import { SOURCES } from '../../constants/sources'
 import { NavLink } from 'react-router-dom'
 import { LayoutDashboard, History, FileSpreadsheet } from 'lucide-react'
+import { getTodayDate } from '../../utils/dateHelpers'
 
-function Sidebar({ sourceCounts, onExportExcel, generatingFrom = null }) {
+function Sidebar({ sourceCounts, onExportExcel, generatingFrom = null, selectedDate }) {
+  const today = getTodayDate();
+
   return (
     <aside className="hidden md:flex fixed inset-y-0 left-0 w-64 bg-[var(--color-primary)] text-white p-5 flex-col">
       <div className="mb-10">
@@ -54,7 +57,8 @@ function Sidebar({ sourceCounts, onExportExcel, generatingFrom = null }) {
         <button
           type="button"
           onClick={onExportExcel}
-          disabled={!!generatingFrom}
+          disabled={!!generatingFrom || selectedDate !== today}
+          title={selectedDate !== today ? "Solo puedes generar reportes del día actual" : ""}
           className="
             flex items-center gap-3
             px-4 py-3 rounded-xl
