@@ -1,59 +1,70 @@
-import { render } from "@testing-library/react"
+import { render, waitFor } from "@testing-library/react"
 import { MemoryRouter } from "react-router-dom"
-import { vi } from "vitest"
-import {
-  describe,
-  test,
-  expect,
-  beforeEach,
-} from 'vitest'
+import { describe, test, expect, beforeEach, vi } from 'vitest'
 
 import Callback from "../Callback"
-import { AuthProvider } from "../../contexts/AuthContext"
-
-const MOCK_JWT =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwiZW1haWwiOiJkZXZAdGVzdC5jb20iLCJyb2xlIjoiYWRtaW4iLCJleHAiOjk5OTk5OTk5OTl9.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
 
 const mockNavigate = vi.fn()
 
 vi.mock("react-router-dom", async () => {
   const actual = await vi.importActual("react-router-dom")
-
   return {
     ...actual,
     useNavigate: () => mockNavigate,
   }
 })
 
-function renderCallback(search = "") {
-  window.history.pushState({}, "Callback", `/callback${search}`)
+const refreshUser = vi.fn()
+vi.mock("../../hooks/useAuth", () => ({
+  useAuth: () => ({ refreshUser }),
+}))
 
-  return render(
-    <AuthProvider>
-      <MemoryRouter initialEntries={[`/callback${search}`]}>
-        <Callback />
-      </MemoryRouter>
-    </AuthProvider>
+// Renderiza Callback dentro de un router con la URL dada, para que
+// useSearchParams lea el ?redirect= como en producción.
+const renderAt = (url) =>
+  render(
+    <MemoryRouter initialEntries={[url]}>
+      <Callback />
+    </MemoryRouter>,
   )
-}
 
 describe("Callback", () => {
   beforeEach(() => {
-    localStorage.clear()
-    mockNavigate.mockClear()
+    vi.clearAllMocks()
   })
 
-  test("saves token and navigates to dashboard when token is present", () => {
-    renderCallback(`?token=${MOCK_JWT}`)
+  test("sin ?redirect= navega al default /dashboard", async () => {
+    refreshUser.mockResolvedValue({ id: "1", role: "EMPLOYEE" })
 
-    expect(localStorage.getItem("token")).toBe(MOCK_JWT)
+    renderAt("/callback")
 
-    expect(mockNavigate).toHaveBeenCalledWith("/dashboard")
+    await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith("/dashboard"))
+    expect(refreshUser).toHaveBeenCalledTimes(1)
   })
 
-  test("navigates to login when token is missing", () => {
-    renderCallback()
+  test("respeta ?redirect=/admin para el rol ADMIN", async () => {
+    refreshUser.mockResolvedValue({ id: "1", role: "ADMIN" })
 
-    expect(mockNavigate).toHaveBeenCalledWith("/login")
+    renderAt("/callback?redirect=/admin")
+
+    await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith("/admin"))
+  })
+
+  test("ignora un ?redirect= fuera de la allowlist y usa el default", async () => {
+    refreshUser.mockResolvedValue({ id: "1", role: "EMPLOYEE" })
+
+    renderAt("/callback?redirect=https://evil.com")
+
+    await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith("/dashboard"))
+  })
+
+  test("si /auth/me falla, navega a /login?error=auth_failed", async () => {
+    refreshUser.mockRejectedValue(new Error("no session"))
+
+    renderAt("/callback")
+
+    await waitFor(() =>
+      expect(mockNavigate).toHaveBeenCalledWith("/login?error=auth_failed"),
+    )
   })
 })

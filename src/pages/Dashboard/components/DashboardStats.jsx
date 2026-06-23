@@ -1,6 +1,6 @@
-import { CalendarDays, Clock3, TrendingUp, Video } from "lucide-react"
-import StatCard from "../../../components/ui/StatCard"
-import { formatDuration } from "../utils/dashboardCalculations"
+import { CalendarDays, Clock3, TrendingUp, Video } from 'lucide-react'
+import StatCard from '../../../components/ui/StatCard'
+import { formatDuration } from '../utils/dashboardCalculations'
 
 function DashboardStats({
   totalActivities,
@@ -13,32 +13,32 @@ function DashboardStats({
 
   const stats = [
     {
-      title: "Actividades cargadas",
+      title: 'Actividades cargadas',
       value: totalActivities,
-      subtitle: "Desde todas las fuentes",
+      subtitle: 'Desde todas las fuentes',
       icon: CalendarDays,
-      color: "blue",
+      color: 'blue',
     },
     {
-      title: "Eventos de Calendar",
+      title: 'Eventos de Calendar',
       value: calendarEventCount,
-      subtitle: "Del día seleccionado",
+      subtitle: 'Del día seleccionado',
       icon: Video,
-      color: "orange",
+      color: 'orange',
     },
     {
-      title: "Total horas trabajadas",
+      title: 'Total horas trabajadas',
       value: formatDuration(Math.round(totalHours * 60)),
-      subtitle: "Del día seleccionado",
+      subtitle: 'Del día seleccionado',
       icon: Clock3,
-      color: isOverWorkday ? "red" : "purple",
+      color: isOverWorkday ? 'red' : 'purple',
     },
     {
-      title: "Productividad del día",
+      title: 'Productividad del día',
       value: `${productivityPercentage}%`,
-      subtitle: "Basada en su jornada laboral",
+      subtitle: 'Basada en su jornada laboral',
       icon: TrendingUp,
-      color: "green",
+      color: 'green',
     },
   ]
 

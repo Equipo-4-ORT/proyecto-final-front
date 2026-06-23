@@ -24,7 +24,6 @@ const renderCard = (props = {}) =>
   render(
     <ActivityMobileCard
       activity={baseActivity}
-      defaultActivityHours={1}
       isEditing={false}
       editingData={{}}
       editingErrors={{}}
@@ -48,12 +47,10 @@ describe("ActivityMobileCard", () => {
     expect(screen.getByText("Desconocida")).toBeInTheDocument()
   })
 
-  it("renders the estimated end when missing", () => {
-    renderCard({
-      activity: { ...baseActivity, end: "" },
-      defaultActivityHours: 2,
-    })
-    expect(screen.getByText("11:00")).toBeInTheDocument()
+  it("falls back to the start time as end when end is missing", () => {
+    renderCard({ activity: { ...baseActivity, end: "" } })
+    // Sin estimación: Inicio y Fin muestran ambos el inicio.
+    expect(screen.getAllByText("09:00")).toHaveLength(2)
   })
 
   it("invokes onStartEdit and onDeleteClick", () => {

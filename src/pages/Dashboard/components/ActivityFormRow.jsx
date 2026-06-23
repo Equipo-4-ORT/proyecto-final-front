@@ -1,12 +1,13 @@
-import { Check, X } from "lucide-react"
-import Button from "../../../components/ui/Button"
-import TextInput from "../../../components/ui/TextInput"
-import { SOURCES } from "../../../constants/sources"
+import { Check, X } from 'lucide-react'
+import Button from '../../../components/ui/Button'
+import TextInput from '../../../components/ui/TextInput'
+import { SOURCES } from '../../../constants/sources'
 
 function ActivityFormRow({
   isAdding,
   formData,
   errors,
+  isSubmitting = false,
   onChange,
   onAdd,
   onCancel,
@@ -29,14 +30,16 @@ function ActivityFormRow({
               variant="success"
               className="flex-1 flex items-center justify-center gap-2"
               onClick={onAdd}
+              disabled={isSubmitting}
             >
               <Check size={18} />
-              <span>Agregar</span>
+              <span>{isSubmitting ? 'Guardando...' : 'Agregar'}</span>
             </Button>
 
             <Button
               className="flex-1 flex items-center justify-center gap-2 bg-red-600 text-white hover:bg-red-700"
               onClick={onCancel}
+              disabled={isSubmitting}
             >
               <X size={18} />
               <span>Cancelar</span>
@@ -47,14 +50,12 @@ function ActivityFormRow({
         <div>
           <select
             value={formData.source}
-            onChange={(event) =>
-              onChange("source", event.target.value)
-            }
+            onChange={(event) => onChange('source', event.target.value)}
             disabled={!isAdding}
             className={`
               w-full
               border
-              ${errors.source ? "!border-red-500" : "border-slate-200"}
+              ${errors.source ? '!border-red-500' : 'border-slate-200'}
               bg-white
               rounded-xl
               px-4 py-2.5
@@ -68,9 +69,7 @@ function ActivityFormRow({
               disabled:text-slate-400
             `}
           >
-            <option value="">
-              Fuente
-            </option>
+            <option value="">Fuente</option>
 
             {Object.entries(SOURCES).map(([key, source]) => (
               <option key={key} value={key}>
@@ -80,9 +79,7 @@ function ActivityFormRow({
           </select>
 
           {errors.source && (
-            <p className="text-sm text-red-500 mt-1">
-              {errors.source}
-            </p>
+            <p className="text-sm text-red-500 mt-1">{errors.source}</p>
           )}
         </div>
 
@@ -91,9 +88,7 @@ function ActivityFormRow({
             placeholder="Título"
             value={formData.title}
             disabled={!isAdding}
-            onChange={(event) =>
-              onChange("title", event.target.value)
-            }
+            onChange={(event) => onChange('title', event.target.value)}
           />
         </div>
 
@@ -102,9 +97,7 @@ function ActivityFormRow({
             placeholder="Descripción"
             value={formData.description}
             disabled={!isAdding}
-            onChange={(event) =>
-              onChange("description", event.target.value)
-            }
+            onChange={(event) => onChange('description', event.target.value)}
           />
         </div>
 
@@ -116,18 +109,14 @@ function ActivityFormRow({
             disabled={!isAdding}
             className={
               errors.start
-                ? "!border-red-500 focus:!border-red-500 focus:ring-red-100"
-                : ""
+                ? '!border-red-500 focus:!border-red-500 focus:ring-red-100'
+                : ''
             }
-            onChange={(event) =>
-              onChange("start", event.target.value)
-            }
+            onChange={(event) => onChange('start', event.target.value)}
           />
 
           {errors.start && (
-            <p className="text-sm text-red-500 mt-1">
-              {errors.start}
-            </p>
+            <p className="text-sm text-red-500 mt-1">{errors.start}</p>
           )}
         </div>
 
@@ -139,18 +128,14 @@ function ActivityFormRow({
             disabled={!isAdding}
             className={
               errors.end
-                ? "!border-red-500 focus:!border-red-500 focus:ring-red-100"
-                : ""
+                ? '!border-red-500 focus:!border-red-500 focus:ring-red-100'
+                : ''
             }
-            onChange={(event) =>
-              onChange("end", event.target.value)
-            }
+            onChange={(event) => onChange('end', event.target.value)}
           />
 
           {errors.end && (
-            <p className="text-sm text-red-500 mt-1">
-              {errors.end}
-            </p>
+            <p className="text-sm text-red-500 mt-1">{errors.end}</p>
           )}
         </div>
 
@@ -159,9 +144,7 @@ function ActivityFormRow({
             placeholder="Notas"
             value={formData.notes}
             disabled={!isAdding}
-            onChange={(event) =>
-              onChange("notes", event.target.value)
-            }
+            onChange={(event) => onChange('notes', event.target.value)}
           />
         </div>
       </div>

@@ -1,160 +1,285 @@
-import { useEffect, useState } from "react"
-import { useNavigate } from "react-router-dom"
+import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
-import { useAuth } from "../hooks/useAuth"
-
-import AppLayout from "../components/layout/AppLayout"
-import { SOURCES } from "../constants/sources"
-
-import DashboardStats from "./Dashboard/components/DashboardStats"
-import ActivitiesTable from "./Dashboard/components/ActivitiesTable"
-import SourceSummary from "./Dashboard/components/SourceSummary"
+import { useAuth } from '../hooks/useAuth'
+import { useActivityData } from '../hooks/useActivityData';
+import AppLayout from '../components/layout/AppLayout'
+import Toast from '../components/common/Toast'
+import { SOURCES } from '../constants/sources'
+import DashboardStats from './Dashboard/components/DashboardStats'
+import ReportView from './Dashboard/components/ReportView'
+import SourceSummary from './Dashboard/components/SourceSummary'
+import JiraCallbackBanner from './Dashboard/components/JiraCallbackBanner'
+import JiraIntegrationCard from './Dashboard/components/JiraIntegrationCard'
 
 import {
   getCalendarEventCount,
   getProductivityPercentage,
-  getSourceCounts,
   getSourceSummary,
   getTotalHours,
-  DEFAULT_ACTIVITY_HOURS,
+  getWorkdayHours,
   DEFAULT_WORKDAY_HOURS,
-} from "./Dashboard/utils/dashboardCalculations"
+} from './Dashboard/utils/dashboardCalculations'
 
-import { initialActivities } from "./Dashboard/mocks/activities"
-import { getTodayDate } from "../utils/dateHelpers"
+import {
+  activityToApiPayload,
+  buildUpdatePayload,
+  filterByLocalDate,
+} from './Dashboard/utils/activityMapper'
 
-function getStoredNumber(key, fallbackValue) {
-  const storedValue = localStorage.getItem(key)
+import {
+  createActivity,
+  deleteActivity,
+  updateActivity,
+} from '../services/activitiesApi'
+import { getApiErrorMessage } from '../utils/apiErrors'
+import { getTodayDate } from '../utils/dateHelpers'
+import { generateReport } from '../services/reportsService'
+import { getUserSettings } from '../services/userSettingsApi'
 
-  if (!storedValue) {
-    return fallbackValue
-  }
-
-  const parsedValue = Number(storedValue)
-
-  return Number.isNaN(parsedValue)
-    ? fallbackValue
-    : parsedValue
+const ACTIVITY_ERROR_MESSAGES = {
+  validation_error:
+    'Revisá los datos: hay campos requeridos o fechas inválidas.',
+  unauthenticated: 'Sesión expirada. Volvé a iniciar sesión.',
+  activity_not_found: 'La actividad ya no existe.',
+  activity_forbidden: 'No tenés permisos sobre esta actividad.',
 }
 
 function Dashboard() {
   const navigate = useNavigate()
-
   const { user, logout } = useAuth()
 
-  const [activities, setActivities] = useState(initialActivities)
+  const {
+    activities: contextActivities,
+    setDate: setContextDate,
+    isLoading: isContextLoading,
+    error: contextError,
+    refreshActivities,
+  } = useActivityData()
 
-  const [selectedDate, setSelectedDate] = useState(
-    getTodayDate()
-  )
+  const [selectedDate, setSelectedDate] = useState(getTodayDate())
+  const activities = contextActivities || []
 
-  const [workdayHours, setWorkdayHours] = useState(() =>
-    getStoredNumber(
-      "workdayHours",
-      DEFAULT_WORKDAY_HOURS
-    )
-  )
+  const [loadError, setLoadError] = useState(null)
 
-  const [defaultActivityHours, setDefaultActivityHours] =
-    useState(() =>
-      getStoredNumber(
-        "defaultActivityHours",
-        DEFAULT_ACTIVITY_HOURS
-      )
-    )
+  const handleDateChange = (newDate) => {
+    setSelectedDate(newDate)
+    setContextDate(newDate)
+  }
+
+  const [generatingFrom, setGeneratingFrom] = useState(null)
+  const [toast, setToast] = useState(null)
+
+  // Largo de la jornada (denominador de la productividad). Sale de la config del
+  // usuario; al volver de /settings el Dashboard se re-monta y toma el valor nuevo.
+  // El usuario siempre tiene una jornada por defecto (09:00-18:00) garantizada por
+  // la BD, así que un usuario recién creado que aún no abrió /settings ya da 9 h.
+  const [workdayHours, setWorkdayHours] = useState(DEFAULT_WORKDAY_HOURS)
 
   useEffect(() => {
-    localStorage.setItem(
-      "workdayHours",
-      workdayHours
-    )
-  }, [workdayHours])
+    let cancelled = false
+    getUserSettings()
+      .then((settings) => {
+        if (!cancelled) {
+          setWorkdayHours(getWorkdayHours(settings.workStartTime, settings.workEndTime))
+        }
+      })
+      .catch(() => {
+        // Si falla la carga, mantenemos el fallback (DEFAULT_WORKDAY_HOURS).
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
-  useEffect(() => {
-    localStorage.setItem(
-      "defaultActivityHours",
-      defaultActivityHours
-    )
-  }, [defaultActivityHours])
+  const handleAddActivity = async (formData) => {
+    setLoadError(null);
+    try {
+      const payload = activityToApiPayload(formData, selectedDate);
+      await createActivity(payload);
+      await refreshActivities();
+      return { ok: true };
+    } catch (err) {
+      const message = getApiErrorMessage(
+        err,
+        ACTIVITY_ERROR_MESSAGES,
+        'No pudimos crear la actividad.'
+      );
+      setLoadError(message);
+      return { ok: false, message };
+    }
+  };
 
-  const totalActivities = activities.length
 
-  const totalHours = getTotalHours(
-    activities,
-    defaultActivityHours
+  const handleUpdateActivity = async (id, editingData) => {
+    setLoadError(null);
+    const original = activities.find((a) => a.id === id);
+    if (!original) {
+      const message = 'La actividad ya no existe.';
+      setLoadError(message);
+      return { ok: false, message };
+    }
+
+    try {
+      const payload = buildUpdatePayload(editingData, original);
+      await updateActivity(id, payload);
+      await refreshActivities();
+      return { ok: true };
+    } catch (err) {
+      const message = getApiErrorMessage(
+        err,
+        ACTIVITY_ERROR_MESSAGES,
+        'No pudimos actualizar la actividad.'
+      );
+      setLoadError(message);
+      return { ok: false, message };
+    }
+  };
+
+  const handleDeleteActivity = async (id) => {
+    setLoadError(null);
+    try {
+      await deleteActivity(id);
+      await refreshActivities();
+      return { ok: true };
+    } catch (err) {
+      const message = getApiErrorMessage(
+        err,
+        ACTIVITY_ERROR_MESSAGES,
+        'No pudimos eliminar la actividad.'
+      );
+      setLoadError(message);
+      return { ok: false, message };
+    }
+  };
+
+  const visibleActivities = filterByLocalDate(activities, selectedDate)
+  const totalActivities = visibleActivities.length
+  const totalHours = getTotalHours(visibleActivities)
+  const calendarEventCount = getCalendarEventCount(visibleActivities)
+  const productivityPercentage = getProductivityPercentage(
+    totalHours,
+    workdayHours,
   )
+  const sourceSummary = getSourceSummary(visibleActivities, SOURCES)
 
-  const calendarEventCount =
-    getCalendarEventCount(activities)
-
-  const productivityPercentage =
-    getProductivityPercentage(
-      totalHours,
-      workdayHours
-    )
-
-  const sourceSummary = getSourceSummary(
-    activities,
-    SOURCES,
-    defaultActivityHours
-  )
-
-  const sourceCounts = getSourceCounts(
-    activities,
-    SOURCES
-  )
-
-  function handleExportExcel() {
-    // Reemplazar por backend después
-    console.log("Exportar Excel", {
-      selectedDate,
-      activities,
+  function handleExportExcel(source) {
+    if (generatingFrom) return
+    setGeneratingFrom(source)
+    setToast({
+      type: 'info',
+      message: 'Generando el informe... Esto puede tardar hasta un minuto.',
     })
+
+    generateReport({
+      date: selectedDate,
+    })
+      .then((result) => {
+        const sheetUrl = result?.xlsxUrl
+        if (sheetUrl) {
+          window.open(sheetUrl, '_blank', 'noopener,noreferrer')
+          setToast({
+            type: 'success',
+            message: 'Informe generado exitosamente.',
+            actionHref: sheetUrl,
+            actionLabel: 'Abrir Google Sheet',
+          })
+        } else {
+          setToast({
+            type: 'success',
+            message:
+              'Informe generado, pero no pudimos crear el Google Sheet. Reconectá tu cuenta de Google e intentá de nuevo.',
+          })
+        }
+      })
+      .catch((error) => {
+        console.error('Error al generar el informe:', error)
+        let errorMessage =
+          'Error al generar el informe. Por favor, intenta de nuevo.'
+
+        if (error.code === 'ECONNABORTED') {
+          errorMessage =
+            'Error al generar el informe. La solicitud tardó demasiado tiempo (máx 2 minutos). Intenta de nuevo.'
+        } else if (error?.response?.data?.error) {
+          errorMessage = error.response.data.error
+        } else if (error?.response?.data?.message) {
+          errorMessage = error.response.data.message
+        }
+
+        setToast({
+          type: 'error',
+          message: errorMessage,
+        })
+      })
+      .finally(() => {
+        setGeneratingFrom(null)
+      })
   }
 
   function handleLogout() {
     logout()
-
-    navigate("/login")
+    navigate('/login')
   }
+
+  if (isContextLoading)
+    return <div className="py-10 text-center">Cargando reporte...</div>
+  if (contextError)
+    return (
+      <div className="py-10 text-center text-red-500">
+        Error al cargar el reporte.
+      </div>
+    )
 
   return (
     <AppLayout
       user={user}
       onLogout={handleLogout}
-      sourceCounts={sourceCounts}
       selectedDate={selectedDate}
-      onDateChange={setSelectedDate}
+      onDateChange={handleDateChange}
       onExportExcel={handleExportExcel}
-      workdayHours={workdayHours}
-      defaultActivityHours={defaultActivityHours}
-      onWorkdayHoursChange={setWorkdayHours}
-      onDefaultActivityHoursChange={
-        setDefaultActivityHours
-      }
+      generatingFrom={generatingFrom}
     >
+      <JiraCallbackBanner />
+      <JiraIntegrationCard onSynced={refreshActivities} />
+
       <DashboardStats
         totalActivities={totalActivities}
         calendarEventCount={calendarEventCount}
         totalHours={totalHours}
-        productivityPercentage={
-          productivityPercentage
-        }
+        productivityPercentage={productivityPercentage}
         workdayHours={workdayHours}
       />
 
-      <ActivitiesTable
-        activities={activities}
-        setActivities={setActivities}
-        defaultActivityHours={
-          defaultActivityHours
-        }
+      {loadError && (
+        <div
+          role="alert"
+          className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 my-4"
+        >
+          {loadError}
+        </div>
+      )}
+
+      <ReportView
+        activities={visibleActivities}
+        onAddActivity={handleAddActivity}
+        onUpdateActivity={handleUpdateActivity}
+        onDeleteActivity={handleDeleteActivity}
       />
 
       <SourceSummary
         sourceSummary={sourceSummary}
         workdayHours={workdayHours}
       />
+
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          actionHref={toast.actionHref}
+          actionLabel={toast.actionLabel}
+          onClose={() => setToast(null)}
+        />
+      )}
     </AppLayout>
   )
 }

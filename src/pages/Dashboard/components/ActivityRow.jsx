@@ -10,8 +10,9 @@ import {
 } from "../utils/dashboardCalculations"
 
 function ActivityRow({
+  readOnly = false,
+  rowNumber,
   activity,
-  defaultActivityHours,
   isEditing,
   editingData,
   editingErrors,
@@ -27,7 +28,7 @@ function ActivityRow({
   return (
     <tr className="border-b border-slate-100 hover:bg-slate-50 transition">
       <td className="px-4 py-3 text-slate-500">
-        {activity.id}
+        {rowNumber}
       </td>
 
       <td className="px-4 py-3">
@@ -52,7 +53,8 @@ function ActivityRow({
           />
         ) : (
           <div
-            className={`${
+            title={activity.title || undefined}
+            className={`max-w-[200px] truncate ${
               activity.title
                 ? "text-slate-700 not-italic"
                 : "text-slate-400 italic"
@@ -75,7 +77,8 @@ function ActivityRow({
           />
         ) : (
           <div
-            className={`${
+            title={activity.description || undefined}
+            className={`max-w-[280px] truncate ${
               activity.description
                 ? "text-slate-700 not-italic"
                 : "text-slate-400 italic"
@@ -122,22 +125,14 @@ function ActivityRow({
         ) : (
           activity.end || (
             <span className="text-slate-400 italic">
-              {getActivityEndTime(
-                activity,
-                defaultActivityHours
-              )}
+              {getActivityEndTime(activity)}
             </span>
           )
         )}
       </td>
 
       <td className="px-4 py-3 font-semibold">
-        {formatDuration(
-          getActivityDurationMinutes(
-            activity,
-            defaultActivityHours
-          )
-        )}
+        {formatDuration(getActivityDurationMinutes(activity))}
       </td>
 
       <td className="px-4 py-3">
@@ -164,73 +159,75 @@ function ActivityRow({
       </td>
 
       <td className="px-4 py-3">
-        <div className="flex items-center gap-2">
-          {isEditing ? (
-            <>
-              <button
-                type="button"
-                onClick={onSaveEdit}
-                className="
-                  w-9 h-9 rounded-xl border border-slate-200
-                  flex items-center justify-center
-                  text-slate-500
-                  hover:bg-emerald-50 hover:text-emerald-600
-                  transition
-                "
-                aria-label="Guardar edición"
-              >
-                <Check size={16} />
-              </button>
+        {!readOnly && (
+          <div className="flex items-center gap-2">
+            {isEditing ? (
+              <>
+                <button
+                  type="button"
+                  onClick={onSaveEdit}
+                  className="
+                    w-9 h-9 rounded-xl border border-slate-200
+                    flex items-center justify-center
+                    text-slate-500
+                    hover:bg-emerald-50 hover:text-emerald-600
+                    transition
+                  "
+                  aria-label="Guardar edición"
+                >
+                  <Check size={16} />
+                </button>
 
-              <button
-                type="button"
-                onClick={onCancelEdit}
-                className="
-                  w-9 h-9 rounded-xl border border-slate-200
-                  flex items-center justify-center
-                  text-slate-500
-                  hover:bg-red-50 hover:text-red-600
-                  transition
-                "
-                aria-label="Cancelar edición"
-              >
-                <X size={16} />
-              </button>
-            </>
-          ) : (
-            <>
-              <button
-                type="button"
-                onClick={() => onStartEdit(activity)}
-                className="
-                  w-9 h-9 rounded-xl border border-slate-200
-                  flex items-center justify-center
-                  text-slate-500
-                  hover:bg-slate-50 hover:text-blue-600
-                  transition
-                "
-                aria-label="Editar actividad"
-              >
-                <Pencil size={16} />
-              </button>
+                <button
+                  type="button"
+                  onClick={onCancelEdit}
+                  className="
+                    w-9 h-9 rounded-xl border border-slate-200
+                    flex items-center justify-center
+                    text-slate-500
+                    hover:bg-red-50 hover:text-red-600
+                    transition
+                  "
+                  aria-label="Cancelar edición"
+                >
+                  <X size={16} />
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  type="button"
+                  onClick={() => onStartEdit(activity)}
+                  className="
+                    w-9 h-9 rounded-xl border border-slate-200
+                    flex items-center justify-center
+                    text-slate-500
+                    hover:bg-slate-50 hover:text-blue-600
+                    transition
+                  "
+                  aria-label="Editar actividad"
+                >
+                  <Pencil size={16} />
+                </button>
 
-              <button
-                type="button"
-                onClick={() => onDeleteClick(activity)}
-                className="
-                  w-9 h-9 rounded-xl border border-slate-200
-                  flex items-center justify-center
-                  text-slate-500
-                  hover:bg-red-50 hover:text-red-600
-                  transition
-                "
-                aria-label="Eliminar actividad"
-              >
-                <Trash2 size={16} />
-              </button>
-            </>
-          )}
-        </div>
+                <button
+                  type="button"
+                  onClick={() => onDeleteClick(activity)}
+                  className="
+                    w-9 h-9 rounded-xl border border-slate-200
+                    flex items-center justify-center
+                    text-slate-500
+                    hover:bg-red-50 hover:text-red-600
+                    transition
+                  "
+                  aria-label="Eliminar actividad"
+                >
+                  <Trash2 size={16} />
+                </button>
+              </>
+            )}
+          </div>
+        )}
       </td>
     </tr>
   )
